@@ -69,7 +69,7 @@ See `core-filing-access.md`. Key passthrough: `filing.cik`, `filing.company`, `f
 | Method | Parameters | Returns | Description |
 |--------|-----------|---------|-------------|
 | `has_infotable()` | — | `bool` | `True` only for `13F-HR` and `13F-HR/A` |
-| `previous_holding_report()` | — | `Optional[ThirteenF]` | Prior quarter; searches `Company.get_filings(latest=40)`, prefers 30–200 day gap; result manually cached |
+| `previous_holding_report()` | — | `Optional[ThirteenF]` | Prior quarter; searches `company.get_filings(form=self.form, amendments=False).latest(40)`, prefers 30–200 day gap; result manually cached |
 | `holdings_view(display_limit=200)` | `display_limit: int` | `Optional[HoldingsView]` | Renderable/iterable wrapper around `infotable_summary()`; `None` if no holdings |
 | `compare_holdings(display_limit=200)` | `display_limit: int` | `Optional[HoldingsComparison]` | QoQ outer-merge on CUSIP with share/value deltas and Status labels; `None` if no previous |
 | `holding_history(periods=3, display_limit=100)` | `periods: int`, `display_limit: int` | `Optional[HoldingsHistory]` | Multi-quarter wide DataFrame; deduplicated by `report_period` |
@@ -92,7 +92,7 @@ See `core-filing-access.md`. Key passthrough: `filing.cik`, `filing.company`, `f
 | `Cusip` | `str` | 9-character CUSIP |
 | `Value` | `int` | Market value in dollars (normalized via per-filing unit detection; raw XML may be in thousands or whole dollars) |
 | `PutCall` | `str` | `''` (non-option), `'PUT'`, or `'CALL'` |
-| `InvestmentDiscretion` | `str` | `'SOLE'`, `'DEFINED'`, or `'OTHER'` |
+| `InvestmentDiscretion` | `str` | `'SOLE'`, `'DFND'`, or `'OTHR'` for XML-format filings (2013+); `'SOLE'`, `'DEFINED'`, or `'OTHER'` for pre-2013 TXT-format filings |
 | `OtherManager` | `str` | Manager sequence number(s); for multi-manager filings |
 | `SharesPrnAmount` | `int` | Share count or principal amount |
 | `Type` | `str` | `'Shares'` or `'Principal'` |

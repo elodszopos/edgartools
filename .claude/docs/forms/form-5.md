@@ -75,7 +75,7 @@ Identical to Form 4. See `_base-ownership.md` → "DataFrame Schemas" → "Owner
 |-----------|----------|
 | Form 5 with no transactions | `TransactionSummary.transactions = []`; `primary_activity = "No Transactions"` |
 | All transactions are exempt/unusual codes | `market_trades` is `None`; `net_change = 0` |
-| `has_10b5_1_plan` | Typically `None` — exempt transactions rarely have 10b5-1 footnotes |
+| `has_10b5_1_plan` | Typically `False` — exempt transactions rarely have 10b5-1 footnotes |
 
 ---
 

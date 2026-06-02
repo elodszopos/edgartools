@@ -35,9 +35,9 @@ All five required parameters are stored as instance attributes. All content is l
 | Property | Type | Description | Source |
 |----------|------|-------------|--------|
 | `accession_number` | `str` | Alias for `accession_no` | `_filings.py:1439` |
-| `is_multi_entity` | `bool` | True if `_related_entities` non-empty OR header has multiple filers | `_filings.py:1510` |
-| `all_ciks` | `List[int]` | All CIKs including co-filers; sorted, deduplicated | `_filings.py:1443` |
-| `all_entities` | `List[Dict[str, Any]]` | All `{cik, company}` dicts including co-filers | `_filings.py:1475` |
+| `is_multi_entity` | `bool` | True if `_related_entities` non-empty OR header has multiple filers; falls through to `self.header` (SGML load) when `_related_entities` is empty | `_filings.py:1510` |
+| `all_ciks` | `List[int]` | All CIKs including co-filers; sorted, deduplicated; falls through to `self.header` (SGML load) when `_related_entities` is empty | `_filings.py:1443` |
+| `all_entities` | `List[Dict[str, Any]]` | All `{cik, company}` dicts including co-filers; falls through to `self.header` (SGML load) when `_related_entities` is empty | `_filings.py:1475` |
 | `obj_type` | `Optional[str]` | Class name that `.obj()` returns, or None if unsupported | `_filings.py:2009` |
 | `exhibits` | `list` | Shortcut to `attachments.exhibits` | `_filings.py:1593` |
 | `docs` | `Docs` | Interactive API documentation object | `_filings.py:1435` |
@@ -48,12 +48,11 @@ All five required parameters are stored as instance attributes. All content is l
 
 | Property | Type | Value pattern | Source |
 |----------|------|---------------|--------|
-| `base_dir` | `str` | `{SEC_ARCHIVE_URL}/data/{cik}/{accession_no_nodash}` | `_filings.py:2149` |
-| `homepage_url` | `str` | `{SEC_ARCHIVE_URL}/data/{cik}/{accession_no}-index.html` | `_filings.py:2137` |
-| `text_url` | `str` | `{base_dir}/{accession_no}.txt` | `_filings.py:2141` |
-| `filing_url` | `str` | `{base_dir}/{document.document}` — primary doc URL | `_filings.py:2133` |
-| `index_header_url` | `str` | `{base_dir}/index-headers.html` | `_filings.py:2145` |
-| `url` | `str` | Alias for `homepage_url` | `_filings.py:2153` |
+| `base_dir` | `str` | `{SEC_ARCHIVE_URL}/data/{cik}/{accession_no_nodash}` | `_filings.py:2176` |
+| `homepage_url` | `str` | `{SEC_ARCHIVE_URL}/data/{cik}/{accession_no}-index.html` | `_filings.py:2164` |
+| `text_url` | `str` | `{base_dir}/{accession_no}.txt` | `_filings.py:2168` |
+| `index_header_url` | `str` | `{base_dir}/index-headers.html` | `_filings.py:2172` |
+| `url` | `str` | Alias for `homepage_url` | `_filings.py:2180` |
 
 ---
 
@@ -65,10 +64,11 @@ These all call `self.sgml()` internally. SGML is loaded once and cached.
 |----------|------|------|-------------|--------|
 | `attachments` | `Attachments` | network | All documents in the SGML bundle | `_filings.py:1587` |
 | `document` | `Attachment` | network | Primary display document (HTML/XHTML); paper-filing fallback to scanned PDF | `_filings.py:1532` |
+| `filing_url` | `str` | network | URL to primary filing document; accesses `self.document` which triggers SGML load | `_filings.py:2160` |
 | `primary_documents` | `list[Attachment]` | network | Primary HTML + XML documents | `_filings.py:1550` |
 | `period_of_report` | `Optional[str]` | network | Reporting period; from SGML header, fallback to homepage | `_filings.py:1560` |
-| `homepage` | `FilingHomepage` | network | Lazy-loaded index page; instance-cached after first access | `_filings.py:2157` |
-| `home` | `FilingHomepage` | network | Alias for `homepage` | `_filings.py:2167` |
+| `homepage` | `FilingHomepage` | network | Lazy-loaded index page; instance-cached after first access | `_filings.py:2184` |
+| `home` | `FilingHomepage` | network | Alias for `homepage` | `_filings.py:2194` |
 
 ---
 
@@ -90,13 +90,12 @@ These all call `self.sgml()` internally. SGML is loaded once and cached.
 
 | Method | Returns | Lazy | Description | Source |
 |--------|---------|------|-------------|--------|
-| `sgml()` | `FilingSGML` | network | Full SGML bundle; priority chain: local → datamule → network → homepage fallback | `_filings.py:1872` |
+| `sgml()` | `FilingSGML` | network | Full SGML bundle; priority chain: local → datamule → network → homepage fallback; manual instance cache (`self._sgml`), not lru_cache | `_filings.py:1872` |
 | `html()` | `Optional[str]` | network | Primary document HTML; XML ownership forms rendered to HTML; `None` for PDF/binary | `_filings.py:1598` |
 | `xml()` | `Optional[str]` | network | Primary document XML; fallback to homepage XML attachment | `_filings.py:1639` |
 | `text()` | `str` | network | HTML→text via `HTMLParser`; fallback to TEXT-EXTRACT attachment | `_filings.py:1655` |
 | `parse()` | `Optional[Document]` | network | Parse HTML into structured `Document` tree | `_filings.py:1735` |
-| `sections()` | `List[str]` | network | HTML sections list; raises `ValueError` if no HTML | `_filings.py:2035` |
-| `full_text_submission()` | `str` | network | Download full `.txt` SGML submission file | `_filings.py:1688` |
+| `sections()` | `List[str]` | network | HTML sections list; returns empty list `[]` if no HTML | `_filings.py:2035` |
 
 ---
 
@@ -104,6 +103,7 @@ These all call `self.sgml()` internally. SGML is loaded once and cached.
 
 | Method | Parameters | Returns | Description | Source |
 |--------|-----------|---------|-------------|--------|
+| `full_text_submission()` | — | `str` | Download full `.txt` SGML submission file; not cached | `_filings.py:1688` |
 | `markdown(include_page_breaks, start_page_number)` | `bool=False, int=0` | `str` | HTML→Markdown; falls back to `text_to_markdown` | `_filings.py:1699` |
 | `xbrl()` | — | `Optional[XBRL]` | Parse XBRL; returns `None` if no XBRL; raises network errors | `_filings.py:1765` |
 | `view()` | — | `None` | Render primary document as markdown in console | `_filings.py:1721` |
@@ -114,8 +114,8 @@ These all call `self.sgml()` internally. SGML is loaded once and cached.
 
 | Method | Returns | Description | Source |
 |--------|---------|-------------|--------|
-| `obj()` | `Optional[object]` | Dispatch to typed form class (TenK, TenQ, EightK, etc.) via module-level `obj()` | `_filings.py:2004` |
-| `data_object()` | `Optional[object]` | Alias for `obj()` | `_filings.py:1999` |
+| `data_object()` | `Optional[object]` | Dispatch to typed form class (TenK, TenQ, EightK, etc.) via module-level `obj()` | `_filings.py:1999` |
+| `obj()` | `Optional[object]` | Alias for `data_object()` | `_filings.py:2004` |
 
 ---
 
@@ -123,12 +123,12 @@ These all call `self.sgml()` internally. SGML is loaded once and cached.
 
 | Method | Parameters | Returns | Description | Source |
 |--------|-----------|---------|-------------|--------|
-| `search(query, regex)` | `str, bool=False` | search result | BM25 or regex search across HTML sections | `_filings.py:2053` |
+| `search(query, regex)` | `str, bool=False` | `SearchResults` | BM25 or regex search across HTML sections | `_filings.py:2054` |
 | `grep(pattern, regex, document)` | `str, bool=False, Optional[str]=None` | `GrepResult` | Case-insensitive search across all attachments; `document='primary'` or doc type | `_filings.py:2061` |
-| `get_entity()` | — | `Company` | Company owning this filing (lru_cache) | `_filings.py:2172` |
-| `related_filings()` | — | `CompanyFilings` | All filings sharing same file_number (lru_cache) | `_filings.py:2191` |
-| `as_company_filing()` | — | `CompanyFiling\|None` | Richer company-filing object via entity lookup (lru_cache) | `_filings.py:2179` |
-| `correspondence()` | — | `Optional[CorrespondenceThread]` | SEC review correspondence thread; works on any form type | `_filings.py:2223` |
+| `get_entity()` | — | `Company` | Company owning this filing (lru_cache) | `_filings.py:2199` |
+| `related_filings()` | — | `CompanyFilings` | All filings sharing same file_number (lru_cache) | `_filings.py:2218` |
+| `as_company_filing()` | — | `CompanyFiling\|None` | Richer company-filing object via entity lookup (lru_cache) | `_filings.py:2206` |
+| `correspondence()` | — | `Optional[CorrespondenceThread]` | SEC review correspondence thread; works on any form type | `_filings.py:2250` |
 
 ---
 
@@ -138,7 +138,7 @@ These all call `self.sgml()` internally. SGML is loaded once and cached.
 |--------|-----------|---------|-------------|--------|
 | `save(directory_or_file)` | `PathLike` | `None` | Pickle to file; preloads SGML first for self-contained file | `_filings.py:1796` |
 | `to_dict()` | — | `Dict[str, Union[str, int]]` | Serialize to 5-key dict | `_filings.py:1965` |
-| `summary()` | — | `pd.DataFrame` | Single-row DataFrame with accession/date/company/CIK | `_filings.py:2271` |
+| `summary()` | — | `pd.DataFrame` | Single-row DataFrame with accession/date/company/CIK | `_filings.py:2298` |
 
 ---
 
@@ -146,7 +146,7 @@ These all call `self.sgml()` internally. SGML is loaded once and cached.
 
 | Method | Parameters | Returns | Description | Source |
 |--------|-----------|---------|-------------|--------|
-| `to_context(detail)` | `str='standard'` | `str` | LLM-optimized markdown-KV context | `_filings.py:2278` |
+| `to_context(detail)` | `str='standard'` | `str` | LLM-optimized markdown-KV context | `_filings.py:2305` |
 | `serve(port)` | `int=8000` | `AttachmentServer` | Serve attachments on local HTTP server | `_filings.py:1790` |
 | `open()` | — | `None` | Open primary document in browser | `_filings.py:2028` |
 | `open_homepage()` | — | `None` | Open filing homepage in browser | `_filings.py:2024` |
@@ -204,7 +204,7 @@ Single document within a filing.
 | `size` | `Optional[int]` | File size in bytes; `None` if not parseable |
 | `sgml_document` | `Optional[SGMLDocument]` | In-memory content from SGML bundle |
 | `purpose` | `Optional[str]` | Override description for display |
-| `filing_sgml` | `Optional[FilingSGML]` | Parent SGML bundle reference |
+| `sgml` | `Optional[FilingSGML]` | Parent SGML bundle reference |
 
 ### `Attachment` Properties
 
@@ -290,13 +290,13 @@ Accessed via `filing.header` (cached_property).
 | Property | Type | Source |
 |----------|------|--------|
 | `accession_number` | `str` | `sgml_header.py:397` |
-| `cik` | `str` | `sgml_header.py` |
+| `cik` | `Optional[int]` | `sgml_header.py` |
 | `form` | `str` | `sgml_header.py` |
 | `period_of_report` | `Optional[str]` | `sgml_header.py` |
 | `filing_date` | `str` | `sgml_header.py` |
 | `date_as_of_change` | `Optional[str]` | `sgml_header.py` |
 | `document_count` | `Optional[int]` | `sgml_header.py` |
-| `acceptance_datetime` | `Optional[str]` | `sgml_header.py` |
+| `acceptance_datetime` | `Optional[datetime]` | `sgml_header.py` |
 | `file_numbers` | `List[str]` | `sgml_header.py` |
 | `filers` | `List[Filer]` | Each has `company_information` (name, CIK, SIC, addresses) |
 | `reporting_owners` | `List[ReportingOwner]` | For Forms 3/4/5 |
@@ -312,7 +312,7 @@ Accessed via `filing.header` (cached_property).
 | `pattern` | `str` | The search pattern |
 | `matches` | `List[GrepMatch]` | All matches found |
 
-Each `GrepMatch` has: `location` (document name or `'primary'`), `context` (surrounding text snippet).
+Each `GrepMatch` has: `location` (`str`, document name or `'primary'`), `match` (`str`, the matched text itself), `context` (`str`, surrounding text snippet).
 
 ---
 
@@ -325,7 +325,7 @@ Each `GrepMatch` has: `location` (document name or `'primary'`), `context` (surr
 | Network timeout | `sgml()` raises if permanent; HTML fallback for transient content errors |
 | No HTML document | `html()` returns `None`; `text()` falls back to TEXT-EXTRACT attachment |
 | No XBRL data | `xbrl()` returns `None` |
-| No HTML for sections | `sections()` raises `ValueError` with diagnostic message |
+| No HTML for sections | `sections()` returns empty list `[]` |
 | Paper/scanned filing | `document` property returns scanned PDF attachment if found |
 | `Attachments[key]` miss | Raises `KeyError` |
 

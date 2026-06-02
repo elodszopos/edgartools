@@ -2,7 +2,7 @@
 
 **Python class**: `CompanyReport`
 **Source**: `edgar/company_reports/_base.py:23`
-**Subclasses**: `TenK`, `TenQ`, `CurrentReport`/`EightK`, `TwentyF`, `FortyF`
+**Subclasses**: `TenK`, `TenQ`, `CurrentReport`, `TwentyF`, `FortyF` — `EightK` is an alias for `CurrentReport` (`EightK = CurrentReport` at `current_report.py:943`), not a separate subclass
 **Not a parent of**: `SixK` (standalone)
 **Filing fields**: See `_base-filing.md` — all `Filing` fields accessible via `self._filing`
 
@@ -99,7 +99,7 @@ Accessed via `report.financials`. Thin facade over `XBRL`.
 
 | Attribute | Type | Description |
 |-----------|------|-------------|
-| `xb` | `XBRL` | Underlying XBRL object; direct access for low-level operations |
+| `xb` | `Optional[XBRL]` | Underlying XBRL object; direct access for low-level operations |
 
 ### Statement Accessors
 
@@ -150,7 +150,7 @@ All return `Optional[Union[int, float]]`. Strategy: concept-based first, label-b
 
 | Method | Returns | Description | Source |
 |--------|---------|-------------|--------|
-| `get_financial_metrics()` | `Dict[str, Any]` | 14 named metrics + `current_ratio`, `debt_to_assets` | `financials.py:743` |
+| `get_financial_metrics()` | `Dict[str, Any]` | 13 named metrics + `current_ratio`, `debt_to_assets` | `financials.py:743` |
 
 `get_financial_metrics()` keys: `revenue`, `operating_income`, `net_income`, `total_assets`, `total_liabilities`, `stockholders_equity`, `current_assets`, `current_liabilities`, `operating_cash_flow`, `capital_expenditures`, `free_cash_flow`, `shares_outstanding_basic`, `shares_outstanding_diluted`, `current_ratio`, `debt_to_assets`
 
@@ -191,10 +191,22 @@ Each `Note` object has:
 
 | Field | Type | Description |
 |-------|------|-------------|
+| `number` | `int` | Note number (e.g. 5 for "Note 5") |
 | `title` | `str` | Note title |
-| `tables` | `list` | Extracted financial tables |
-| `text` | `str` | Note text content |
-| `expands` | `list` | Statement line item labels this note expands |
+| `short_name` | `str` | Short display name |
+| `role` | `str` | XBRL presentation role URI |
+| `statement` | `Optional[Statement]` | Top-level Statement for narrative text; `None` if unavailable |
+| `tables` | `List[Statement]` | Child table Statements within this note |
+| `policies` | `List[Statement]` | Accounting policy Statements within this note |
+| `details` | `List[Statement]` | Detail Statements within this note |
+| `menu_category` | `str` | Category for display grouping (default `'Notes'`) |
+| `text` | `Optional[str]` | Note text content; `None` when `statement` is absent |
+| `html` | `Optional[str]` | Raw HTML content from TextBlock tags; `None` when `statement` is absent |
+| `table_count` | `int` | Number of child tables |
+| `has_tables` | `bool` | Whether this note contains tables |
+| `children` | `List[Statement]` | All child Statements (tables + policies + details) |
+| `expands` | `List[str]` | Statement line item labels this note expands |
+| `expands_concepts` | `List[str]` | Raw XBRL concept IDs that overlap with core financial statements |
 | `to_context(detail)` | `str` | AI-optimized note content string |
 
 ---

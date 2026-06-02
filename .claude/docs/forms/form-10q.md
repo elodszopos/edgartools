@@ -31,8 +31,8 @@ See `_base-company-report.md` — `financials`, `income_statement`, `balance_she
 | Field | Type | Lazy | Description |
 |-------|------|------|-------------|
 | `document` | `Document\|None` | cached/network | `HTMLParser(ParserConfig(form='10-Q'))` parse of filing HTML; returns `None` if no HTML. See `ten_q.py:203` |
-| `sections` | `Sections\|{}` | cached (via document) | Dict of part-qualified section keys → `Section` objects; empty dict if `document` is None. Keys always part-qualified (e.g., `part_i_item_1`, `part_ii_item_1`). See `ten_q.py:225` |
-| `items` | `List[str]` | cached (via sections) | Part-qualified item names (e.g., `['Part I, Item 1', 'Part II, Item 1']`); falls back to `chunked_document.list_items()` when sections is empty. See `ten_q.py:245` |
+| `sections` | `Sections\|{}` | no (plain `@property`, recomputes each call; backing `document` is cached) | Dict of part-qualified section keys → `Section` objects; empty dict if `document` is None. Keys always part-qualified (e.g., `part_i_item_1`, `part_ii_item_1`). See `ten_q.py:225` |
+| `items` | `List[str]` | no (plain `@property`, recomputes each call) | Part-qualified item names (e.g., `['Part I, Item 1', 'Part II, Item 1']`); falls back to `chunked_document.list_items()` when sections is empty. See `ten_q.py:245` |
 | `chunked_document` | `ChunkedDocument` | cached/network | Legacy HTML parser; fallback for `items` and `__getitem__`. See `ten_q.py:455` |
 
 #### Methods
@@ -59,7 +59,7 @@ Applied in order; returns on first match.
 | 2 | `'Part I, Item X'` / `'Part II, Item X'` | `part_i_item_{n}` or `part_ii_item_{n}` | `'Part II, Item 1'` → `part_ii_item_1` |
 | 3 | `'Item X'` (unqualified) | `part_i_item_{n}` first, then `part_ii_item_{n}`, then TOC keys | `'Item 1'` → Part I (backward compat) |
 | 4 | Short number `'1'`/`'1a'` | `part_i_item_{n}` first, then `part_ii_item_{n}`, then TOC keys | `'1'` → Part I Item 1 |
-| fallback | All formats | `chunked_document[item_or_part]` (deprecated v5, removed v6) | logs warning |
+| fallback | All formats | `chunked_document[item_or_part]` (planned for removal in v6.0, no DeprecationWarning emitted by TenQ override) | logs warning |
 
 **CRITICAL**: `tenq['Item 1']` returns Part I Item 1 (Financial Statements) for backward compat. Use `tenq['Part II, Item 1']` or `tenq.get_item_with_part('Part II', 'Item 1')` for Legal Proceedings.
 
@@ -109,7 +109,7 @@ Item metadata dict keys: `Title` (str), `Description` (str).
 | `financials` is `None` (no XBRL) | `income_statement`, `balance_sheet`, `cash_flow_statement` return `None`; `auditor` returns `None` |
 | `__getitem__` with unqualified `'Item 1'` | Returns Part I (Financial Statements), NOT Part II (Legal Proceedings) |
 | `chunked_document` fallback | Logs `WARNING` with accession number and available section keys |
-| `get_item_with_part` with unknown `part` string | `part_prefix` is `None`; falls through to `chunked_document` fallback |
+| `get_item_with_part` with unknown `part` string | `part_prefix` is `None`; falls through to `chunked_document` fallback, then `id_parse_document` fallback if `chunked_document` yields nothing |
 | `__getitem__` finds no match | Returns `None` |
 
 ---

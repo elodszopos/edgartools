@@ -38,7 +38,8 @@ All fields and methods are inherited from `Ownership`. Behavior diverges from Fo
 | `get_ownership_summary()` | Returns `TransactionSummary` (not `InitialOwnershipSummary`) |
 | `to_dataframe()` | One row per `TransactionActivity` |
 | `to_dataframe(detailed=False)` | Single summary row with aggregated counts and values |
-| `__rich__` / HTML render | Shows transaction tables with 11 columns |
+| `__rich__` | Renders via `TransactionSummary.__rich__()`: 7 columns for non-derivative (Type, Code, Description, Shares, Price, Value, Ownership) and 5 columns for derivative (Type, Code, Shares, Underlying, Expiration) |
+| HTML render (`_repr_html_`) | Table I: 11 columns (non-derivative); Table II: 14 columns (derivative). See HTML Rendering sections below |
 
 ### Key Transaction Identification
 
@@ -50,7 +51,7 @@ Form 4 is commonly used to identify:
 | Open market sale | `S` | `"sale"` |
 | Grant / award | `A` | `"award"` |
 | Option exercise | `M` | `"exercise"` |
-| In-the-money/at-the-money derivative exercise | `X` | `"exercise"` |
+| In-the-money/at-the-money derivative exercise | `X` | `"other_acquisition"` / `"other_disposition"` (non-deriv, based on AcquiredDisposed) or `"derivative_purchase"` / `"derivative_sale"` (deriv) |
 | Tax withholding | `F` | `"tax"` |
 | Gift | `G` | `"gift"` |
 | Derivative acquisition | `A`, `C`, etc. on derivative table | `"derivative_purchase"` |
@@ -91,9 +92,9 @@ Template renders 11 columns:
 |--------|-------------|-------------|
 | Security Title | `Security` | |
 | Transaction Date | `Date` | |
-| Deemed Execution Date | `DeemedDate` | Typically empty |
+| Deemed Execution Date | `DeemedDate` | Not a real DataFrame column; `html_render.py` uses `.get('DeemedDate', '')` which always returns empty string. Do not access as a DataFrame column. |
 | Transaction Code | `Code` | |
-| V | `V` | Equity swap indicator |
+| V | `V` | Not a real DataFrame column; `html_render.py` uses `.get('V', '')` which always returns empty string. Do not access as a DataFrame column. |
 | Amount | `Shares` | |
 | A or D | `AcquiredDisposed` | |
 | Price | `Price` | |
@@ -112,9 +113,9 @@ Holdings rows (when present in Form 4) fill transaction-specific columns with em
 | Security Title | `Security` | |
 | Conversion/Exercise Price | `ExercisePrice` | |
 | Transaction Date | `Date` | |
-| Deemed Execution Date | `DeemedDate` | |
+| Deemed Execution Date | `DeemedDate` | Not a real DataFrame column; `html_render.py` uses `.get('DeemedDate', '')` which always returns empty string. Do not access as a DataFrame column. |
 | Transaction Code | `Code` | |
-| V | `V` | |
+| V | `V` | Not a real DataFrame column; `html_render.py` uses `.get('V', '')` which always returns empty string. Do not access as a DataFrame column. |
 | Amount | `Shares` | |
 | A or D | `AcquiredDisposed` | |
 | Exercisable/Expiration Date | `ExerciseDate - ExpirationDate` | Combined |

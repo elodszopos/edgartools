@@ -38,7 +38,7 @@ See `reports-financials.md` § CompanyReport. Key inherited fields:
 | `press_releases` | `PressReleases\|None` | queries attachments | EX-99, EX-99.1, EX-99.01 `.htm` docs; EX-99.2 excluded — `current_report.py:594` |
 | `items` | `List[str]` | 3-tier fallback | Returns `['Item 2.02', 'Item 9.01', ...]`; see fallback chain below — `current_report.py:626` |
 | `date_of_report` | `str` | immediate (from header) | `period_of_report` formatted as `"June 30, 2025"`; empty string if not set — `current_report.py:735` |
-| `chunked_document` | `ChunkedDocument\|None` | cached (HTML parse) | Legacy parser; used internally as fallback; accessing via base class emits DeprecationWarning in v5 — `current_report.py:609` |
+| `chunked_document` | `ChunkedDocument\|None` | cached (HTML parse) | Legacy parser; used internally as fallback; `CurrentReport` overrides this property so no DeprecationWarning is emitted (only the base class `CompanyReport.chunked_document` warns); planned for removal in v6.0 — `current_report.py:609` |
 | `doc` | `ChunkedDocument\|None` | delegated to `chunked_document` | Alias; points to legacy parser on 8-K (differs from base class which returns `document`) — `current_report.py:622` |
 
 #### Methods

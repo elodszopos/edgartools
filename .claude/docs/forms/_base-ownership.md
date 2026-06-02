@@ -46,7 +46,7 @@
 | `extract_form3_holdings` | — | `List[SecurityHolding]` | Combines non-derivative + derivative holdings; Form 3 focus |
 | `get_transaction_activities` | — | `List[TransactionActivity]` | All market + non-market + derivative transactions; resolves footnotes |
 | `get_ownership_summary` | — | `InitialOwnershipSummary \| TransactionSummary` | Form 3 → `InitialOwnershipSummary`; Form 4/5 → `TransactionSummary` |
-| `to_dataframe` | `detailed: bool = True`, `include_metadata: bool = True` | `pd.DataFrame` | Delegates to `get_ownership_summary().to_dataframe()` |
+| `to_dataframe` | `detailed: bool = True`, `include_metadata: bool = True` | `pd.DataFrame` | Delegates to `get_ownership_summary().to_dataframe()`. Note: `include_metadata` only takes effect when `detailed=True`; summary mode (`detailed=False`) always includes metadata |
 | `to_context` | `detail: str = 'standard'` | `str` | AI context; `'minimal'` ~100 tokens, `'standard'` ~300, `'full'` ~500+ |
 | `to_html` | — | `str` | Jinja2 SEC-style HTML via `ownership_to_html(self)` |
 
@@ -69,7 +69,7 @@ Source: `edgar/ownership/ownershipforms.py:931`
 | Field | Type | Description |
 |-------|------|-------------|
 | `cik` | `str` | Owner CIK from `<rptOwnerCik>` |
-| `is_company` | `bool` | `True` if entity lookup determines company (vs individual) |
+| `is_company` | `Optional[bool]` | `True` if entity lookup determines company (vs individual); `None` if CIK lookup fails |
 | `name` | `str` | Display name — reversed (First Last) if individual, unchanged if company |
 | `name_unreversed` | `str` | Raw name from XML before reversal |
 | `address` | `Address` | Street, city, state, zip from `<reportingOwnerAddress>` |
@@ -117,7 +117,7 @@ Source: `edgar/ownership/ownershipforms.py:285`
 | `_footnotes` | `Dict[str, str]` | Internal dict; keys are footnote IDs (e.g. `"F1"`), values are text |
 | `__getitem__(id)` | `str` | Direct access; raises `KeyError` if ID not found |
 | `get(id, default)` | `Optional[str]` | Safe access with default |
-| `summary()` | `pd.DataFrame` | DataFrame with columns `id`, `footnote` |
+| `summary()` | `pd.DataFrame` | DataFrame indexed by `id`, with column `footnote` |
 | `__len__` | `int` | Number of footnotes |
 
 ### OwnerSignature
@@ -215,7 +215,7 @@ Source: `edgar/ownership/ownershipforms.py:407`
 |--------|-------------|
 | `data` | `pd.DataFrame` — see DataFrame schema below |
 | `__getitem__(int)` | Returns `DerivativeHolding` frozen dataclass |
-| `summary()` | Subset: Security, Underlying, Shares, ExercisePrice, ExerciseDate |
+| `summary()` | Subset: Security, Underlying, Shares, Ex price, Ex date (renamed from UnderlyingShares, ExercisePrice, ExerciseDate) |
 
 ### DerivativeHolding (frozen dataclass)
 
@@ -241,7 +241,7 @@ Source: `edgar/ownership/ownershipforms.py:479`
 | `disposals` | Property — rows where `AcquiredDisposed == 'D'` |
 | `acquisitions` | Property — rows where `AcquiredDisposed == 'A'` |
 | `shares_disposed()` | Sum of disposed shares |
-| `summary()` | Subset: Date, Security, Shares (+/-), Remaining, Price, Underlying |
+| `summary()` | Subset: Date, Security, Shares (+/-), Remaining, Price, Underlying. Date becomes the index |
 
 ### DerivativeTransaction (frozen dataclass)
 
@@ -440,7 +440,7 @@ Source: `edgar/ownership/ownershipforms.py:1400` — extends `OwnershipSummary`
 | `has_10b5_1_plan` | `Optional[bool]` | `True` if any transaction is 10b5-1; `False` if footnotes exist but no plan; `None` if no footnotes |
 | `net_change` | `int` | `purchases_shares - sales_shares` |
 | `net_value` | `float` | `purchase_value - sale_value` |
-| `primary_activity` | `str` | Dominant label: `"Purchase"`, `"Sale"`, `"Tax Withholding"`, `"Grant/Award"`, `"Option Exercise"`, `"Conversion"`, `"DERIVATIVE TRANSACTIONS"`, etc. |
+| `primary_activity` | `str` | Dominant label: `"Purchase"`, `"Sale"`, `"Tax Withholding"`, `"Grant/Award"`, `"Option Exercise"`, `"Conversion"`, `"Mixed Transactions"`, `"DERIVATIVE TRANSACTIONS"`, `"DERIVATIVE ACQUISITION"`, `"DERIVATIVE DISPOSITION"`, `"DERIVATIVE TRANSACTION"`, `"No Transactions"`, or dynamic `.title()` of first transaction type as fallback |
 
 **Methods:**
 

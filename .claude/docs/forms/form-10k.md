@@ -31,14 +31,14 @@ See `_base-company-report.md` — `financials`, `income_statement`, `balance_she
 | Field | Type | Lazy | Description |
 |-------|------|------|-------------|
 | `document` | `Document\|None` | cached/network | `HTMLParser(ParserConfig(form='10-K'))` parse of filing HTML; returns `None` on parse failure, triggering `chunked_document` fallback. See `ten_k.py:181` |
-| `sections` | `Sections\|{}` | cached (via document) | Dict of section keys → `Section` objects from `document.sections`; empty dict if `document` is None. Keys are part-qualified (e.g., `part_i_item_1`). See `ten_k.py:213` |
-| `items` | `List[str]` | cached (via sections) | Section names in `"Item X"` format in canonical SEC order (1, 1A, 1B, 1C, 2, 3 … 15, 16); deduplicated and sorted by `_item_sort_key` (numeric then full token); falls back to `chunked_document.list_items()` when sections is empty. See `ten_k.py:248` |
-| `business` | `str\|None` | cached (via __getitem__) | Shortcut for `self['Item 1']` — Part I Item 1 Business. See `ten_k.py:293` |
-| `risk_factors` | `str\|None` | cached (via __getitem__) | Shortcut for `self['Item 1A']` — Part I Item 1A Risk Factors. See `ten_k.py:296` |
-| `management_discussion` | `str\|None` | cached (via __getitem__) | Shortcut for `self['Item 7']` — Part II Item 7 MD&A. See `ten_k.py:299` |
-| `directors_officers_and_governance` | `str\|None` | cached (via __getitem__) | Shortcut for `self['Item 10']` — Part III Item 10. See `ten_k.py:303` |
+| `sections` | `Sections\|{}` | no (plain @property, recomputes each access via `document.sections`) | Dict of section keys → `Section` objects from `document.sections`; empty dict if `document` is None. Keys are part-qualified (e.g., `part_i_item_1`) or friendly names (e.g., `business`, `mda`, `risk_factors`). See `ten_k.py:213` |
+| `items` | `List[str]` | no (plain @property, recomputes each access) | Section names in `"Item X"` format in canonical SEC order (1, 1A, 1B, 1C, 2, 3 … 15, 16); deduplicated and sorted by `_item_sort_key` (numeric then full token); falls back to `chunked_document.list_items()` when sections is empty. See `ten_k.py:248` |
+| `business` | `str\|None` | no (plain @property, delegates to `__getitem__`) | Shortcut for `self['Item 1']` — Part I Item 1 Business. See `ten_k.py:293` |
+| `risk_factors` | `str\|None` | no (plain @property, delegates to `__getitem__`) | Shortcut for `self['Item 1A']` — Part I Item 1A Risk Factors. See `ten_k.py:296` |
+| `management_discussion` | `str\|None` | no (plain @property, delegates to `__getitem__`) | Shortcut for `self['Item 7']` — Part II Item 7 MD&A. See `ten_k.py:299` |
+| `directors_officers_and_governance` | `str\|None` | no (plain @property, delegates to `__getitem__`) | Shortcut for `self['Item 10']` — Part III Item 10. See `ten_k.py:303` |
 | `subsidiaries` | `SubsidiaryList\|None` | cached/network | Scans `_filing.attachments` for first `EX-21*` exhibit; parses HTML via `parse_subsidiaries()`; returns `None` if no EX-21 exhibit. See `ten_k.py:308` |
-| `chunked_document` | `ChunkedDocument` | cached/network | Legacy HTML parser; used as fallback by `items` and `__getitem__`; emits no warning here (base class `chunked_document` does). See `ten_k.py:328` |
+| `chunked_document` | `ChunkedDocument` | cached/network | Legacy HTML parser; used as fallback by `items` and `__getitem__`; planned for removal in v6.0 but TenK override does NOT emit `DeprecationWarning` (only base class version does). See `ten_k.py:328` |
 | `_cross_reference_index` | `CrossReferenceIndex\|None` | cached/network | Detects Cross Reference Index format (GE, Henry Schein style); `None` if not present. See `ten_k.py:331` |
 
 #### Methods
@@ -68,7 +68,7 @@ Applied in order; returns on first match.
 | 4 | `'Item X'` → friendly name lookup | `'Item 7'` → `'mda'` |
 | 5 | Short format `'1'`/`'1A'` → `'Item X'` | `'7'` → `'Item 7'` |
 | fallback | Cross Reference Index (if detected) | for GE/Henry Schein style |
-| fallback | `chunked_document[item_or_part]` (deprecated v5, removed v6) | last resort |
+| fallback | `chunked_document[item_or_part]` (planned for removal in v6.0, no DeprecationWarning emitted) | last resort |
 
 Item-to-Part mapping (`_ITEM_TO_PART_10K`) constrains lookup to SEC-canonical Part, preventing wrong-Part fallback (GH #821).
 

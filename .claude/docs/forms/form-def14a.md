@@ -4,7 +4,7 @@
 **Python class**: `ProxyStatement` (no base class — standalone)
 **Access**: `filing.obj()` → `ProxyStatement`; or `ProxyStatement.from_filing(filing)`
 **Base fields**: See `core-filing-access.md` — all `Filing` fields available via `.filing`
-**Source**: `edgar/proxy/core.py`, `edgar/proxy/models.py`, `edgar/proxy/html_extractor.py`, `edgar/proxy/season.py`, `edgar/proxy/contest.py`
+**Source**: `edgar/proxy/core.py`, `edgar/proxy/models.py`, `edgar/proxy/html_extractor.py`, `edgar/proxy/season.py`, `edgar/proxy/contest.py`, `edgar/proxy/contests.py`
 
 ---
 
@@ -66,12 +66,12 @@ All return None when `has_xbrl` is False.
 
 | Field | Type | Lazy | Description |
 |-------|------|------|-------------|
-| `has_individual_executive_data` | `bool` | cached | True if `dim_ecd_IndividualAxis` exists in facts |
+| `has_individual_executive_data` | `bool` | cached | True if `dim_ecd_IndividualAxis` column exists with non-null values |
 | `named_executives` | `List[NamedExecutive]` | cached | Per-executive data; only when dimensionally tagged (~60% of filers) |
 
 #### HTML-Extracted Properties
 
-All use `lxml` DOM on `_html_tree` (shared cached parse, ~100-200ms first access).
+`voting_proposals` and `ceo_pay_ratio` use text-based regex on `_filing_text`. The remaining properties use `lxml` DOM on `_html_tree` (shared cached parse, ~100-200ms first access).
 
 | Field | Type | Lazy | Description |
 |-------|------|------|-------------|
@@ -260,9 +260,9 @@ Groups all proxy filings around one annual meeting, anchored by management's def
 | `num_filings` | `int` | no | Total filings in this season |
 | `proxy` | `ProxyStatement` | cached | ProxyStatement from anchor filing |
 | `related_filings` | `List[Filing]` | no | All proxy filings in season window |
-| `preliminary_filings` | `List[SeasonFiling]` | cached | Tier 3: PRE 14A, PREC14A, etc. |
-| `supplemental_filings` | `List[SeasonFiling]` | cached | Tier 4: DEFA14A, DFAN14A, DFRN14A |
-| `exempt_solicitations` | `List[SeasonFiling]` | cached | Tier 5: PX14A6G, PX14A6N |
+| `preliminary_filings` | `List[SeasonFiling]` | no | Tier 3: PRE 14A, PREC14A, etc. |
+| `supplemental_filings` | `List[SeasonFiling]` | no | Tier 4: DEFA14A, DFAN14A, DFRN14A |
+| `exempt_solicitations` | `List[SeasonFiling]` | no | Tier 5: PX14A6G, PX14A6N |
 | `is_contested` | `bool` | cached | True if any CONTEST_INDICATOR_FORMS in season |
 | `contest` | `Optional[ProxyContest]` | cached | ProxyContest if contested, else None |
 
@@ -293,9 +293,9 @@ Analyzes a contested proxy: parties, timeline, settlement status.
 | `parties` | `Dict[str, str]` | cached (network) | All parties: {name: party_type} |
 | `is_settled` | `bool` | cached (network) | True if management never filed DEFC14A (settled heuristic) |
 | `timeline` | `pd.DataFrame` | cached (network) | Chronological table of all contest filings |
-| `management_filings` | `List[SeasonFiling]` | cached (network) | Filings where party_type == 'management' |
-| `dissident_filings` | `List[SeasonFiling]` | cached (network) | Filings where party_type == 'dissident' |
-| `third_party_filings` | `List[SeasonFiling]` | cached (network) | Filings where party_type == 'third_party' |
+| `management_filings` | `List[SeasonFiling]` | no | Filings where party_type == 'management' |
+| `dissident_filings` | `List[SeasonFiling]` | no | Filings where party_type == 'dissident' |
+| `third_party_filings` | `List[SeasonFiling]` | no | Filings where party_type == 'third_party' |
 
 ### `timeline` DataFrame columns
 
