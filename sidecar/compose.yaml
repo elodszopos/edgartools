@@ -1,0 +1,21 @@
+# Reference service block for consumers (e.g. knowledge-distiller wires an equivalent into its own compose).
+# Build context is the fork root (one level up): the sidecar installs ../ as an editable path dep.
+services:
+  edgar:
+    build:
+      context: ..
+      dockerfile: sidecar/Dockerfile
+    image: edgar-sidecar:dev
+    ports:
+      - "8000:8000"
+    environment:
+      SEC_EDGAR_USER_AGENT: ${SEC_EDGAR_USER_AGENT:?SEC identity required, e.g. "Name contact@example.com"}
+      EDGAR_RATE_LIMIT_PER_SEC: ${EDGAR_RATE_LIMIT_PER_SEC:-8}
+      # uncomment (with the volume below) to persist the edgartools disk cache across restarts
+      # EDGAR_USE_LOCAL_DATA: "1"
+      # EDGAR_LOCAL_DATA_DIR: /data/edgar
+    # volumes:
+    #   - edgar-cache:/data/edgar
+
+# volumes:
+#   edgar-cache:

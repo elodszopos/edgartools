@@ -187,7 +187,7 @@ Commit per unit on green: `git add <unit files> && git commit -m "sidecar: U## <
 
 | ID | Phase | Scope | State |
 |---|---|---|---|
-| U00 | P0 | Scaffold: `sidecar/` pyproject (local `edgar` path dep), app skeleton, settings, identity boot, `/health`, Dockerfile, compose.yaml, ruff/pyright config | todo |
+| U00 | P0 | Scaffold: `sidecar/` pyproject (local `edgar` path dep), app skeleton, settings, identity boot, `/health`, Dockerfile, compose.yaml, ruff/pyright config | done |
 | U01 | P0 | `serialize.py` policy + common models (FilingRef/FilingsPage/EntityRef/FilingEnvelope sans union) + exception->status mapping + CIK helpers (unit-tested) | todo |
 | U02 | P0 | Test harness: pytest+VCR wiring (fork conventions), golden-dump helper, live marker, budget-guard helper; first cassette+test (`/health`, `/tickers`) | todo |
 | U03 | P0 | Codegen: evaluate+pick tool (comet_ask), export_openapi.py, generate_zod.sh, check_drift.sh, ts/ scaffold (bun, eslint, zod), first golden->Zod test green | todo |
@@ -237,3 +237,5 @@ Commit per unit on green: `git add <unit files> && git commit -m "sidecar: U## <
 ## Log
 
 (append-only; `U## | state | one-line findings`)
+
+U00 | done | Gates run: ruff+pyright+TestClient boot checks (pytest/drift/ts gates land with U02/U03). Findings: edgar.core.get_identity() prompts interactively when unset -> /health reads EDGAR_IDENTITY env directly; EDGAR_RATE_LIMIT_PER_SEC is edgar-native (httpclient.py, lib default 9) -> sidecar pins 8 at boot before client creation; EDGAR_LOCAL_DATA_DIR/EDGAR_USE_LOCAL_DATA are edgar-native passthrough. Pins: fastapi 0.136.3, uvicorn 0.49.0, pytest 9.0.3, vcrpy 8.1.1, pytest-vcr 1.0.2, httpx 0.28.1, ruff 0.15.17, pyright 1.1.410 (dev dep; not on PATH). Ruff mirrors fork rules minus retired PD901 and minus tests/ exclude. Watch for U02: starlette deprecates plain-httpx TestClient (wants httpx2) but edgartools pins httpxthrottlecache<0.5.0 to stay on plain httpx. Dockerfile build context = fork root (editable ../ dep); container validation deferred to U60 per plan.
