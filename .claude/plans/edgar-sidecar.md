@@ -38,6 +38,7 @@ One command from anywhere: `~/Projects/edgartools/sidecar/loop.sh` — zero prer
 - `SEC_EDGAR_USER_AGENT` is hardcoded in the launcher (contact string, not a credential — same plaintext value as v1's `.env.tpl`).
 - Starts `claude` anchored in the fork root with the /loop prompt baked in.
 - Fork `.claude/settings.json` pre-allows comet + context7 MCP (the U03 research tools missing from global allows); Bash/Edit/Write under `~/Projects/**` are already globally allowed, so loop iterations never hit a permission prompt.
+- Fork `.claude/settings.json` env sets `CLAUDE_CODE_AUTO_COMPACT_WINDOW=300000`: loop sessions auto-compact at 300k context tokens (user request 2026-06-12; per-N-iterations compaction is not supported by Claude Code — hooks cannot trigger compaction and agents cannot invoke built-in /compact).
 
 ## Layout
 
