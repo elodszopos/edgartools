@@ -34,8 +34,8 @@
 
 ## Launch (zero manual setup)
 
-One command from anywhere: `~/Projects/edgartools/sidecar/loop.sh`
-- Resolves `SEC_EDGAR_USER_AGENT` via `op read op://api_creds/sec-edgar/user_agent` — 1Password unlocked at launch is the ONLY human step.
+One command from anywhere: `~/Projects/edgartools/sidecar/loop.sh` — zero prerequisites.
+- `SEC_EDGAR_USER_AGENT` is hardcoded in the launcher (contact string, not a credential — same plaintext value as v1's `.env.tpl`).
 - Starts `claude` anchored in the fork root with the /loop prompt baked in.
 - Fork `.claude/settings.json` pre-allows comet + context7 MCP (the U03 research tools missing from global allows); Bash/Edit/Write under `~/Projects/**` are already globally allowed, so loop iterations never hit a permission prompt.
 
