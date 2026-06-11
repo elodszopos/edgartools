@@ -23,6 +23,15 @@
 - SEC traffic only via the recording protocol below. Tests replay cassettes offline.
 - Stateless service: no DB, no Redis, no cron, no auth (single consumer on compose network).
 
+## Loop-session rules (unattended operation)
+
+- **No subagents.** Never spawn Agent/Task in loop sessions — work directly. (Agent spawns require a context-injection MCP that may be down overnight; a blocked spawn stalls the loop. Determinism beats parallelism here.)
+- **Standing authorization.** This plan pre-approves, inside this repo only: the quality-gate commands, `sidecar/scripts/*`, pytest (incl. VCR recording within the SEC budget), codegen, `uv`/`bun` installs scoped to `sidecar/`, and `git add`/`git commit`. Anything outside that set (pushes, KD writes, library rewrites, new external services) -> `blocked(user)`.
+- **Precedence.** For `sidecar/` work this plan supersedes the fork's `CLAUDE.md` workflow ceremony (beads issue tracking, triage commands — skip them). Fork `CLAUDE.md` still governs style when touching `edgar/` library code.
+- **Anti-spin halt.** If no executable unit remains (everything `done`/`blocked`), or an iteration ends with zero state change twice in a row, append `HALT <reason>` to the Log, commit, and END the loop — do not idle-reschedule.
+- **Context discipline.** If a unit outgrows the session, finish the smallest coherent slice, commit it, set `in-progress`, and write the exact next action into the Log line so the next iteration resumes without re-deriving.
+- Outside this repo, read ONLY the named v1 fixture-mining path. Never read/write KD.
+
 ## Layout
 
 ```
@@ -53,6 +62,8 @@ sidecar/
 | `EDGAR_PORT` | 8000 | uvicorn |
 | `EDGAR_LOCAL_DATA_DIR` / `EDGAR_USE_LOCAL_DATA` | optional | edgartools disk cache volume |
 
+Tooling: `uv`-managed venv at `sidecar/.venv`, Python 3.12 (matches container). Local `edgar` as editable path dep (`uv add --editable ../`). All deps exact-pinned. Run locally: `uv run uvicorn app.main:app`. TS side: bun, deps exact-pinned.
+
 ## Wire conventions
 
 - `id` params accept ticker or CIK; all returned CIKs 10-digit zero-padded strings.
@@ -80,12 +91,15 @@ Envelope-only (typed later only if ever needed): CORRESP/UPLOAD, ATS-N family, M
 
 **Full fidelity rule:** every public field/property the edgartools data object exposes is captured (nested tables, footnotes, signatures, remarks, flags). Exclusions ONLY for: rendering helpers (`__rich__`, `to_html`, repr), internal caches/private attrs, DataFrame views whose data is captured as typed records elsewhere. Each exclusion lives in the form's parity-gate test with a one-line justification.
 
+**Lazy/expensive property policy:** envelope `data` is built ONLY from the filing's own artifacts (its documents/XML/XBRL — internal fetches bounded to that filing). Properties that trigger cross-filing or cross-entity SEC calls are excluded (justified in the parity gate) and served by dedicated endpoints instead. Envelope responses stay lean (soft budget ~1-2MB): long-form text (10-K items, MD&A) ships via `/content`, `/sections`, or explicit `include_*` opt-in params — `data` carries the structure (section titles, presence, bounded excerpts), not megabytes of prose.
+
 ## Codegen pipeline
 
 1. Pydantic -> `scripts/export_openapi.py` -> committed `sidecar/openapi.json` (snapshot test).
 2. `generate_zod.sh` -> `ts/src/generated/` with do-not-edit header, committed.
 3. Drift gate: `check_drift.sh` = regenerate both + `git diff --exit-code` + bun test green. Run in every unit's verify step.
-4. Tool picked in U03 against criteria: OpenAPI 3.1 in, discriminated unions -> `z.discriminatedUnion` (or acceptable equivalent), deterministic output, maintained. Candidates: `openapi-zod-client`, `orval`, `kubb`, `typed-openapi`. Zod 3 vs 4: WHATEVER the best tool emits (user decision — do not block on this). Use comet_ask for current tool state.
+4. Tool picked in U03 against criteria: OpenAPI 3.1 in, discriminated unions -> `z.discriminatedUnion` (or acceptable equivalent), deterministic output, maintained. Candidates: `openapi-zod-client`, `orval`, `kubb`, `typed-openapi`. Zod 3 vs 4: WHATEVER the best tool emits (user decision — do not block on this). Use comet_ask for current tool state; if comet is unavailable, evaluate by installing candidates against the U03 spec sample directly.
+5. If NO tool meets the criteria: mark U03 `blocked(user)` with the evidence table. Do NOT hand-roll a generator — that is a user decision.
 
 ## Test architecture (the centerpiece)
 
@@ -96,6 +110,10 @@ Envelope-only (typed later only if ever needed): CORRESP/UPLOAD, ATS-N family, M
 | TS end-to-end | generated Zod accepts every real response | Python tests dump each response JSON as golden -> `ts/fixtures/responses/` -> bun test parses ALL goldens with generated Zod (strict) |
 | Live smoke | true SEC round-trip | tiny opt-in suite, `@pytest.mark.live`, excluded by default |
 | Unit | pure helpers only (CIK pad, period-type, serialize policy) | plain pytest |
+
+VCR wiring: copy the fork's `tests/conftest.py` `vcr_config` pattern into `sidecar/tests/conftest.py` (`record_mode=once`, match on method/host/path/query, filter User-Agent, decode compressed).
+
+Golden lifecycle: goldens are written once at fixture creation, committed, then asserted byte-equal on every run. Intentional regeneration ONLY via `GOLDEN_UPDATE=1` with the diff explained in the commit message. `check_drift.sh` validates committed goldens against freshly regenerated Zod.
 
 Target: hundreds of cases = per typed form 5-15 real accessions x (model + parity + golden-Zod) + financials across ticker classes (mega-cap, REIT, bank, IFRS/ADR e.g. INFY, fund) + discovery/search/content cases.
 
@@ -129,7 +147,7 @@ Commit per unit on green: `git add <unit files> && git commit -m "sidecar: U## <
 5. Run ALL quality gates. Green -> state `done`, append one Log line (`U## | done | key findings/decisions`), commit.
 6. Failure: max 3 fix attempts -> state `blocked(<reason>)` + Log line with all 3 attempts' evidence, commit safe artifacts only, move on.
 7. Edit only: Units states, splits, Log, Open decisions. Design sections are STABLE — changing them requires the user.
-8. Stop the iteration after ONE unit (or when blocked). All units done -> final Log line `ALL DONE` and report.
+8. Stop the iteration after ONE unit (or when blocked). All units done -> final Log line `ALL DONE` and report. No executable unit left, or two consecutive zero-progress iterations -> `HALT <reason>` per Loop-session rules and end the loop.
 
 ## Form Unit Recipe (every P4 unit)
 
