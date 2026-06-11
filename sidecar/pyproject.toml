@@ -38,10 +38,17 @@ ignore = ["W291", "E501", "S608", "C901", "S101"]
 [tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["F401"]
 
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+markers = [
+    "live: true SEC round-trip, opt-in (excluded from default gates)",
+]
+
 [tool.pyright]
 typeCheckingMode = "standard"
 pythonVersion = "3.12"
 venvPath = "."
 venv = ".venv"
-include = ["app"]
+include = ["app", "tests"]
 exclude = [".venv"]

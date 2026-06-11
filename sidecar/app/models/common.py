@@ -1,0 +1,50 @@
+"""Common wire models shared by every router (plan "Wire conventions")."""
+
+from __future__ import annotations
+
+from datetime import date
+
+from pydantic import BaseModel, ConfigDict, Field
+
+CIK_PATTERN = r"^\d{10}$"
+ACCESSION_PATTERN = r"^\d{10}-\d{2}-\d{6}$"
+
+
+class WireModel(BaseModel):
+    """Base for every response model: unknown constructor fields are converter bugs - fail loud."""
+
+    model_config = ConfigDict(extra="forbid")
+
+
+class EntityRef(WireModel):
+    cik: str = Field(pattern=CIK_PATTERN)
+    name: str | None = None
+
+
+class FilingRef(WireModel):
+    accession_number: str = Field(pattern=ACCESSION_PATTERN)
+    form: str
+    cik: str = Field(pattern=CIK_PATTERN)
+    company: str | None = None
+    filing_date: date
+
+
+class FilingsPage(WireModel):
+    filings: list[FilingRef]
+    total: int | None = None
+    start: int
+    page_size: int
+    has_more: bool
+    next_start: int | None = None
+
+
+class FilingEnvelope(WireModel):
+    # TODO(DEFERRED): U20 adds header/multi-entity fields; `data` becomes the typed-form
+    # discriminated union when the first P4 unit (U40) lands.
+    accession_number: str = Field(pattern=ACCESSION_PATTERN)
+    form: str
+    cik: str = Field(pattern=CIK_PATTERN)
+    company: str | None = None
+    filing_date: date
+    obj_type: str | None = None
+    data: None = None

@@ -7,6 +7,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
+from app.errors import register_exception_handlers
 from app.routers import health
 from app.settings import apply_settings, load_settings
 
@@ -27,3 +28,4 @@ app = FastAPI(
     lifespan=lifespan,
 )
 app.include_router(health.router)
+register_exception_handlers(app)
