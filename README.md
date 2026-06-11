@@ -10,14 +10,12 @@
   <a href="https://pypi.org/project/edgartools"><img src="https://img.shields.io/pypi/v/edgartools.svg" alt="PyPI - Version"></a>
   <a href="https://github.com/dgunning/edgartools/actions"><img src="https://img.shields.io/github/actions/workflow/status/dgunning/edgartools/python-hatch-workflow.yml" alt="GitHub Workflow Status"></a>
   <a href="https://www.codefactor.io/repository/github/dgunning/edgartools"><img src="https://www.codefactor.io/repository/github/dgunning/edgartools/badge" alt="CodeFactor"></a>
-  <a href="https://github.com/pypa/hatch"><img src="https://img.shields.io/badge/%F0%9F%A5%9A-Hatch-4051b5.svg" alt="Hatch project"></a>
   <a href="https://github.com/dgunning/edgartools/blob/main/LICENSE"><img src="https://img.shields.io/github/license/dgunning/edgartools" alt="GitHub"></a>
-  <a href="https://pypi.org/project/edgartools"><img src="https://img.shields.io/pypi/dm/edgartools" alt="PyPI - Downloads"></a>
-</p>
+  <a href="https://edgartools.readthedocs.io/"><img alt="Documentation" src="https://img.shields.io/badge/docs-edgartools-blue"></a>
+  <img alt="Pepy Total Downloads" src="https://img.shields.io/pepy/dt/edgartools">
+  <a href="https://pepy.tech/project/edgartools"><img alt="Pepy Monthly Downloads" src="https://static.pepy.tech/badge/edgartools/month"></a>
+  <a href="https://github.com/dgunning/edgartools/stargazers"><img alt="GitHub stars" src="https://img.shields.io/github/stars/dgunning/edgartools?style=social"></a>
 
-<p>
-  <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/badges/badge-ai-native.svg" alt="AI Native">
-  <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/badges/badge-open-source.svg" alt="Open Source">
 </p>
 
 **EdgarTools** is a Python library for accessing SEC EDGAR filings as structured data. Parse financial statements, insider trades, fund holdings, proxy statements, and 20+ other filing types with a consistent Python API — in a few lines of code. Free and open source.
@@ -67,90 +65,79 @@ Everything starts with a **`Company`** or a **`Filing`**. Call **`.obj()`** and 
 
 The same typed output that reads cleanly in a notebook drops straight into a pipeline: DataFrames for your warehouse, LLM-ready text and an MCP server for your AI stack, rate-limit and enterprise-mirror aware for scale.
 
-<p align="center">
-  <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/sections/section-quick-start.svg" alt="Quick Start">
-</p>
+## Quick Start
+
+**1. Install**
 
 ```bash
 pip install edgartools
 ```
 
+**2. Identify yourself to the SEC** — EDGAR requires an email with every request. No key, no signup, no rate-limit tier; set it once:
+
 ```python
 from edgar import *
-set_identity("your.name@example.com")   # SEC requires an identifying email
-
-# One line to a rendered, standardized balance sheet
-Company("AAPL").get_financials().balance_sheet()
-
-# Browse a company's filings, parse insider transactions
-form4 = Company("MSFT").get_filings(form="4")[0].obj()
-form4.to_dataframe()   # insider buy/sell transactions
+set_identity("your.name@example.com")
 ```
 
-![Apple SEC Form 4 insider transaction data extraction with Python](https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/aapl-insider.png)
+**3. Get data** — every filing is now a few lines away:
+
+```python
+# Standardized financial statements, straight from XBRL
+Company("AAPL").get_financials().income_statement()
+
+# The latest insider Form 4 as a structured object
+Company("AAPL").get_filings(form="4").latest().obj()
+```
+
+![Apple SEC Form 4 insider transactions parsed into a structured Python object](https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/quickstart-form4.gif)
+
+**Next:** explore the [Use Cases](#use-cases) below, or dive into the [documentation](https://edgartools.readthedocs.io/) and [Quick Guide](https://edgartools.readthedocs.io/en/latest/quick-guide/).
 
 ## Use Cases
 
-### Extract Financial Statements from 10-K and 10-Q Filings
-
-Get income statements, balance sheets, and cash flow statements from SEC annual and quarterly reports. Data is parsed from XBRL with standardized labels for cross-company comparison.
+### Financial statements from 10-K and 10-Q filings
 
 ```python
 financials = Company("MSFT").get_financials()
-financials.balance_sheet()     # Balance sheet with all line items
-financials.income_statement()  # Revenue, net income, EPS
+financials.balance_sheet()     # all line items
+financials.income_statement()  # revenue, net income, EPS
 ```
-
 [Financial Statements guide →](https://edgartools.readthedocs.io/en/latest/guides/financial-data/)
 
-### Track Insider Trading with SEC Form 4
-
-Monitor insider buying and selling activity from SEC Form 4 filings. See which executives are purchasing or selling shares, option exercises, and net position changes.
+### Insider trading from SEC Form 4
 
 ```python
-form4 = Company("TSLA").get_filings(form="4")[0].obj()
-form4.to_dataframe()  # Insider buy/sell transactions
+form4 = Company("TSLA").get_filings(form="4").latest().obj()
+form4.to_dataframe()  # insider buy/sell transactions
 ```
-
 [Insider Trades guide →](https://edgartools.readthedocs.io/en/latest/insider-filings/)
 
-### Analyze 13F Institutional Holdings & Hedge Fund Portfolios
-
-Track what hedge funds and institutional investors own by parsing SEC 13F filings. EdgarTools extracts complete portfolio holdings with position sizes, values, and quarter-over-quarter changes.
+### 13F institutional holdings & hedge fund portfolios
 
 ```python
-from edgar import get_filings
-thirteenf = get_filings(form="13F-HR")[0].obj()
-thirteenf.holdings  # DataFrame of all portfolio positions
+thirteenf = get_filings(form="13F-HR").latest().obj()
+thirteenf.holdings  # every portfolio position as a DataFrame
 ```
-
 [Institutional Holdings guide →](https://edgartools.readthedocs.io/en/latest/guides/thirteenf-data-object-guide/)
 
-### Parse 8-K Current Reports for Corporate Events
-
-Access material corporate events as they happen -- earnings releases, acquisitions, executive changes, and more. EdgarTools parses 8-K filings into structured items with full text extraction.
+### 8-K current reports & corporate events
 
 ```python
-eightk = get_filings(form="8-K")[0].obj()
-eightk.items  # List of reported event items
+eightk = get_filings(form="8-K").latest().obj()
+eightk.items  # reported event items
 ```
-
 [Current Events guide →](https://edgartools.readthedocs.io/en/latest/guides/eightk-data-object-guide/)
 
-### Query XBRL Financial Data Across Companies
-
-Access structured XBRL financial facts for any SEC filer. Query specific line items like revenue or total assets over time, and compare across companies using standardized concepts.
+### XBRL financial data across companies
 
 ```python
 facts = Company("AAPL").get_facts()
-facts.query().by_concept("Revenue").to_dataframe()  # Revenue history as DataFrame
+facts.query().by_concept("Revenue").to_dataframe()  # revenue history as a DataFrame
 ```
-
 [XBRL Deep Dive →](https://edgartools.readthedocs.io/en/latest/xbrl/)
 
-<p align="center">
-  <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/sections/section-features.svg" alt="Key Features">
-</p>
+## Key Features
 
 <table>
 <tr>
@@ -188,23 +175,28 @@ EdgarTools supports all SEC form types including **10-K annual reports**, **10-Q
 
 ## Comparison with Alternatives
 
-EdgarTools is a **Python library** that talks directly to SEC EDGAR. [sec-api](https://sec-api.io) is a **hosted API service** that returns JSON. Both parse SEC filings — the difference is how you work with the data.
+EdgarTools is a **Python library** that talks directly to SEC EDGAR. [sec-api](https://sec-api.io) is the best-known **hosted API** that returns JSON. Both parse filings — the difference is how you work with the data, and what it costs you.
 
-| | EdgarTools | sec-api | Raw EDGAR |
-|---|------------|---------|-----------|
-| **What it is** | Python library | REST API service | DIY |
-| **Cost** | Free (MIT) | $49+/mo | Free |
-| **Data format** | Typed Python objects | JSON | Raw XML/HTML |
-| **Parsed filing types** | 24 (10-K, 8-K, 13F, N-PORT, proxy, etc.) | 15+ structured APIs | — |
-| **Financials** | <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/icons/compare-check.svg" width="20"> Parsed + standardized | <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/icons/compare-check.svg" width="20"> Parsed (XBRL-to-JSON) | <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/icons/compare-cross.svg" width="20"> |
-| **Full-text search** | <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/icons/compare-check.svg" width="20"> via EFTS | <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/icons/compare-check.svg" width="20"> | <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/icons/compare-cross.svg" width="20"> |
-| **AI/MCP integration** | <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/icons/compare-check.svg" width="20"> | <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/icons/compare-cross.svg" width="20"> | <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/icons/compare-cross.svg" width="20"> |
-| **Language** | Python | Any | Any |
-| **Open source** | <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/icons/compare-check.svg" width="20"> | <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/icons/compare-cross.svg" width="20"> Proprietary | N/A |
+| | EdgarTools | sec-api |
+|---|------------|---------|
+| **Cost** | Free, MIT | $49+/mo |
+| **Data format** | Typed Python objects → DataFrames | JSON you parse yourself |
+| **Where it runs** | In your process — no key, no quotas, no vendor lock-in | Hosted API — key + rate tiers |
+| **Filing coverage** | 20+ typed forms (10-K, 8-K, 13F, N-PORT, proxy…) | 15+ structured endpoints |
+| **AI / MCP** | <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/icons/compare-check.svg" width="20"> Built in | <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/icons/compare-cross.svg" width="20"> |
+| **Open source** | <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/icons/compare-check.svg" width="20"> Inspect, fork, self-host | <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/icons/compare-cross.svg" width="20"> Proprietary |
 
-<p align="center">
-  <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/sections/section-ai-integration.svg" alt="AI Integration">
-</p>
+**Bottom line:** in Python, EdgarTools gives you typed objects, AI-native output, and the full SEC corpus — free, open, and inspectable, with no keys or bills. `pip install edgartools` and you're querying filings in two lines.
+
+## Library or hosted?
+
+**EdgarTools** is the open-source library — SEC-filing primitives you compose in your own code, free and self-run.
+
+[**edgar.tools**](https://edgar.tools) is the hosted platform built on that same open engine: the full SEC corpus as a managed service, so your team gets the data without running the pipeline — and without the black box of a closed API.
+
+Reach for the library when you want control in your own stack; reach for **edgar.tools** when you'd rather not operate it yourself.
+
+## AI Integration
 
 ### Use EdgarTools with Claude Code & Claude Desktop
 
@@ -253,31 +245,25 @@ See [AI Integration Guide](docs/ai-integration.md) for complete documentation.
 
 </details>
 
-## <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/icons/emoji-heart.svg" width="24" height="24"> Support This Project
+## ❤️ Support This Project
 
-EdgarTools is used in production at hedge funds, fintechs, and research desks. It's MIT-licensed — no API keys, no rate limits, no subscriptions — and one person maintains it.
+EdgarTools runs in production at hedge funds, fintechs, and research desks — MIT-licensed, no keys, no subscriptions, and maintained by one person.
 
-The SEC ships a new XBRL taxonomy every year and amends filing types every quarter. Keeping 20+ parsers current, and adding new extractors as the SEC adds disclosure types, is the work sponsorship funds.
+The SEC amends filing formats every quarter and ships a new XBRL taxonomy every year. Sponsorship is what keeps 20+ parsers current and funds new extractors as fresh disclosure types appear.
 
 <p align="center">
   <a href="https://github.com/sponsors/dgunning" target="_blank">
-    <img src="https://img.shields.io/badge/sponsor-30363D?style=for-the-badge&logo=GitHub-Sponsors&logoColor=#EA4AAA" alt="GitHub Sponsors" height="40">
+    <img src="https://img.shields.io/badge/Sponsor-30363D?style=for-the-badge&logo=GitHub-Sponsors&logoColor=EA4AAA" alt="Sponsor on GitHub" height="44">
   </a>
   &nbsp;&nbsp;
   <a href="https://www.buymeacoffee.com/edgartools" target="_blank">
-    <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" height="40">
+    <img src="https://img.shields.io/badge/Buy_me_a_coffee-FFDD00?style=for-the-badge&logo=buymeacoffee&logoColor=black" alt="Buy Me A Coffee" height="44">
   </a>
 </p>
 
 <p align="center">
   <sub>Recurring sponsorship + corporate tiers via GitHub · One-time thanks via Buy Me a Coffee</sub>
 </p>
-
-**Recent maintenance shipped via sponsorship:**
-- NPORT-P fund portfolio extraction
-- MA-I municipal advisor parser
-- 424B prospectus family (B1–B8) extractors
-- XBRL taxonomy updates for the 2026 cycle
 
 ---
 
@@ -293,9 +279,7 @@ If EdgarTools is in your data pipeline, [GitHub Sponsors](https://github.com/spo
 
 → **[See sponsor tiers](https://github.com/sponsors/dgunning)**
 
-<p align="center">
-  <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/sections/section-community.svg" alt="Community & Support">
-</p>
+## Community & Support
 
 ### Documentation & Resources
 

@@ -7,6 +7,81 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **TTM Q4 derivation no longer produces wrong/negative values for discrete-quarter reporters** — when a concept is reported as discrete quarters with no cumulative 9-month YTD fact (common for BDCs and investment companies), `TTMCalculator` derives Q4 as `FY - (Q1+Q2+Q3)`. It previously selected the three input quarters by their `fiscal_period` label, but the SEC tags comparative facts in re-filings with the *filing's* fiscal period, so the same calendar quarter could appear labeled Q1, Q2 and Q3 across successive 10-Qs — producing a wrong, often negative Q4 (e.g. GAIN `InvestmentCompanyDividendDistribution`: `57.2M - 3×28.8M = -29.2M`). Quarters are now selected by distinct calendar period (dedup by `period_end`, latest periodic filing wins), and derivation is skipped when a discrete Q4 is already reported. This affects `quarterize()`, TTM calculations, and quarterly statement views. ([#848](https://github.com/dgunning/edgartools/issues/848))
+
+## [5.36.0] - 2026-06-09
+
+A batch of robustness fixes across insider-ownership context, 6-K exhibit decoding, fund/N-PORT filing access, Schedule 13D/G, and XBRL depreciation standardization, plus an internal restructure of the ownership module. No public API changes.
+
+### Added
+
+- **`form='N-PORT'` resolves to `NPORT-P`** — `get_filings(form='N-PORT')` and related queries now match the actual SEC form type (`NPORT-P`) via a form-name alias, so the intuitive name returns results instead of an empty set. ([#843](https://github.com/dgunning/edgartools/issues/843))
+
+### Fixed
+
+- **`Ownership.to_context()` no longer crashes on string share values** — Form 3/4/5 filings whose share amounts carried footnote references or other non-numeric text raised a `TypeError` when building the AI context string; the value is now coerced safely so `to_context()` always returns a string. ([#846](https://github.com/dgunning/edgartools/issues/846))
+- **`SixK.text()` no longer crashes on bytes exhibit content** — 6-K exhibits whose `Attachment.download()` returns `bytes` raised `TypeError: a bytes-like object is required, not 'str'` in the legacy HTML parser's `<TEXT>` check; the parser now decodes bytes first, so bytes and str inputs parse identically. Non-UTF-8 exhibits (cp1252/latin-1, common in older filings) decode correctly via a cp1252→latin-1 fallback instead of emitting replacement characters. ([#844](https://github.com/dgunning/edgartools/issues/844))
+- **`SixK.text()` skips binary exhibits** — `.xlsx` and `.zip` attachments are now classified as binary so `SixK.text()` no longer attempts to decode them as HTML/text. ([#844](https://github.com/dgunning/edgartools/issues/844))
+- **`Fund(ticker).get_filings(series_only=True)` now isolates the series** — the flag previously returned filings beyond the requested series; series filtering is now applied correctly. ([#843](https://github.com/dgunning/edgartools/issues/843))
+- **Corrected a dead `N-PORT` entry in `FILER_TYPE_DOMESTIC_FORMS`** — the stale entry meant N-PORT filer-type filtering matched nothing. ([#843](https://github.com/dgunning/edgartools/issues/843))
+- **Schedule 13D/G `obj()` returns a partial object instead of silent `None`** — a parsing gap previously caused `filing.obj()` to return `None` for some 13D/G filings; it now returns a partial object so callers get the data that did parse rather than nothing, and the `to_context()` navigation hints for these filings were corrected. ([#840](https://github.com/dgunning/edgartools/issues/840), [#841](https://github.com/dgunning/edgartools/issues/841))
+- **`OtherDepreciationAndAmortization` no longer breaks standardized cash flow** — filers reporting D&A under the `OtherDepreciationAndAmortization` concept had the primary D&A line dropped from the standardized cash-flow statement and the concept misclassified as non-operating income in XBRL standardization. The line is now retained and classified correctly, with the orphan-fold dedup hardened against duplicate facts. ([#839](https://github.com/dgunning/edgartools/issues/839))
+- **Pinned `httpxthrottlecache <0.5.0`** to avoid a breaking httpx2 fork in the 0.5.x line.
+
+### Changed
+
+- **Internal: `edgar/ownership/ownershipforms.py` split into focused submodules** — the 2,279-line module was decomposed into `models`, `core`, `tables`, `table_containers`, `owners`, `summary_records`, `summary`, `forms`, and `text_render` (each under 600 lines). `ownershipforms.py` remains a backward-compatibility shim re-exporting every previously public name, and the `edgar.ownership` package surface is unchanged — verified by a new public-API guard test. Pure structural refactor with no behavior change.
+
+## [5.35.1] - 2026-06-04
+
+10-K section detection and agent TOC parsing receive two targeted fixes that close gaps introduced in 5.34.0.
+
+### Fixed
+
+- **Spurious Part IV Item 1/1A keys no longer appear in 10-K section maps** — the section detector emitted duplicate entries for Items 1 and 1A under the Part IV heading of certain 10-Ks; the keys are now dropped so lookups return the correct Part I sections. ([#836](https://github.com/dgunning/edgartools/issues/836))
+- **Agent TOC parsers no longer drop Item 1 on title-only rows** — when a TOC row contained only a title with no page number or hyperlink, the parser silently skipped Item 1; the row is now accepted and keyed correctly. ([#837](https://github.com/dgunning/edgartools/issues/837))
+
+## [5.35.0] - 2026-06-02
+
+BDC non-accrual extraction no longer depends on a filer phrasing its footnotes exactly the way our whitelist expected, and a parsing gap is now surfaced as a warning rather than read as a confirmed zero.
+
+### Added
+
+- **`edgar.__version__`** — the installed version is now exposed at the package root (`import edgar; edgar.__version__`), following the standard `pkg.__version__` convention so downstream consumers can detect which version they have without reading `edgar.__about__` or running `pip show`. ([#794](https://github.com/dgunning/edgartools/issues/794))
+- **`NonAccrualResult.warnings`** — flags a portfolio that produced no non-accrual signal from any extraction layer, and recognized flags that resolved no investments, so an LLM consumer never mistakes a parsing gap for a confirmed zero. Surfaced in `to_context`, mirroring the `Section.warnings` pattern.
+
+### Fixed
+
+- **BDC non-accrual footnote detection is now robust to wording drift** — the exact-phrase affirmative-pattern whitelist silently dropped any footnote a filer didn't phrase as an enumerated sentence. MAIN changed "Non-accrual *and* non-income producing…" to "…*or*…" and its 10-Q returned an empty list; PSEC's verb-less "Investment on non-accrual status as of the reporting date" matched nothing. The binary regex gate is replaced with a layered classifier (mention → negation → explicit pattern → structure-corroborated short label) that accepts short footnotes linked to specific investment facts regardless of exact phrasing, while long rollforward/policy footnotes stay excluded by length. Real-world impact: PSEC 0 → 5 non-accrual investments, GBDC now extracts footnote-level detail, MAIN/ARCC/FSK unchanged. ([#835](https://github.com/dgunning/edgartools/issues/835))
+
+## [5.34.0] - 2026-06-02
+
+SEC section extraction is now form-aware by design: form structure is declarative data rather than 10-K-shaped heuristics, link-less-TOC bank filings (Goldman Sachs, Citigroup) extract their items correctly, and wrong-content sections are flagged instead of trusted.
+
+### Added
+
+- **`Section.markdown()` now works on TOC-detected sections** — slices the section HTML and renders structure-preserving markdown (tables, lists) instead of falling back to flat text. Completes the `Section.markdown()` work from 5.32.0.
+- **Per-form section schema** — each form's extraction rules live in a declarative schema (`form_schema.py`) instead of branches in the TOC analyzer; supporting a new form is now a table entry.
+- **Body-header item recovery** — recovers canonical items from link-less-TOC 10-Ks (Goldman Sachs: 13 garbage sections → 21 correct items). Fires only when the linked-TOC parse is incomplete, so well-formed filings are untouched.
+- **`Section.warnings`** — flags sections whose content size is anomalous (truncated or over-captured) instead of returning them at high confidence.
+
+### Fixed
+
+- **`TenQ['Item 1']` returned Legal Proceedings instead of Financial Statements** — pre-header 10-Q items were keyed without their Part prefix, so lookups fell through to Part II.
+- **Fund `get_company()` silently returned `None`** — SEC now types fund CIKs as numeric (`225323.0`), which broke key matching; CIKs are normalized through `int` so all forms key identically.
+- **`TenK.items` now returns canonical SEC order** (`1, 1A, … 16`) on all paths, not detection order.
+- **Bare 10-K item keys get their canonical part prefix** inferred from the item number; `"Item 8" in sections` still works.
+- **Filer-specific item suffixes (e.g. Caterpillar "Item 1D") are accepted** instead of dropped as non-canonical.
+- **Descriptive free-text and bare Part labels no longer leak as sections** in the generic TOC path.
+- **`'part'` no longer false-matches inside words** like "counterparties" when inferring Part context.
+- **TOC analyzer logs internal failures** instead of silently degrading to the generic scraper.
+
+### Changed
+
+- **Refreshed bundled reference data** — `ct.pq` (CUSIP→ticker, 13F rendering) refreshed from SEC Fails-to-Deliver and merged to preserve coverage (68,512 CUSIPs); `company_tickers.parquet` (ticker↔CIK resolution) refreshed as a clean mirror of SEC's current data (10,365 entries).
+
 ## [5.33.0] - 2026-05-29
 
 ### Added
