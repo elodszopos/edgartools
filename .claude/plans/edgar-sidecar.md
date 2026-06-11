@@ -31,6 +31,7 @@
 - **Anti-spin halt.** If no executable unit remains (everything `done`/`blocked`), or an iteration ends with zero state change twice in a row, append `HALT <reason>` to the Log, commit, and END the loop — do not idle-reschedule.
 - **Context discipline.** If a unit outgrows the session, finish the smallest coherent slice, commit it, set `in-progress`, and write the exact next action into the Log line so the next iteration resumes without re-deriving.
 - Outside this repo, read ONLY the named v1 fixture-mining path. Never read/write KD.
+- **Overnight authorization (user, 2026-06-12).** Run continuously, do NOT stop. FULL authorization for all API interactions within rate limits and for everything inside this repo. Docker: the sidecar's own image/containers only — touching ANY other running container is strictly forbidden.
 
 ## Launch (zero manual setup)
 
@@ -160,7 +161,7 @@ Commit per unit on green: `git add <unit files> && git commit -m "sidecar: U## <
 
 ## Form Unit Recipe (every P4 unit)
 
-1. **Inventory**: read fork docs for the form (`docs/*.md`) + the data object source. Write the field manifest as the parity-gate test skeleton (every public attr/property listed: captured | excluded+why).
+1. **Inventory**: read fork docs for the form (`docs/*.md`) + the data object source. Form docs are comprehensive but MAYBE slightly outdated or inaccurate (user, 2026-06-12) — verify every documented claim against the data object source and real filings, never trust blindly; record discrepancies in the unit Log. Write the field manifest as the parity-gate test skeleton (every public attr/property listed: captured | excluded+why).
 2. **Models**: `app/models/forms/<form>.py` — full fidelity, `kind` literal, nested models for tables/footnotes/signatures. Register in envelope union.
 3. **Converter**: `app/converters/forms/<form>.py` — explicit field-by-field from the edgartools object. No `vars()`, no `getattr` loops.
 4. **Parity gate**: finish the introspection test; it must FAIL if edgartools grows a field this converter misses.
@@ -190,7 +191,7 @@ Commit per unit on green: `git add <unit files> && git commit -m "sidecar: U## <
 |---|---|---|---|
 | U00 | P0 | Scaffold: `sidecar/` pyproject (local `edgar` path dep), app skeleton, settings, identity boot, `/health`, Dockerfile, compose.yaml, ruff/pyright config | done |
 | U01 | P0 | `serialize.py` policy + common models (FilingRef/FilingsPage/EntityRef/FilingEnvelope sans union) + exception->status mapping + CIK helpers (unit-tested) | done |
-| U02 | P0 | Test harness: pytest+VCR wiring (fork conventions), golden-dump helper, live marker, budget-guard helper; first cassette+test (`/health`, `/tickers`) | todo |
+| U02 | P0 | Test harness: pytest+VCR wiring (fork conventions), golden-dump helper, live marker, budget-guard helper; first cassette+test (`/health`, `/tickers`) | done |
 | U03 | P0 | Codegen: evaluate+pick tool (comet_ask), export_openapi.py, generate_zod.sh, check_drift.sh, ts/ scaffold (bun, eslint, zod), first golden->Zod test green | todo |
 | U10 | P1 | `/filings` + `/filings/current` (paging, owner filter) | todo |
 | U11 | P1 | `/search` EFTS full-text (verify pagination depth past 100/page) | todo |
@@ -241,4 +242,5 @@ Commit per unit on green: `git add <unit files> && git commit -m "sidecar: U## <
 
 U00 | done | Gates run: ruff+pyright+TestClient boot checks (pytest/drift/ts gates land with U02/U03). Findings: edgar.core.get_identity() prompts interactively when unset -> /health reads EDGAR_IDENTITY env directly; EDGAR_RATE_LIMIT_PER_SEC is edgar-native (httpclient.py, lib default 9) -> sidecar pins 8 at boot before client creation; EDGAR_LOCAL_DATA_DIR/EDGAR_USE_LOCAL_DATA are edgar-native passthrough. Pins: fastapi 0.136.3, uvicorn 0.49.0, pytest 9.0.3, vcrpy 8.1.1, pytest-vcr 1.0.2, httpx 0.28.1, ruff 0.15.17, pyright 1.1.410 (dev dep; not on PATH). Ruff mirrors fork rules minus retired PD901 and minus tests/ exclude. Watch for U02: starlette deprecates plain-httpx TestClient (wants httpx2) but edgartools pins httpxthrottlecache<0.5.0 to stay on plain httpx. Dockerfile build context = fork root (editable ../ dep); container validation deferred to U60 per plan.
 
+U02 | done | conftest mirrors fork vcr_config (once-mode, method/scheme/host/port/path/query match, UA+Auth filtered, decode_compressed) + pinned shared vcr_cassette_dir (pytest-vcr defaults to per-test-file dirs); budget guard via before_record_response counter (fires only while recording, hard-fails >60 new interactions/run); golden helper byte-equal asserts with GOLDEN_UPDATE=1 regeneration; identity env defaulted for offline replay. First cassette company_tickers_exchange.yaml (566KB, 1 interaction, UA verified filtered); replay offline 0.7s; first golden health/ok.json. 63 tests green; ruff+pyright clean. WARNING: root .venv + uv.lock created by a wrong-cwd uv run at 00:31 (no-deletion rule, user to remove); ALWAYS cd sidecar explicitly - shell state does not persist between Bash calls.
 U01 | done | serialize.py strict scalar coercers (NaN/NaT/inf->null, bool refused for int/float, ISO-only date strings); cik.py pad_cik/parse_entity_id (ascii-digit guard vs unicode isdigit); models/common.py WireModel base with extra=forbid (anti-silent-drop) + CIK/ACCESSION regex patterns, FilingEnvelope.data typed None until U40 union; errors.py maps TooManyRequestsError/TooManyRequestsException->429 (+Retry-After header), IdentityNotSetException->503, InvalidDateException + enums.ValidationError->422, DataObjectException->502, httpx HTTPStatusError->404/429/502, other httpx->502, unknown exceptions stay unmapped (loud 500). 61 tests green (unit: serialize/cik/errors; integration: handler wiring via TestClient, no VCR needed). pytest config: pythonpath=["."], live marker registered. Gates: ruff+pyright+pytest (drift/ts land U03).
