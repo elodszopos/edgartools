@@ -32,10 +32,18 @@
 - **Context discipline.** If a unit outgrows the session, finish the smallest coherent slice, commit it, set `in-progress`, and write the exact next action into the Log line so the next iteration resumes without re-deriving.
 - Outside this repo, read ONLY the named v1 fixture-mining path. Never read/write KD.
 
+## Launch (zero manual setup)
+
+One command from anywhere: `~/Projects/edgartools/sidecar/loop.sh`
+- Resolves `SEC_EDGAR_USER_AGENT` via `op read op://api_creds/sec-edgar/user_agent` — 1Password unlocked at launch is the ONLY human step.
+- Starts `claude` anchored in the fork root with the /loop prompt baked in.
+- Fork `.claude/settings.json` pre-allows comet + context7 MCP (the U03 research tools missing from global allows); Bash/Edit/Write under `~/Projects/**` are already globally allowed, so loop iterations never hit a permission prompt.
+
 ## Layout
 
 ```
 sidecar/
+  loop.sh                 # overnight-loop launcher (op-resolved env, /loop prompt baked in)
   pyproject.toml          # name edgar-sidecar; deps: edgar @ file://../ (editable), fastapi, uvicorn[standard]; dev: pytest, pytest-vcr, vcrpy, httpx
   app/
     main.py               # FastAPI app, identity boot (fail without SEC_EDGAR_USER_AGENT), exception mapping
