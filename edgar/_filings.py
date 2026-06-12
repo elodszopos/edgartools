@@ -1332,7 +1332,9 @@ def get_filings(year: Optional[Years] = None,
 
     filings = Filings(filing_index)
 
-    if form or filing_date:
+    # `not amendments` must trigger the filter even without form/filing_date: Filings.filter
+    # derives the base forms from the data, so amendments=False alone strips /A filings
+    if form or filing_date or not amendments:
         filings = filings.filter(form=form, amendments=amendments, filing_date=filing_date)
 
     # Warn if using defaults and data appears stale
