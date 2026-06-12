@@ -428,6 +428,59 @@
           }
         }
       }
+    },
+    "/tickers": {
+      "get": {
+        "summary": "List Tickers",
+        "operationId": "list_tickers_tickers_get",
+        "parameters": [
+          {
+            "name": "start",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0,
+              "title": "Start"
+            }
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 20000,
+              "minimum": 1,
+              "default": 20000,
+              "title": "Page Size"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TickersPage"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -950,6 +1003,99 @@
           "inc_state"
         ],
         "title": "SearchResult"
+      },
+      "TickerRef": {
+        "properties": {
+          "cik": {
+            "type": "string",
+            "pattern": "^\\d{10}$",
+            "title": "Cik"
+          },
+          "ticker": {
+            "type": "string",
+            "title": "Ticker"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "exchange": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Exchange"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "cik",
+          "ticker",
+          "name",
+          "exchange"
+        ],
+        "title": "TickerRef"
+      },
+      "TickersPage": {
+        "properties": {
+          "tickers": {
+            "items": {
+              "$ref": "#/components/schemas/TickerRef"
+            },
+            "type": "array",
+            "title": "Tickers"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "start": {
+            "type": "integer",
+            "title": "Start"
+          },
+          "page_size": {
+            "type": "integer",
+            "title": "Page Size"
+          },
+          "has_more": {
+            "type": "boolean",
+            "title": "Has More"
+          },
+          "next_start": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Start"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "tickers",
+          "total",
+          "start",
+          "page_size",
+          "has_more",
+          "next_start"
+        ],
+        "title": "TickersPage"
       },
       "ValidationError": {
         "properties": {

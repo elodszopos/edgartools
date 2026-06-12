@@ -144,6 +144,31 @@ export const SearchPage = zod.strictObject({
 
 export type SearchPage = zod.input<typeof SearchPage>;
 export type SearchPageOutput = zod.output<typeof SearchPage>;
+
+export const tickerRefCikRegExp = new RegExp('^\\d{10}$');
+
+
+export const TickerRef = zod.strictObject({
+  "cik": zod.string().regex(tickerRefCikRegExp),
+  "ticker": zod.string(),
+  "name": zod.union([zod.string(),zod.null()]),
+  "exchange": zod.union([zod.string(),zod.null()])
+});
+
+export type TickerRef = zod.input<typeof TickerRef>;
+export type TickerRefOutput = zod.output<typeof TickerRef>;
+
+export const TickersPage = zod.strictObject({
+  "tickers": zod.array(TickerRef),
+  "total": zod.number(),
+  "start": zod.number(),
+  "page_size": zod.number(),
+  "has_more": zod.boolean(),
+  "next_start": zod.union([zod.number(),zod.null()])
+});
+
+export type TickersPage = zod.input<typeof TickersPage>;
+export type TickersPageOutput = zod.output<typeof TickersPage>;
 /**
  * @summary Health
  */
@@ -228,3 +253,22 @@ export const SearchSearchGetQueryParams = zod.strictObject({
 })
 
 export const SearchSearchGetResponse = SearchPage
+
+
+/**
+ * @summary List Tickers
+ */
+export const listTickersTickersGetQueryStartDefault = 0;
+export const listTickersTickersGetQueryStartMin = 0;
+
+export const listTickersTickersGetQueryPageSizeDefault = 20000;
+export const listTickersTickersGetQueryPageSizeMax = 20000;
+
+
+
+export const ListTickersTickersGetQueryParams = zod.strictObject({
+  "start": zod.number().min(listTickersTickersGetQueryStartMin).default(listTickersTickersGetQueryStartDefault),
+  "page_size": zod.number().min(1).max(listTickersTickersGetQueryPageSizeMax).default(listTickersTickersGetQueryPageSizeDefault)
+})
+
+export const ListTickersTickersGetResponse = TickersPage
