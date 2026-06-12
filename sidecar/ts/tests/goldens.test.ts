@@ -11,6 +11,7 @@ import {
   HealthHealthGetResponse,
   ListCurrentFilingsFilingsCurrentGetResponse,
   ListFilingsFilingsGetResponse,
+  SearchSearchGetResponse,
 } from '../src/generated/zod';
 
 const FIXTURES = join(import.meta.dir, '..', 'fixtures', 'responses');
@@ -20,6 +21,7 @@ const RESPONSE_SCHEMAS: Record<string, z.ZodType> = {
   health: HealthHealthGetResponse,
   filings: ListFilingsFilingsGetResponse,
   filings_current: ListCurrentFilingsFilingsCurrentGetResponse,
+  search: SearchSearchGetResponse,
 };
 
 const endpoints = readdirSync(FIXTURES).filter((entry) => statSync(join(FIXTURES, entry)).isDirectory());

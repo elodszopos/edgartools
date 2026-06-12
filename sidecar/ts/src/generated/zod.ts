@@ -31,6 +31,14 @@ export const CurrentFilingsPage = zod.strictObject({
 export type CurrentFilingsPage = zod.input<typeof CurrentFilingsPage>;
 export type CurrentFilingsPageOutput = zod.output<typeof CurrentFilingsPage>;
 
+export const FacetBucket = zod.strictObject({
+  "key": zod.string(),
+  "count": zod.number()
+});
+
+export type FacetBucket = zod.input<typeof FacetBucket>;
+export type FacetBucketOutput = zod.output<typeof FacetBucket>;
+
 export const filingRefAccessionNumberRegExp = new RegExp('^\\d{10}-\\d{2}-\\d{6}$');
 export const filingRefCikRegExp = new RegExp('^\\d{10}$');
 
@@ -86,6 +94,56 @@ export const Health = zod.strictObject({
 
 export type Health = zod.input<typeof Health>;
 export type HealthOutput = zod.output<typeof Health>;
+
+export const SearchAggregations = zod.strictObject({
+  "entities": zod.array(FacetBucket),
+  "sics": zod.array(FacetBucket),
+  "states": zod.array(FacetBucket),
+  "forms": zod.array(FacetBucket)
+});
+
+export type SearchAggregations = zod.input<typeof SearchAggregations>;
+export type SearchAggregationsOutput = zod.output<typeof SearchAggregations>;
+
+export const searchResultAccessionNumberRegExp = new RegExp('^\\d{10}-\\d{2}-\\d{6}$');
+export const searchResultCikOneRegExp = new RegExp('^\\d{10}$');
+
+
+export const SearchResult = zod.strictObject({
+  "accession_number": zod.string().regex(searchResultAccessionNumberRegExp),
+  "form": zod.string(),
+  "filed": zod.iso.date(),
+  "company": zod.union([zod.string(),zod.null()]),
+  "cik": zod.union([zod.string().regex(searchResultCikOneRegExp),zod.null()]),
+  "period": zod.union([zod.iso.date(),zod.null()]),
+  "score": zod.number(),
+  "file_type": zod.union([zod.string(),zod.null()]),
+  "file_description": zod.union([zod.string(),zod.null()]),
+  "document_id": zod.union([zod.string(),zod.null()]),
+  "items": zod.array(zod.string()),
+  "sic": zod.union([zod.string(),zod.null()]),
+  "location": zod.union([zod.string(),zod.null()]),
+  "state": zod.union([zod.string(),zod.null()]),
+  "inc_state": zod.union([zod.string(),zod.null()])
+});
+
+export type SearchResult = zod.input<typeof SearchResult>;
+export type SearchResultOutput = zod.output<typeof SearchResult>;
+
+export const SearchPage = zod.strictObject({
+  "query": zod.string(),
+  "total": zod.number(),
+  "total_relation": zod.enum(['eq', 'gte']),
+  "results": zod.array(SearchResult),
+  "aggregations": SearchAggregations,
+  "start": zod.number(),
+  "page_size": zod.number(),
+  "has_more": zod.boolean(),
+  "next_start": zod.union([zod.number(),zod.null()])
+});
+
+export type SearchPage = zod.input<typeof SearchPage>;
+export type SearchPageOutput = zod.output<typeof SearchPage>;
 /**
  * @summary Health
  */
@@ -144,3 +202,29 @@ export const ListCurrentFilingsFilingsCurrentGetQueryParams = zod.strictObject({
 })
 
 export const ListCurrentFilingsFilingsCurrentGetResponse = CurrentFilingsPage
+
+
+/**
+ * @summary Search
+ */
+export const searchSearchGetQueryQDefault = ``;
+export const searchSearchGetQueryStartDefault = 0;
+export const searchSearchGetQueryStartMin = 0;
+
+export const searchSearchGetQueryPageSizeDefault = 20;
+export const searchSearchGetQueryPageSizeMax = 100;
+
+
+
+export const SearchSearchGetQueryParams = zod.strictObject({
+  "q": zod.string().default(searchSearchGetQueryQDefault),
+  "forms": zod.union([zod.array(zod.string()),zod.null()]).optional(),
+  "items": zod.union([zod.array(zod.string()),zod.null()]).optional(),
+  "id": zod.union([zod.string(),zod.null()]).optional(),
+  "date_from": zod.union([zod.iso.date(),zod.null()]).optional(),
+  "date_to": zod.union([zod.iso.date(),zod.null()]).optional(),
+  "start": zod.number().min(searchSearchGetQueryStartMin).default(searchSearchGetQueryStartDefault),
+  "page_size": zod.number().min(1).max(searchSearchGetQueryPageSizeMax).default(searchSearchGetQueryPageSizeDefault)
+})
+
+export const SearchSearchGetResponse = SearchPage

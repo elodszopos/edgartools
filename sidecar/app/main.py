@@ -8,7 +8,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from app.errors import register_exception_handlers
-from app.routers import filings, health
+from app.routers import filings, health, search
 from app.settings import apply_settings, load_settings
 
 
@@ -29,4 +29,5 @@ app = FastAPI(
 )
 app.include_router(health.router)
 app.include_router(filings.router)
+app.include_router(search.router)
 register_exception_handlers(app)

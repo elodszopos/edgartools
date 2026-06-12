@@ -277,6 +277,157 @@
           }
         }
       }
+    },
+    "/search": {
+      "get": {
+        "summary": "Search",
+        "operationId": "search_search_get",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Q"
+            }
+          },
+          {
+            "name": "forms",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Forms"
+            }
+          },
+          {
+            "name": "items",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Items"
+            }
+          },
+          {
+            "name": "id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Id"
+            }
+          },
+          {
+            "name": "date_from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Date From"
+            }
+          },
+          {
+            "name": "date_to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Date To"
+            }
+          },
+          {
+            "name": "start",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0,
+              "title": "Start"
+            }
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 20,
+              "title": "Page Size"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchPage"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -374,6 +525,25 @@
           "next_start"
         ],
         "title": "CurrentFilingsPage"
+      },
+      "FacetBucket": {
+        "properties": {
+          "key": {
+            "type": "string",
+            "title": "Key"
+          },
+          "count": {
+            "type": "integer",
+            "title": "Count"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "key",
+          "count"
+        ],
+        "title": "FacetBucket"
       },
       "FilingRef": {
         "properties": {
@@ -511,6 +681,275 @@
           "identity_set"
         ],
         "title": "Health"
+      },
+      "SearchAggregations": {
+        "properties": {
+          "entities": {
+            "items": {
+              "$ref": "#/components/schemas/FacetBucket"
+            },
+            "type": "array",
+            "title": "Entities"
+          },
+          "sics": {
+            "items": {
+              "$ref": "#/components/schemas/FacetBucket"
+            },
+            "type": "array",
+            "title": "Sics"
+          },
+          "states": {
+            "items": {
+              "$ref": "#/components/schemas/FacetBucket"
+            },
+            "type": "array",
+            "title": "States"
+          },
+          "forms": {
+            "items": {
+              "$ref": "#/components/schemas/FacetBucket"
+            },
+            "type": "array",
+            "title": "Forms"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "entities",
+          "sics",
+          "states",
+          "forms"
+        ],
+        "title": "SearchAggregations"
+      },
+      "SearchPage": {
+        "properties": {
+          "query": {
+            "type": "string",
+            "title": "Query"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "total_relation": {
+            "type": "string",
+            "enum": [
+              "eq",
+              "gte"
+            ],
+            "title": "Total Relation"
+          },
+          "results": {
+            "items": {
+              "$ref": "#/components/schemas/SearchResult"
+            },
+            "type": "array",
+            "title": "Results"
+          },
+          "aggregations": {
+            "$ref": "#/components/schemas/SearchAggregations"
+          },
+          "start": {
+            "type": "integer",
+            "title": "Start"
+          },
+          "page_size": {
+            "type": "integer",
+            "title": "Page Size"
+          },
+          "has_more": {
+            "type": "boolean",
+            "title": "Has More"
+          },
+          "next_start": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Start"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "query",
+          "total",
+          "total_relation",
+          "results",
+          "aggregations",
+          "start",
+          "page_size",
+          "has_more",
+          "next_start"
+        ],
+        "title": "SearchPage"
+      },
+      "SearchResult": {
+        "properties": {
+          "accession_number": {
+            "type": "string",
+            "pattern": "^\\d{10}-\\d{2}-\\d{6}$",
+            "title": "Accession Number"
+          },
+          "form": {
+            "type": "string",
+            "title": "Form"
+          },
+          "filed": {
+            "type": "string",
+            "format": "date",
+            "title": "Filed"
+          },
+          "company": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Company"
+          },
+          "cik": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^\\d{10}$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cik"
+          },
+          "period": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Period"
+          },
+          "score": {
+            "type": "number",
+            "title": "Score"
+          },
+          "file_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Type"
+          },
+          "file_description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Description"
+          },
+          "document_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Document Id"
+          },
+          "items": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "sic": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sic"
+          },
+          "location": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Location"
+          },
+          "state": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "State"
+          },
+          "inc_state": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Inc State"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "accession_number",
+          "form",
+          "filed",
+          "company",
+          "cik",
+          "period",
+          "score",
+          "file_type",
+          "file_description",
+          "document_id",
+          "items",
+          "sic",
+          "location",
+          "state",
+          "inc_state"
+        ],
+        "title": "SearchResult"
       },
       "ValidationError": {
         "properties": {
