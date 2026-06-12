@@ -254,33 +254,31 @@ def financials_response(
 
 
 def _stitched_statement(stmt: StitchedStatement | None) -> StitchedFinancialStatement | None:
-    """Build the wire statement straight from the stitcher's data dict.
+    """Build the wire statement from the stitched statement's public accessors.
 
     Unlike single-filing statements (which force the to_dataframe column-name
-    mirroring), stitched data keys every value by its XBRL period id directly -
+    mirroring), stitched line items key every value by its XBRL period id directly -
     no name mapping, no drift risk.
     """
     if stmt is None:
         return None
-    data = stmt.statement_data
-    period_ids = [period_id for period_id, _ in data["periods"]]
-    periods = [_statement_period(period_id, period_label) for period_id, period_label in data["periods"]]
-    records = []
-    for item in data["statement_data"]:
-        # concept-level sign; the stitcher stores one sign fanned out per period
-        preferred_sign = next(iter(item["preferred_signs"].values()), None)
-        records.append(
-            StitchedStatementRecord(
-                concept=str(item["concept"]),
-                label=str(item["label"]),
-                standard_concept=_opt_str(item.get("standard_concept")),
-                level=_require_int(item["level"]),
-                is_abstract=bool(item["is_abstract"]),
-                is_total=bool(item["is_total"]),
-                preferred_sign=to_float(preferred_sign),
-                values=[StatementValue(period_key=period_id, value=_value(item["values"].get(period_id))) for period_id in period_ids],
-            )
+    stitched_periods = stmt.stitched_periods
+    period_ids = [period.period_id for period in stitched_periods]
+    periods = [_statement_period(period.period_id, period.label) for period in stitched_periods]
+    records = [
+        StitchedStatementRecord(
+            concept=str(item.concept),
+            label=str(item.label),
+            standard_concept=_opt_str(item.standard_concept),
+            level=_require_int(item.level),
+            is_abstract=bool(item.is_abstract),
+            is_total=bool(item.is_total),
+            # concept-level sign; the stitcher stores one sign fanned out per period
+            preferred_sign=to_float(item.preferred_sign),
+            values=[StatementValue(period_key=period_id, value=_value(item.period_values.get(period_id))) for period_id in period_ids],
         )
+        for item in stmt.line_items()
+    ]
     return StitchedFinancialStatement(periods=periods, records=records)
 
 

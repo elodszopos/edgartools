@@ -8,7 +8,7 @@ from typing import Annotated
 import orjson
 from edgar.httprequests import get_with_retry
 from edgar.reference.tickers import find_cik
-from edgar.search.efts import EFTS_BASE_URL, _parse_aggregations, _parse_hit
+from edgar.search.efts import EFTS_BASE_URL, build_efts_params, parse_aggregations, parse_hit
 from fastapi import APIRouter, HTTPException, Query
 
 from app.cik import pad_cik, parse_entity_id
@@ -27,20 +27,18 @@ def _build_efts_params(
     date_to: date | None,
     start: int,
 ) -> dict[str, str | int]:
-    # mirrors edgar.search.efts.search_filings param encoding (kept in lockstep by cassette tests)
-    params: dict[str, str | int] = {"q": q}
-    if forms:
-        params["forms"] = ",".join(forms)
-    if items:
-        params["items"] = ",".join(items)
-    if date_from or date_to:
-        params["dateRange"] = "custom"
-        if date_from:
-            params["startdt"] = date_from.isoformat()
-        if date_to:
-            params["enddt"] = date_to.isoformat()
-    if cik:
-        params["ciks"] = cik
+    # delegate the wire encoding to the library's public builder (one source of truth);
+    # the sidecar adds only its pagination offset on top. A unit test asserts equality.
+    params: dict[str, str | int] = {
+        **build_efts_params(
+            q,
+            forms=forms,
+            items=items,
+            cik=cik,
+            start_date=date_from.isoformat() if date_from else None,
+            end_date=date_to.isoformat() if date_to else None,
+        )
+    }
     if start > 0:
         params["from"] = start
     return params
@@ -93,8 +91,8 @@ def search(
     hits = data.get("hits", {})
     total = hits.get("total", {}).get("value", 0)
     total_relation = hits.get("total", {}).get("relation", "eq")
-    results = [_parse_hit(hit) for hit in hits.get("hits", [])[:page_size]]
-    aggregations = _parse_aggregations(data.get("aggregations", {}))
+    results = [parse_hit(hit) for hit in hits.get("hits", [])[:page_size]]
+    aggregations = parse_aggregations(data.get("aggregations", {}))
 
     return search_page(
         query=query,

@@ -1,11 +1,11 @@
 """Runtime configuration for edgar-sidecar.
 
-Env vars:
-    SEC_EDGAR_USER_AGENT      required     SEC identity; boot fails without it
-    EDGAR_RATE_LIMIT_PER_SEC  default 8    edgartools-native throttle (edgar/httpclient.py reads it)
+Env vars (parsed by load_settings, then pushed into edgartools by apply_settings):
+    SEC_EDGAR_USER_AGENT      required     SEC identity; boot fails without it (-> set_identity)
+    EDGAR_RATE_LIMIT_PER_SEC  default 8    SEC request throttle (-> set_rate_limit reconfigures the live limiter)
     EDGAR_PORT                default 8000 uvicorn bind port (consumed by Dockerfile/launcher, not app code)
-    EDGAR_LOCAL_DATA_DIR      optional     edgartools disk cache location (read natively by edgar.paths)
-    EDGAR_USE_LOCAL_DATA      optional     edgartools local storage mode (read natively by edgar)
+    EDGAR_LOCAL_DATA_DIR      optional     edgartools data dir (-> set_local_storage_path)
+    EDGAR_USE_LOCAL_DATA      optional     enable edgartools local storage when truthy (-> use_local_storage)
 """
 
 from __future__ import annotations
@@ -13,7 +13,7 @@ from __future__ import annotations
 import os
 from dataclasses import dataclass
 
-from edgar import set_identity
+from edgar import set_identity, set_local_storage_path, set_rate_limit, use_local_storage
 
 DEFAULT_RATE_LIMIT_PER_SEC = 8
 
@@ -52,6 +52,14 @@ def load_settings() -> Settings:
 
 
 def apply_settings(settings: Settings) -> None:
-    # throttle env must be pinned before edgartools lazily creates its HTTP clients
-    os.environ["EDGAR_RATE_LIMIT_PER_SEC"] = str(settings.rate_limit_per_sec)
     set_identity(settings.sec_edgar_user_agent)
+    # HTTP_MGR builds its throttle eagerly at import from EDGAR_RATE_LIMIT_PER_SEC, before this
+    # runs - so mutating the env var alone is too late. Reconfigure the live limiter instead.
+    set_rate_limit(settings.rate_limit_per_sec)
+    # Point edgartools at the configured data dir, then enable local storage when requested.
+    # Enable-only: never disable here (edgar truthy-checks the raw EDGAR_USE_LOCAL_DATA in
+    # places, so writing the "0" sentinel would read back as on).
+    if settings.local_data_dir is not None:
+        set_local_storage_path(settings.local_data_dir)
+    if settings.use_local_data:
+        use_local_storage(True)

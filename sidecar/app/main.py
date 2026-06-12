@@ -15,9 +15,7 @@ from app.settings import apply_settings, load_settings
 @asynccontextmanager
 async def lifespan(application: FastAPI) -> AsyncIterator[None]:
     # load_settings raises without SEC_EDGAR_USER_AGENT -> uvicorn aborts boot
-    settings = load_settings()
-    apply_settings(settings)
-    application.state.settings = settings
+    apply_settings(load_settings())
     yield
 
 

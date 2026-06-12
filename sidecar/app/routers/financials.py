@@ -8,7 +8,7 @@ from datetime import date
 from typing import TYPE_CHECKING, Annotated
 
 from edgar._filings import Filing
-from edgar.entity.core import Company
+from edgar.entity.core import ANNUAL_FINANCIAL_FORMS, QUARTERLY_FINANCIAL_FORMS, Company
 from edgar.financials import Financials
 from edgar.xbrl.presentation import StatementView
 from edgar.xbrl.stitching.xbrls import XBRLS
@@ -40,11 +40,12 @@ router = APIRouter()
 
 _TTM_QUARTER_KEY = re.compile(r"^\d{4}-[Qq][1-4]$")
 
-# mirrors Company.get_financials / get_quarterly_financials fallback chains; the filing
-# is selected here (not via those methods) so the response can carry its provenance
+# the period -> form fallback chain, sourced from edgartools' public constants so the
+# sidecar and Company.get_financials / get_quarterly_financials cannot drift apart; the
+# filing is selected here (not via those methods) so the response can carry its provenance
 _FORM_CHAIN: dict[str, tuple[str, ...]] = {
-    "annual": ("10-K", "20-F", "40-F"),
-    "quarterly": ("10-Q", "6-K"),
+    "annual": ANNUAL_FINANCIAL_FORMS,
+    "quarterly": QUARTERLY_FINANCIAL_FORMS,
 }
 
 

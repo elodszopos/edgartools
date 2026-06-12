@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from edgar.entity.core import Company
 from edgar.entity.data import Address
-from edgar.reference._codes import is_foreign_company
+from edgar.reference import is_foreign_company
 
 from app.cik import pad_cik
 from app.models.company import (

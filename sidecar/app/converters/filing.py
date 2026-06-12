@@ -105,7 +105,7 @@ def _filer(filer: Filer) -> HeaderFiler:
 def _reporting_owner(owner: ReportingOwner) -> HeaderReportingOwner:
     # Owner.name lazily fetches the entity from SEC to fix name order - serve the raw
     # conformed name from the header artifact instead (no cross-entity calls in envelopes)
-    raw_name = owner.owner._raw_name if owner.owner else None  # noqa: SLF001
+    raw_name = owner.owner.raw_name if owner.owner else None
     raw_cik = to_str(owner.owner.cik) if owner.owner else None
     return HeaderReportingOwner(
         name=to_str(raw_name),
