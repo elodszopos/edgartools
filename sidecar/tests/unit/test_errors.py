@@ -8,7 +8,7 @@ from edgar.entity.core import CompanyNotFoundError
 from edgar.enums import ValidationError as EdgarValidationError
 from edgar.httprequests import IdentityNotSetException, TooManyRequestsError
 
-from app.errors import status_for_exception
+from app.errors import retry_after_header, status_for_exception
 
 
 def _must_map(exc: Exception) -> tuple[int, str]:
@@ -93,3 +93,23 @@ def test_company_not_found_maps_to_404_with_suggestions():
 
 def test_unknown_exception_is_unmapped():
     assert status_for_exception(KeyError("boom")) is None
+
+
+def test_retry_after_from_edgar_native_rate_limit():
+    assert retry_after_header(TooManyRequestsError("https://www.sec.gov/x", retry_after=600)) == "600"
+
+
+def test_retry_after_from_httpx_429_response_header():
+    # the SEC's Retry-After rides on the httpx response, not as an exception attribute
+    request = httpx.Request("GET", "https://www.sec.gov/x")
+    response = httpx.Response(429, headers={"Retry-After": "120"}, request=request)
+    exc = httpx.HTTPStatusError("HTTP 429", request=request, response=response)
+    assert retry_after_header(exc) == "120"
+
+
+def test_retry_after_absent_on_httpx_429_without_header():
+    assert retry_after_header(_http_status_error(429)) is None
+
+
+def test_retry_after_none_for_unrelated_exception():
+    assert retry_after_header(KeyError("boom")) is None

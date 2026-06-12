@@ -57,15 +57,27 @@ def status_for_exception(exc: Exception) -> tuple[int, str] | None:
     return None
 
 
+def retry_after_header(exc: Exception) -> str | None:
+    """Retry-After for a rate-limit exception: the edgartools attr, else the httpx 429 response header."""
+    retry_after = getattr(exc, "retry_after", None)
+    if retry_after:
+        return str(retry_after)
+    if isinstance(exc, httpx.HTTPStatusError):
+        # httpx carries the SEC's Retry-After on the response, not as an exception attribute
+        return exc.response.headers.get("Retry-After")
+    return None
+
+
 async def _handle(request: Request, exc: Exception) -> JSONResponse:
     mapped = status_for_exception(exc)
     if mapped is None:  # registered type without a mapping is a programming error
         raise exc
     status, detail = mapped
     headers: dict[str, str] = {}
-    retry_after = getattr(exc, "retry_after", None)
-    if status == 429 and retry_after:
-        headers["Retry-After"] = str(retry_after)
+    if status == 429:
+        retry_after = retry_after_header(exc)
+        if retry_after:
+            headers["Retry-After"] = retry_after
     return JSONResponse({"detail": detail}, status_code=status, headers=headers)
 
 

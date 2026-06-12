@@ -17,6 +17,14 @@ def test_pad_cik_already_padded():
     assert pad_cik("0000320193") == "0000320193"
 
 
+def test_pad_cik_consolidation_points_resolve_identically():
+    # every call site routes its CIK through pad_cik: Company.cik (int), index rows (int/str),
+    # EFTS result.cik (str), already-padded strings. The same logical CIK must collapse to one
+    # canonical wire value no matter which representation a converter hands the helper.
+    forms = [320193, "320193", "0000320193", " 320193 "]
+    assert {pad_cik(form) for form in forms} == {"0000320193"}
+
+
 def test_pad_cik_strips_whitespace():
     assert pad_cik(" 320193 ") == "0000320193"
 

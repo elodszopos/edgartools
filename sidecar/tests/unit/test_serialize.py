@@ -257,3 +257,53 @@ def test_utc_naive_to_utc_none_is_null():
 def test_utc_naive_to_utc_date_raises():
     with pytest.raises(TypeError):
         utc_naive_to_utc(date(2025, 1, 8))
+
+
+# date/datetime coercers must fail LOUDLY on garbage -- never a silent None, never an opaque crash.
+
+
+def test_to_date_iso_shaped_but_invalid_calendar_raises():
+    with pytest.raises(ValueError, match="month must be in 1..12"):
+        to_date("2024-13-01")
+    with pytest.raises(ValueError, match="day is out of range"):
+        to_date("2024-02-30")
+
+
+def test_to_date_bytes_raises_typed():
+    with pytest.raises(TypeError, match="cannot coerce bytes to date"):
+        to_date(b"2024-05-01")
+
+
+def test_to_date_collection_raises_typed():
+    with pytest.raises(TypeError, match="cannot coerce list to date"):
+        to_date(["2024-05-01"])
+    with pytest.raises(TypeError, match="cannot coerce dict to date"):
+        to_date({"date": "2024-05-01"})
+
+
+def test_to_date_bool_raises_typed():
+    with pytest.raises(TypeError, match="cannot coerce bool to date"):
+        to_date(True)
+
+
+def test_to_utc_datetime_string_raises_typed():
+    # the coercer parses datetimes, not strings; a date-shaped string is a caller error, not None
+    with pytest.raises(TypeError, match="cannot coerce str to UTC datetime"):
+        to_utc_datetime("2026-06-12T00:00:00Z")
+
+
+def test_to_utc_datetime_epoch_int_raises_typed():
+    with pytest.raises(TypeError, match="cannot coerce int to UTC datetime"):
+        to_utc_datetime(1700000000)
+
+
+def test_eastern_naive_to_utc_string_raises_typed():
+    with pytest.raises(TypeError, match="cannot coerce str to UTC datetime"):
+        eastern_naive_to_utc("2025-01-10T07:15:33")
+
+
+def test_utc_naive_to_utc_garbage_raises_typed():
+    with pytest.raises(TypeError, match="cannot coerce str to UTC datetime"):
+        utc_naive_to_utc("2025-01-08T18:04:06")
+    with pytest.raises(TypeError, match="cannot coerce bytes to UTC datetime"):
+        utc_naive_to_utc(b"x")

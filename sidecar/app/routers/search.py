@@ -13,6 +13,7 @@ from fastapi import APIRouter, HTTPException, Query
 
 from app.cik import pad_cik, parse_entity_id
 from app.converters.search import EFTS_RESULT_WINDOW, search_page
+from app.deps import StartParam
 from app.models.search import SearchPage
 
 router = APIRouter()
@@ -52,7 +53,7 @@ def search(
     id: str | None = None,
     date_from: date | None = None,
     date_to: date | None = None,
-    start: Annotated[int, Query(ge=0)] = 0,
+    start: StartParam = 0,
     page_size: Annotated[int, Query(ge=1, le=100)] = 20,
 ) -> SearchPage:
     query = q.strip()

@@ -14,6 +14,7 @@ from fastapi import APIRouter, HTTPException, Query
 
 from app.cik import parse_entity_id
 from app.converters.filings import current_filings_page, filings_page
+from app.deps import StartParam
 from app.models.common import FilingsPage
 from app.models.filings import CurrentFilingsPage
 
@@ -29,7 +30,7 @@ def list_filings(
     date_from: date | None = None,
     date_to: date | None = None,
     id: str | None = None,
-    start: Annotated[int, Query(ge=0)] = 0,
+    start: StartParam = 0,
     page_size: Annotated[int, Query(ge=1, le=1000)] = 50,
 ) -> FilingsPage:
     if (date_from or date_to) and (year or quarter):
@@ -59,7 +60,7 @@ def list_current_filings(
     form: str = "",
     owner: Literal["include", "exclude", "only"] = "include",
     amendments: bool = True,
-    start: Annotated[int, Query(ge=0)] = 0,
+    start: StartParam = 0,
     page_size: int = 40,
 ) -> CurrentFilingsPage:
     if page_size not in (10, 20, 40, 80, 100):

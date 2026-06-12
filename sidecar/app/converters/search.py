@@ -12,6 +12,7 @@ from edgar.search.efts import EFTSAggregations, EFTSResult
 
 from app.cik import pad_cik
 from app.models.search import FacetBucket, SearchAggregations, SearchPage, SearchResult
+from app.pagination import paginate
 from app.serialize import to_date
 
 # empirical (D2, 2026-06-12): EFTS rejects from+size > 10000 ("Result window is too large")
@@ -64,15 +65,17 @@ def search_page(
 ) -> SearchPage:
     # pagination can never pass the EFTS window, however large the reported total
     reachable = min(total, EFTS_RESULT_WINDOW)
-    has_more = start + page_size < reachable
+    # a cursor at/beyond the last reachable hit yields a clean empty page, never a stray slice
+    visible = results if start < reachable else []
+    page = paginate(reachable, start, page_size)
     return SearchPage(
         query=query,
         total=total,
         total_relation=total_relation,
-        results=[search_result_from_efts(result) for result in results],
+        results=[search_result_from_efts(result) for result in visible],
         aggregations=search_aggregations_from_efts(aggregations),
         start=start,
         page_size=page_size,
-        has_more=has_more,
-        next_start=start + page_size if has_more else None,
+        has_more=page.has_more,
+        next_start=page.next_start,
     )

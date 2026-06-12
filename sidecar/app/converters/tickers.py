@@ -8,6 +8,7 @@ import pandas as pd
 
 from app.cik import pad_cik
 from app.models.tickers import TickerRef, TickersPage
+from app.pagination import paginate
 from app.serialize import to_str
 
 
@@ -26,12 +27,12 @@ def ticker_ref_from_row(row: dict[str, Any]) -> TickerRef:
 def tickers_page(data: pd.DataFrame, start: int, page_size: int) -> TickersPage:
     total = len(data)
     window = data.iloc[start : start + page_size]
-    has_more = start + page_size < total
+    page = paginate(total, start, page_size)
     return TickersPage(
         tickers=[ticker_ref_from_row(row) for row in window.to_dict(orient="records")],
         total=total,
         start=start,
         page_size=page_size,
-        has_more=has_more,
-        next_start=start + page_size if has_more else None,
+        has_more=page.has_more,
+        next_start=page.next_start,
     )

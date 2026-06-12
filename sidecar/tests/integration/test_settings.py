@@ -10,10 +10,11 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
+import pytest
 from edgar import is_using_local_storage
 from edgar.httpclient import HTTP_MGR, set_rate_limit
 
-from app.settings import Settings, apply_settings
+from app.settings import Settings, apply_settings, load_settings
 
 
 def _current_limit() -> int:
@@ -66,6 +67,66 @@ def test_apply_settings_governs_local_storage(tmp_path: Path) -> None:
         )
         assert is_using_local_storage() is True
         assert Path(os.environ["EDGAR_LOCAL_DATA_DIR"]).resolve() == data_dir.resolve()
+    finally:
+        set_rate_limit(original_limit)
+        os.environ.clear()
+        os.environ.update(env_snapshot)
+    assert _current_limit() == original_limit
+    assert is_using_local_storage() is False
+
+
+def test_load_settings_missing_user_agent_raises() -> None:
+    snapshot = dict(os.environ)
+    try:
+        os.environ.pop("SEC_EDGAR_USER_AGENT", None)
+        with pytest.raises(RuntimeError, match="SEC_EDGAR_USER_AGENT is not set"):
+            load_settings()
+    finally:
+        os.environ.clear()
+        os.environ.update(snapshot)
+
+
+def test_load_settings_non_integer_rate_limit_raises() -> None:
+    snapshot = dict(os.environ)
+    try:
+        os.environ["SEC_EDGAR_USER_AGENT"] = "edgar-sidecar tests test@example.com"
+        os.environ["EDGAR_RATE_LIMIT_PER_SEC"] = "abc"
+        with pytest.raises(RuntimeError, match=r"EDGAR_RATE_LIMIT_PER_SEC must be an integer, got 'abc'"):
+            load_settings()
+    finally:
+        os.environ.clear()
+        os.environ.update(snapshot)
+
+
+def test_load_settings_sub_minimum_rate_limit_raises() -> None:
+    snapshot = dict(os.environ)
+    try:
+        os.environ["SEC_EDGAR_USER_AGENT"] = "edgar-sidecar tests test@example.com"
+        for bad in ("0", "-3"):
+            os.environ["EDGAR_RATE_LIMIT_PER_SEC"] = bad
+            with pytest.raises(RuntimeError, match=rf"EDGAR_RATE_LIMIT_PER_SEC must be >= 1, got {bad}"):
+                load_settings()
+    finally:
+        os.environ.clear()
+        os.environ.update(snapshot)
+
+
+def test_apply_settings_missing_local_storage_path_raises(tmp_path: Path) -> None:
+    # A non-existent local-storage dir must fail loudly, not silently no-op. Snapshot/restore the
+    # live limiter + env since set_identity/set_rate_limit run before the raise.
+    original_limit = _current_limit()
+    env_snapshot = dict(os.environ)
+    missing = tmp_path / "does-not-exist"
+    try:
+        with pytest.raises(FileNotFoundError, match="Directory does not exist"):
+            apply_settings(
+                Settings(
+                    sec_edgar_user_agent="edgar-sidecar tests test@example.com",
+                    rate_limit_per_sec=original_limit,
+                    local_data_dir=str(missing),
+                    use_local_data=True,
+                )
+            )
     finally:
         set_rate_limit(original_limit)
         os.environ.clear()

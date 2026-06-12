@@ -45,24 +45,33 @@ One command from anywhere: `~/Projects/edgartools/sidecar/loop.sh` — zero prer
 
 ```
 sidecar/
-  loop.sh                 # overnight-loop launcher (op-resolved env, /loop prompt baked in)
-  pyproject.toml          # name edgar-sidecar; deps: edgar @ file://../ (editable), fastapi, uvicorn[standard]; dev: pytest, pytest-vcr, vcrpy, httpx
+  loop.sh                 # overnight-loop launcher (hardcoded SEC identity fallback, env-overridable; /loop prompt baked in)
+  pyproject.toml          # name edgar-sidecar; deps: edgartools (editable ../), fastapi, uvicorn[standard], numpy/pandas/pyarrow/orjson; dev: pytest, httpx, pyyaml, ruff, pyright
+  uv.lock                 # resolved dependency lock; Dockerfile installs via uv sync --frozen
+  openapi.json            # exported OpenAPI 3.1 snapshot (zod codegen source + snapshot test)
   app/
-    main.py               # FastAPI app, identity boot (fail without SEC_EDGAR_USER_AGENT), exception mapping
+    main.py               # FastAPI app, identity boot (fail without SEC_EDGAR_USER_AGENT), router wiring
     settings.py           # env vars table below
+    cik.py                # CIK pad/parse helpers
+    errors.py             # exception -> HTTP status mapping
     serialize.py          # JSON policy: numpy->int/float, Decimal->float, date->ISO, NaN/NaT->null, DataFrame -> typed records via explicit converters ONLY
-    models/               # Pydantic: common.py, filings.py, company.py, financials.py, facts.py, forms/<form>.py
-    converters/           # edgartools object -> model, explicit field-by-field. forms/<form>.py
-    routers/              # filings.py, filing.py, company.py, financials.py, facts.py, reference.py, health.py
-  tests/                  # pytest; cassettes/ (VCR, fork conventions); unit/ for pure helpers; integration/ per router
-  ts/                     # bun project: zod pinned, eslint; src/generated/ (codegen output, do-not-edit), fixtures/responses/<endpoint>/<case>.json (goldens), tests/ validate every golden against generated Zod
+    models/               # Pydantic wire models: common, company, filing, filings, financials, search, tickers
+    converters/           # edgartools object -> model, explicit field-by-field: company, filing, filings, financials, search, tickers
+    routers/              # company, filing, filings, financials, health, search, tickers
+  tests/
+    conftest.py           # offline-replay wiring + shared fixtures
+    sec_replay.py         # URL-keyed SEC fixture store + httpx replay transport (offline by default)
+    fixtures/sec/         # recorded SEC responses keyed by host/path (decoded body + .meta.json sibling)
+    unit/                 # pure-helper tests (cik, serialize, errors, search params, openapi snapshot, fixture store)
+    integration/          # per-router endpoint tests (FastAPI TestClient)
+  ts/                     # bun project: zod pinned, eslint, orval.config.ts; src/generated/ (codegen output, do-not-edit), fixtures/responses/<endpoint>/<case>.json (goldens), tests/ validate every golden against generated Zod
   scripts/
     export_openapi.py     # app -> openapi.json (committed snapshot)
-    generate_zod.sh       # openapi.json -> ts/src/generated/ (tool picked in U03)
+    generate_zod.sh       # openapi.json -> ts/src/generated/ (orval, picked in U03)
     check_drift.sh        # regen openapi + zod + goldens-schema pass; git diff --exit-code
+    decompose_cassettes.py # one-off CLI: decompose VCR cassettes into the URL-keyed fixtures/sec store
   Dockerfile              # python:3.12-slim, non-root, uvicorn app.main:app, HEALTHCHECK /health
   compose.yaml            # reference service block: name edgar, port 8000, env, optional edgar-cache volume
-  README.md               # endpoint census, env, runbook, consumer wiring notes (incl. KD zod copy path)
 ```
 
 | Env | Default | Purpose |

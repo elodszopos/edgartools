@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 import pytest
+from edgar.search.efts import EFTSResult
 from fastapi.testclient import TestClient
 
+from app.converters.search import search_page
 from app.main import app
 
 
@@ -98,3 +100,55 @@ def test_search_param_validation(client: TestClient) -> None:
     response = client.get("/search", params={"q": "x", "start": 9999, "page_size": 100})
     assert response.status_code == 422
     assert "result window" in response.json()["detail"].lower()
+
+
+def _hit(accession: str) -> EFTSResult:
+    return EFTSResult(accession_number=accession, form="8-K", filed="2024-01-01")
+
+
+def test_search_page_clamps_past_tail_cursor() -> None:
+    # cursor past the 15-result tail: a clean empty page with no next cursor, hits dropped
+    page = search_page(
+        query="x",
+        results=[_hit("0000000000-00-000001"), _hit("0000000000-00-000002")],
+        total=15,
+        total_relation="eq",
+        aggregations=None,
+        start=20,
+        page_size=10,
+    )
+    assert page.results == []
+    assert page.has_more is False
+    assert page.next_start is None
+    assert page.total == 15  # the real total is still reported
+
+
+def test_search_page_at_exact_tail_is_empty() -> None:
+    page = search_page(
+        query="x",
+        results=[_hit("0000000000-00-000001")],
+        total=15,
+        total_relation="eq",
+        aggregations=None,
+        start=15,
+        page_size=10,
+    )
+    assert page.results == []
+    assert page.has_more is False
+    assert page.next_start is None
+
+
+def test_search_page_within_range_keeps_hits() -> None:
+    # contrast: identical hits inside the window are not clamped, proving the clamp is the cause
+    page = search_page(
+        query="x",
+        results=[_hit("0000000000-00-000001"), _hit("0000000000-00-000002")],
+        total=15,
+        total_relation="eq",
+        aggregations=None,
+        start=0,
+        page_size=10,
+    )
+    assert len(page.results) == 2
+    assert page.has_more is True
+    assert page.next_start == 10

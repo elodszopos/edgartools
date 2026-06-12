@@ -9,6 +9,7 @@ from edgar._filings import Filings
 from app.cik import pad_cik
 from app.models.common import FilingRef, FilingsPage
 from app.models.filings import CurrentFilingRef, CurrentFilingsPage
+from app.pagination import paginate
 from app.serialize import to_utc_datetime
 
 
@@ -40,14 +41,14 @@ def current_filing_ref_from_row(row: dict[str, Any]) -> CurrentFilingRef:
 def filings_page(filings: Filings, start: int, page_size: int) -> FilingsPage:
     total = len(filings.data)
     rows = filings.data.slice(start, page_size).to_pylist()
-    has_more = start + page_size < total
+    page = paginate(total, start, page_size)
     return FilingsPage(
         filings=[filing_ref_from_row(row) for row in rows],
         total=total,
         start=start,
         page_size=page_size,
-        has_more=has_more,
-        next_start=start + page_size if has_more else None,
+        has_more=page.has_more,
+        next_start=page.next_start,
     )
 
 

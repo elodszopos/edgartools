@@ -37,7 +37,7 @@ from app.models.financials import (
     TTMMetricModel,
     TTMPeriod,
 )
-from app.serialize import to_date, to_float, to_int, to_str
+from app.serialize import to_bool, to_date, to_float, to_int, to_str
 
 if TYPE_CHECKING:
     from edgar._filings import Filing
@@ -128,12 +128,6 @@ def _opt_str(raw: object) -> str | None:
     return to_str(str(raw))
 
 
-def _opt_bool(raw: object) -> bool | None:
-    if raw is None or (not isinstance(raw, (bool, str)) and bool(pd.isna(raw))):
-        return None
-    return bool(raw)
-
-
 def _require_int(raw: object) -> int:
     number = to_int(raw)
     if number is None:
@@ -217,7 +211,7 @@ def _statement(stmt: Statement | None, *, standard: bool, dimensions: bool) -> F
                 parent_concept=_opt_str(row.get("parent_concept")),
                 parent_abstract_concept=_opt_str(row.get("parent_abstract_concept")),
                 unit=_opt_str(row.get("unit")),
-                point_in_time=_opt_bool(row.get("point_in_time")),
+                point_in_time=to_bool(row.get("point_in_time")),
                 values=[StatementValue(period_key=column_to_period[column][0], value=_value(row.get(column))) for column in period_columns],
             )
         )

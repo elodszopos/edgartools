@@ -21,6 +21,7 @@ from app.converters.financials import (
     multi_financials_response,
     ttm_metric_model,
 )
+from app.deps import lookup_company
 from app.models.financials import (
     FinancialMetrics,
     FinancialsPeriod,
@@ -30,7 +31,6 @@ from app.models.financials import (
     TTMMetricModel,
     TTMResponse,
 )
-from app.routers.company import _lookup
 from app.serialize import to_str
 
 if TYPE_CHECKING:
@@ -74,7 +74,7 @@ def get_company_financials(
     view: FinancialsView = "standardized",
     dimensions: bool = False,
 ) -> FinancialsResponse:
-    company = _lookup(id)
+    company = lookup_company(id)
     filing, financials = _latest_financials(company, period)
     return financials_response(company, filing, financials, period=period, view=view, dimensions=dimensions)
 
@@ -84,7 +84,7 @@ def get_company_financial_metrics(
     id: str,
     period: FinancialsPeriod = "annual",
 ) -> FinancialMetrics:
-    company = _lookup(id)
+    company = lookup_company(id)
     filing, financials = _latest_financials(company, period)
     return metrics_response(company, filing, financials, period=period)
 
@@ -97,7 +97,7 @@ def get_company_financials_multi(
     view: FinancialsView = "standardized",
     dimensions: bool = False,
 ) -> MultiFinancialsResponse:
-    company = _lookup(id)
+    company = lookup_company(id)
     forms = _FORM_CHAIN[period]
     for form in forms:
         filings = list(company.get_filings(form=form, amendments=False, trigger_full_load=False).head(n))
@@ -136,7 +136,7 @@ def get_company_financials_ttm(
     concept: str | None = None,
     as_of: str | None = None,
 ) -> TTMResponse:
-    company = _lookup(id)
+    company = lookup_company(id)
     if as_of is not None and _TTM_QUARTER_KEY.match(as_of) is None:
         try:  # the library accepts ISO dates or YYYY-QN quarter keys
             date.fromisoformat(as_of)
