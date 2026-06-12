@@ -45,15 +45,8 @@ def test_goldens_exist():
 
 
 def test_same_concept_same_standard_concept_across_goldens():
-    conflicts = {
-        key: targets
-        for key, targets in _collect_mappings().items()
-        if len(targets) > 1
-    }
-    assert not conflicts, (
-        "raw concepts standardized differently across goldens "
-        f"(single vs stitched divergence): {json.dumps(conflicts, indent=2)}"
-    )
+    conflicts = {key: targets for key, targets in _collect_mappings().items() if len(targets) > 1}
+    assert not conflicts, f"raw concepts standardized differently across goldens (single vs stitched divergence): {json.dumps(conflicts, indent=2)}"
 
 
 def test_dividend_cluster_ground_truth():
@@ -69,20 +62,11 @@ def test_dividend_cluster_ground_truth():
     assert standard_for("0000320193", "us-gaap_PaymentsOfDividends") == "CommonDividendsPaid"
     # Realty Income files separate common, preferred, and NCI dividend lines
     assert standard_for("0000726728", "us-gaap_PaymentsOfDividendsCommonStock") == "CommonDividendsPaid"
-    assert (
-        standard_for("0000726728", "us-gaap_PaymentsOfDividendsPreferredStockAndPreferenceStock")
-        == "PreferredDividendExpense"
-    )
-    assert (
-        standard_for("0000726728", "us-gaap_PaymentsOfDividendsMinorityInterest")
-        == "DistributionsToMinorityInterests"
-    )
+    assert standard_for("0000726728", "us-gaap_PaymentsOfDividendsPreferredStockAndPreferenceStock") == "PreferredDividendExpense"
+    assert standard_for("0000726728", "us-gaap_PaymentsOfDividendsMinorityInterest") == "DistributionsToMinorityInterests"
     # INFY 20-F labels this line "Payment of dividends to non-controlling interests"
     assert (
         standard_for("0001067491", "ifrs-full_DividendsPaidToNoncontrollingInterestsClassifiedAsFinancingActivities")
         == "DistributionsToMinorityInterests"
     )
-    assert (
-        standard_for("0001067491", "ifrs-full_DividendsPaidClassifiedAsFinancingActivities")
-        == "CommonDividendsPaid"
-    )
+    assert standard_for("0001067491", "ifrs-full_DividendsPaidClassifiedAsFinancingActivities") == "CommonDividendsPaid"

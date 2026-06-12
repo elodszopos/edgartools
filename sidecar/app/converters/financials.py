@@ -11,6 +11,7 @@ a library rename breaks tests loudly instead of mislabeling periods.
 
 from __future__ import annotations
 
+import re
 from datetime import datetime
 from typing import TYPE_CHECKING, Literal
 
@@ -104,12 +105,15 @@ def _period_column_name(period_key: str, period_label: str, fiscal_year_end_mont
 def _statement_period(period_key: str, period_label: str) -> StatementPeriod:
     parts = period_key.split("_")
     if period_key.startswith("duration_") and len(parts) >= 3:
+        start, end = to_date(parts[1]), to_date(parts[2])
+        months = round((end - start).days / 30.44) if start is not None and end is not None else None
         return StatementPeriod(
             key=period_key,
             label=period_label,
             period_type="duration",
-            period_start=to_date(parts[1]),
-            period_end=to_date(parts[2]),  # pyright: ignore[reportArgumentType] - key always carries the end date
+            period_start=start,
+            period_end=end,  # pyright: ignore[reportArgumentType] - key always carries the end date
+            period_months=months,
         )
     if period_key.startswith("instant_") and len(parts) >= 2:
         return StatementPeriod(
@@ -118,6 +122,7 @@ def _statement_period(period_key: str, period_label: str) -> StatementPeriod:
             period_type="instant",
             period_start=None,
             period_end=to_date(parts[1]),  # pyright: ignore[reportArgumentType]
+            period_months=None,
         )
     raise ValueError(f"unrecognized XBRL period key: {period_key!r}")
 
@@ -144,6 +149,12 @@ def _value(raw: object) -> float | str | None:
     return to_float(raw)
 
 
+def _statement_value(period_key: str, raw: object) -> StatementValue:
+    value = _value(raw)
+    value_type: Literal["number", "text"] | None = None if value is None else ("text" if isinstance(value, str) else "number")
+    return StatementValue(period_key=period_key, value=value, value_type=value_type)
+
+
 def _balance(raw: object) -> Literal["debit", "credit"] | None:
     text = _opt_str(raw)
     if text is None:
@@ -151,6 +162,21 @@ def _balance(raw: object) -> Literal["debit", "credit"] | None:
     if text in ("debit", "credit"):
         return text
     raise TypeError(f"unexpected XBRL balance attribute: {text!r}")
+
+
+_CURRENCY_UNIT = re.compile(r"^([a-z]{3})(?:PerShare)?$")
+
+
+def _currency(unit: str | None) -> str | None:
+    """ISO 4217 code for monetary units (usd -> USD, usdPerShare -> USD); null otherwise.
+
+    Normalized units come from get_unit_display_name: 3-letter monetary codes and their
+    PerShare variants are monetary; shares/number/perShare are not.
+    """
+    if unit is None:
+        return None
+    match = _CURRENCY_UNIT.match(unit)
+    return match.group(1).upper() if match else None
 
 
 def _statement(stmt: Statement | None, *, standard: bool, dimensions: bool) -> FinancialStatement | None:
@@ -192,6 +218,7 @@ def _statement(stmt: Statement | None, *, standard: bool, dimensions: bool) -> F
     periods = [_statement_period(*column_to_period[column]) for column in period_columns]
     records = []
     for row in df.to_dict(orient="records"):
+        unit = _opt_str(row.get("unit"))
         records.append(
             StatementRecord(
                 concept=str(row["concept"]),
@@ -210,9 +237,10 @@ def _statement(stmt: Statement | None, *, standard: bool, dimensions: bool) -> F
                 preferred_sign=to_float(row.get("preferred_sign")),
                 parent_concept=_opt_str(row.get("parent_concept")),
                 parent_abstract_concept=_opt_str(row.get("parent_abstract_concept")),
-                unit=_opt_str(row.get("unit")),
+                unit=unit,
+                currency=_currency(unit),
                 point_in_time=to_bool(row.get("point_in_time")),
-                values=[StatementValue(period_key=column_to_period[column][0], value=_value(row.get(column))) for column in period_columns],
+                values=[_statement_value(column_to_period[column][0], row.get(column)) for column in period_columns],
             )
         )
     return FinancialStatement(periods=periods, records=records)
@@ -226,6 +254,8 @@ def financials_response(
     period: FinancialsPeriod,
     view: FinancialsView,
     dimensions: bool,
+    amendments: bool,
+    superseded_by: str | None,
 ) -> FinancialsResponse:
     standard = view == "standardized"
     return FinancialsResponse(
@@ -235,9 +265,11 @@ def financials_response(
         accession_number=filing.accession_no,
         filing_date=to_date(filing.filing_date),  # pyright: ignore[reportArgumentType] - filings always carry a date
         period_of_report=to_date(filing.period_of_report),
+        superseded_by=superseded_by,
         period=period,
         view=view,
         dimensions=dimensions,
+        amendments=amendments,
         income_statement=_statement(financials.income_statement(), standard=standard, dimensions=dimensions),
         balance_sheet=_statement(financials.balance_sheet(), standard=standard, dimensions=dimensions),
         cashflow_statement=_statement(financials.cashflow_statement(), standard=standard, dimensions=dimensions),
@@ -259,20 +291,26 @@ def _stitched_statement(stmt: StitchedStatement | None) -> StitchedFinancialStat
     stitched_periods = stmt.stitched_periods
     period_ids = [period.period_id for period in stitched_periods]
     periods = [_statement_period(period.period_id, period.label) for period in stitched_periods]
-    records = [
-        StitchedStatementRecord(
-            concept=str(item.concept),
-            label=str(item.label),
-            standard_concept=_opt_str(item.standard_concept),
-            level=_require_int(item.level),
-            is_abstract=bool(item.is_abstract),
-            is_total=bool(item.is_total),
-            # concept-level sign; the stitcher stores one sign fanned out per period
-            preferred_sign=to_float(item.preferred_sign),
-            values=[StatementValue(period_key=period_id, value=_value(item.period_values.get(period_id))) for period_id in period_ids],
+    records = []
+    for item in stmt.line_items():
+        unit = _opt_str(item.unit)
+        records.append(
+            StitchedStatementRecord(
+                concept=str(item.concept),
+                label=str(item.label),
+                standard_concept=_opt_str(item.standard_concept),
+                level=_require_int(item.level),
+                is_abstract=bool(item.is_abstract),
+                is_total=bool(item.is_total),
+                balance=_balance(item.balance),
+                weight=to_float(item.weight),
+                # concept-level sign; the stitcher guarantees per-period uniformity (raises otherwise)
+                preferred_sign=to_float(item.preferred_sign),
+                unit=unit,
+                currency=_currency(unit),
+                values=[_statement_value(period_id, item.period_values.get(period_id)) for period_id in period_ids],
+            )
         )
-        for item in stmt.line_items()
-    ]
     return StitchedFinancialStatement(periods=periods, records=records)
 
 
@@ -283,9 +321,13 @@ def multi_financials_response(
     period: FinancialsPeriod,
     view: FinancialsView,
     dimensions: bool,
+    amendments: bool,
+    superseded_by: dict[str, str | None],  # accession -> superseding /A accession (router-computed)
     income_statement: StitchedStatement | None,
     balance_sheet: StitchedStatement | None,
     cashflow_statement: StitchedStatement | None,
+    statement_of_equity: StitchedStatement | None,
+    comprehensive_income: StitchedStatement | None,
 ) -> MultiFinancialsResponse:
     return MultiFinancialsResponse(
         cik=pad_cik(company.cik),
@@ -293,29 +335,55 @@ def multi_financials_response(
         period=period,
         view=view,
         dimensions=dimensions,
+        amendments=amendments,
         filings=[
             FilingProvenance(
                 form=filing.form,
                 accession_number=filing.accession_no,
                 filing_date=to_date(filing.filing_date),  # pyright: ignore[reportArgumentType] - filings always carry a date
                 period_of_report=to_date(filing.period_of_report),
+                superseded_by=superseded_by[filing.accession_no],  # missing key = router bug, fail loud
             )
             for filing in filings
         ],
         income_statement=_stitched_statement(income_statement),
         balance_sheet=_stitched_statement(balance_sheet),
         cashflow_statement=_stitched_statement(cashflow_statement),
+        statement_of_equity=_stitched_statement(statement_of_equity),
+        comprehensive_income=_stitched_statement(comprehensive_income),
     )
 
 
 def ttm_metric_model(metric: TTMMetric) -> TTMMetricModel:
+    value = to_float(metric.value)
+    if value is None:  # NaN/inf collapse to None in to_float; a TTM sum must be a real number
+        raise TypeError(f"TTM value for {metric.concept} is not a finite number: {metric.value!r}")
+    unit = to_str(metric.unit)
+    if unit is None:
+        raise TypeError(f"TTM metric for {metric.concept} carries no unit")
+    # periods and period_facts are built from the same quarter window; drift = library bug
+    periods = [
+        TTMPeriod(
+            fiscal_year=fiscal_year,
+            fiscal_period=fiscal_period,
+            filing_date=to_date(fact.filing_date),
+            accession_number=to_str(fact.accession),
+            form_type=to_str(fact.form_type),
+        )
+        for (fiscal_year, fiscal_period), fact in zip(metric.periods, metric.period_facts, strict=True)
+    ]
+    filing_dates = [p.filing_date for p in periods]
+    # the full TTM value is knowable only once every source fact is on file; any
+    # missing provenance makes the latest-known date understate it -> null instead
+    public_date = max(filing_dates) if filing_dates and all(d is not None for d in filing_dates) else None  # pyright: ignore[reportArgumentType]
     return TTMMetricModel(
         concept=metric.concept,
         label=metric.label,
-        value=float(metric.value),
-        unit=metric.unit,
+        value=value,
+        unit=unit,
         as_of_date=to_date(metric.as_of_date),  # pyright: ignore[reportArgumentType] - TTM windows always end on a date
-        periods=[TTMPeriod(fiscal_year=fiscal_year, fiscal_period=fiscal_period) for fiscal_year, fiscal_period in metric.periods],
+        public_date=public_date,
+        periods=periods,
         has_gaps=bool(metric.has_gaps),
         has_calculated_q4=bool(metric.has_calculated_q4),
         warning=_opt_str(metric.warning),
@@ -328,6 +396,8 @@ def metrics_response(
     financials: Financials,
     *,
     period: FinancialsPeriod,
+    amendments: bool,
+    superseded_by: str | None,
 ) -> FinancialMetrics:
     metrics = financials.get_financial_metrics()
     return FinancialMetrics(
@@ -337,7 +407,9 @@ def metrics_response(
         accession_number=filing.accession_no,
         filing_date=to_date(filing.filing_date),  # pyright: ignore[reportArgumentType]
         period_of_report=to_date(filing.period_of_report),
+        superseded_by=superseded_by,
         period=period,
+        amendments=amendments,
         revenue=to_float(metrics["revenue"]),
         operating_income=to_float(metrics["operating_income"]),
         net_income=to_float(metrics["net_income"]),

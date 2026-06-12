@@ -163,8 +163,7 @@ def _capture(request: httpx.Request, net: httpx.Response) -> httpx.Response:
         _recorded["count"] += 1
         if _recorded["count"] > RECORD_BUDGET:
             raise RuntimeError(
-                f"SEC recording budget exceeded: more than {RECORD_BUDGET} new fixtures "
-                "written in one run (plan: edgar-sidecar.md, recording budget)"
+                f"SEC recording budget exceeded: more than {RECORD_BUDGET} new fixtures written in one run (plan: edgar-sidecar.md, recording budget)"
             )
     return _response(request, net.status_code, {"content-type": content_type} if content_type else {}, body)
 

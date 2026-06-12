@@ -7,12 +7,13 @@ from typing import Literal
 
 from edgar.__about__ import __version__ as edgartools_version
 from fastapi import APIRouter
-from pydantic import BaseModel
+
+from app.models.common import WireModel
 
 router = APIRouter()
 
 
-class Health(BaseModel):
+class Health(WireModel):
     status: Literal["ok"]
     edgartools_version: str
     identity_set: bool

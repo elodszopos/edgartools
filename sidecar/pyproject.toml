@@ -64,3 +64,5 @@ venvPath = "."
 venv = ".venv"
 include = ["app", "tests", "scripts"]
 exclude = [".venv"]
+# tests/ doubles as an import root: conftest + scripts/decompose_cassettes import sec_replay from it
+extraPaths = ["tests"]

@@ -39,7 +39,9 @@ def _route_pattern(path: str) -> re.Pattern[str]:
 
 
 def _app_route_paths() -> list[str]:
-    return sorted({route.path for route in app.routes if isinstance(getattr(route, "path", None), str)})
+    # BaseRoute has no typed .path; every concrete route class (APIRoute, Route, Mount) does
+    paths = (getattr(route, "path", None) for route in app.routes)
+    return sorted({path for path in paths if isinstance(path, str)})
 
 
 def _integration_sources() -> str:

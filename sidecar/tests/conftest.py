@@ -98,17 +98,10 @@ def _normalize_for_golden(endpoint: str, obj: Any) -> Any:
     return obj
 
 
-def _render_pretty(obj: Any) -> str:
-    # Active on-disk golden format: human-reviewable pretty JSON with a trailing newline.
-    return json.dumps(obj, indent=2, ensure_ascii=False) + "\n"
-
-
 def _render_wire(payload: Any) -> str:
-    # Serialization-level truth: byte-identical to Starlette's JSONResponse.render output
-    # (response.text) -- compact separators, ensure_ascii=False, allow_nan=False. Verified equal
-    # to response.text on /health. NOT the active on-disk format yet: the committed goldens are
-    # pretty-printed (_render_pretty), differing from response.text only by indentation + trailing
-    # newline. Switching the active compare/write below to this requires regenerating every golden.
+    # The on-disk golden format IS the wire: byte-identical to Starlette's JSONResponse.render
+    # output (response.text) -- compact separators, ensure_ascii=False, allow_nan=False (a
+    # NaN/inf leak fails serialization here exactly as it would on the wire).
     return json.dumps(payload, ensure_ascii=False, allow_nan=False, separators=(",", ":"))
 
 
@@ -116,25 +109,20 @@ def _render_wire(payload: Any) -> str:
 def golden() -> Callable[[str, str, Any], None]:
     """Assert payload matches the committed golden byte-for-byte.
 
-    Callers pass response.json(); the committed golden is the canonical pretty form feeding the
-    generated-Zod validation suite (U03). The serialization-level truth (response.text, compact)
-    is captured by _render_wire but is not yet the active on-disk format - the goldens are
-    pretty-printed; activating it needs a regeneration pass.
+    Callers pass response.json(); the committed golden is wire-exact compact JSON
+    (identical bytes to response.text) feeding the generated-Zod validation suite (U03).
 
     Missing golden: written locally so first-run authoring is cheap; in CI (env CI truthy) a
     missing golden FAILS instead of silently writing an unreviewed artifact. GOLDEN_UPDATE=1 forces
     a rewrite (commit the diff with an explanation - plan: golden lifecycle).
 
-    The health golden's package version is normalized to a stable sentinel on both the rendered
-    payload and the stored file, so an edgartools release never drifts it.
+    The health payload's package version is normalized to a stable sentinel before compare/write
+    (the stored golden carries the sentinel), so an edgartools release never drifts it.
     """
 
     def _check(endpoint: str, case: str, payload: Any) -> None:
         path = GOLDENS_DIR / endpoint / f"{case}.json"
-        # The payload must serialize exactly as the wire would (allow_nan=False); this trips on a
-        # NaN/inf leak that pretty-printing (allow_nan=True) would silently emit as invalid JSON.
-        _render_wire(payload)
-        rendered = _render_pretty(_normalize_for_golden(endpoint, payload))
+        rendered = _render_wire(_normalize_for_golden(endpoint, payload))
 
         if os.environ.get("GOLDEN_UPDATE") == "1":
             path.parent.mkdir(parents=True, exist_ok=True)
@@ -153,10 +141,6 @@ def golden() -> Callable[[str, str, Any], None]:
             return
 
         committed = path.read_text(encoding="utf-8")
-        if endpoint == "health":
-            # Normalize the stored side too so the existing literal-version golden keeps passing
-            # across edgartools releases.
-            committed = _render_pretty(_normalize_for_golden(endpoint, json.loads(committed)))
         assert committed == rendered, (
             f"golden mismatch for {endpoint}/{case}; if the change is intentional, rerun "
             "with GOLDEN_UPDATE=1 and explain the diff in the commit message"

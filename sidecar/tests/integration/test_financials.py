@@ -54,6 +54,9 @@ def test_financials_annual_standardized(client: TestClient, golden) -> None:
     assert body["view"] == "standardized"
     assert body["dimensions"] is False
 
+    assert body["amendments"] is False
+    assert body["superseded_by"] is None  # no 10-K/A amends FY2025 in the fixture submissions
+
     income = body["income_statement"]
     assert income["periods"] == [
         {
@@ -62,6 +65,7 @@ def test_financials_annual_standardized(client: TestClient, golden) -> None:
             "period_type": "duration",
             "period_start": "2024-09-29",
             "period_end": "2025-09-27",
+            "period_months": 12,  # 363-day fiscal year
         },
         {
             "key": "duration_2023-10-01_2024-09-28",
@@ -69,6 +73,7 @@ def test_financials_annual_standardized(client: TestClient, golden) -> None:
             "period_type": "duration",
             "period_start": "2023-10-01",
             "period_end": "2024-09-28",
+            "period_months": 12,
         },
         {
             "key": "duration_2022-09-25_2023-09-30",
@@ -76,6 +81,7 @@ def test_financials_annual_standardized(client: TestClient, golden) -> None:
             "period_type": "duration",
             "period_start": "2022-09-25",
             "period_end": "2023-09-30",
+            "period_months": 12,  # 370-day 53-week fiscal year still rounds to 12
         },
     ]
     assert len(income["records"]) == 18
@@ -85,7 +91,10 @@ def test_financials_annual_standardized(client: TestClient, golden) -> None:
     assert net_sales["balance"] == "credit"
     assert net_sales["preferred_sign"] == 1.0
     assert net_sales["unit"] == "usd"
+    assert net_sales["currency"] == "USD"
     assert net_sales["is_abstract"] is False
+    # numeric facts carry the discriminator; absent values stay null
+    assert {v["value_type"] for v in net_sales["values"]} == {"number"}
     assert _values(_record(income, "us-gaap_GrossProfit", "Gross margin")) == [
         195201000000.0,
         180683000000.0,
@@ -110,6 +119,7 @@ def test_financials_annual_standardized(client: TestClient, golden) -> None:
             "period_type": "instant",
             "period_start": None,
             "period_end": "2025-09-27",
+            "period_months": None,  # instant periods have no duration
         },
         {
             "key": "instant_2024-09-28",
@@ -117,6 +127,7 @@ def test_financials_annual_standardized(client: TestClient, golden) -> None:
             "period_type": "instant",
             "period_start": None,
             "period_end": "2024-09-28",
+            "period_months": None,
         },
     ]
     assert len(balance["records"]) == 37
@@ -152,6 +163,7 @@ def test_financials_annual_standardized(client: TestClient, golden) -> None:
     assert [p["key"] for p in cover["periods"]] == ["duration_2024-09-29_2025-09-27"]
     # cover facts are text - the wire value union carries them as strings
     assert _values(_record(cover, "dei_DocumentType", "Document Type")) == ["10-K"]
+    assert [v["value_type"] for v in _record(cover, "dei_DocumentType", "Document Type")["values"]] == ["text"]
     assert _values(_record(cover, "dei_CurrentFiscalYearEndDate", "Current Fiscal Year End Date")) == ["--09-27"]
     assert _values(_record(cover, "dei_DocumentPeriodEndDate", "Document Period End Date")) == ["2025-09-27"]
 
@@ -260,10 +272,12 @@ def test_financials_ifrs_foreign_filer(client: TestClient, golden) -> None:
         "period_type": "duration",
         "period_start": "2024-04-01",
         "period_end": "2025-03-31",
+        "period_months": 12,
     }
     revenue = _record(income, "ifrs-full_RevenueFromContractsWithCustomers", "Revenues")
     assert _values(revenue) == [19277000000.0, 18562000000.0, 18212000000.0]
     assert revenue["unit"] == "u_usd"  # INFY declares its own unit id, unlike AAPL's 'usd'
+    assert revenue["currency"] is None  # filer-specific unit ids are not ISO-resolvable
     assert _values(_record(income, "ifrs-full_GrossProfit", "Gross profit")) == [
         5872000000.0,
         5587000000.0,
@@ -297,7 +311,9 @@ def test_financials_ifrs_foreign_filer(client: TestClient, golden) -> None:
         "accession_number": "0000950170-25-091925",
         "filing_date": "2025-07-01",
         "period_of_report": "2025-03-31",
+        "superseded_by": None,  # no 20-F/A for FY2025 in the fixture submissions
         "period": "annual",
+        "amendments": False,
         "revenue": 19277000000.0,
         "operating_income": 4071000000.0,
         "net_income": 3162000000.0,
@@ -331,7 +347,9 @@ def test_financial_metrics(client: TestClient, golden) -> None:
         "accession_number": "0000320193-25-000079",
         "filing_date": "2025-10-31",
         "period_of_report": "2025-09-27",
+        "superseded_by": None,  # no 10-K/A amends FY2025 in the fixture submissions
         "period": "annual",
+        "amendments": False,
         "revenue": 416161000000.0,
         "operating_income": 133050000000.0,
         "net_income": 112010000000.0,
@@ -366,24 +384,28 @@ def test_financials_multi_annual(client: TestClient, golden) -> None:
     body = response.json()
     assert body["cik"] == "0000320193"
     assert body["period"] == "annual"
+    assert body["amendments"] is False
     assert body["filings"] == [
         {
             "form": "10-K",
             "accession_number": "0000320193-25-000079",
             "filing_date": "2025-10-31",
             "period_of_report": "2025-09-27",
+            "superseded_by": None,  # no 10-K/A in the fixture submissions for any stitched year
         },
         {
             "form": "10-K",
             "accession_number": "0000320193-24-000123",
             "filing_date": "2024-11-01",
             "period_of_report": "2024-09-28",
+            "superseded_by": None,
         },
         {
             "form": "10-K",
             "accession_number": "0000320193-23-000106",
             "filing_date": "2023-11-03",
             "period_of_report": "2023-09-30",
+            "superseded_by": None,
         },
     ]
 
@@ -395,6 +417,7 @@ def test_financials_multi_annual(client: TestClient, golden) -> None:
             "period_type": "duration",
             "period_start": "2024-09-29",
             "period_end": "2025-09-27",
+            "period_months": 12,
         },
         {
             "key": "duration_2023-10-01_2024-09-28",
@@ -402,6 +425,7 @@ def test_financials_multi_annual(client: TestClient, golden) -> None:
             "period_type": "duration",
             "period_start": "2023-10-01",
             "period_end": "2024-09-28",
+            "period_months": 12,
         },
         {
             "key": "duration_2022-09-25_2023-09-30",
@@ -409,13 +433,20 @@ def test_financials_multi_annual(client: TestClient, golden) -> None:
             "period_type": "duration",
             "period_start": "2022-09-25",
             "period_end": "2023-09-30",
+            "period_months": 12,
         },
     ]
-    assert _values(_record(income, "us-gaap_RevenueFromContractWithCustomerExcludingAssessedTax", "Net sales")) == [
+    net_sales = _record(income, "us-gaap_RevenueFromContractWithCustomerExcludingAssessedTax", "Net sales")
+    assert _values(net_sales) == [
         416161000000.0,
         391035000000.0,
         383285000000.0,
     ]
+    # stitched rows now carry the concept-level attributes from the newest filing
+    assert net_sales["balance"] == "credit"
+    assert net_sales["unit"] == "usd"
+    assert net_sales["currency"] == "USD"
+    assert net_sales["preferred_sign"] == 1.0
     total_opex = _record(income, "us-gaap_OperatingExpenses", "Total operating expenses")
     assert total_opex["is_total"] is True
     assert _values(total_opex) == [62151000000.0, 57467000000.0, 54847000000.0]
@@ -429,6 +460,13 @@ def test_financials_multi_annual(client: TestClient, golden) -> None:
         "balance_sheet": 37,
         "cashflow_statement": 34,
     }
+    # the multi response now stitches equity + comprehensive income as well
+    assert _values(_record(body["comprehensive_income"], "us-gaap_NetIncomeLoss", "Net income")) == [
+        112010000000.0,
+        93736000000.0,
+        96995000000.0,
+    ]
+    assert len(body["statement_of_equity"]["records"]) > 0
 
     golden("company_financials_multi", "aapl_annual_n3", body)
 
@@ -487,11 +525,38 @@ def test_financials_ttm(client: TestClient, golden) -> None:
     response = client.get("/company/AAPL/financials/ttm")
     assert response.status_code == 200
     body = response.json()
+    # per-quarter provenance: the accessions/dates match the 10-Qs pinned in
+    # test_financials_multi_quarterly and the 10-K pinned in the annual tests; the
+    # derived Q4 inherits the provenance of its FY source fact (the 10-K)
     current_window = [
-        {"fiscal_year": 2025, "fiscal_period": "Q3"},
-        {"fiscal_year": 2025, "fiscal_period": "Q4"},
-        {"fiscal_year": 2026, "fiscal_period": "Q1"},
-        {"fiscal_year": 2026, "fiscal_period": "Q2"},
+        {
+            "fiscal_year": 2025,
+            "fiscal_period": "Q3",
+            "filing_date": "2025-08-01",
+            "accession_number": "0000320193-25-000073",
+            "form_type": "10-Q",
+        },
+        {
+            "fiscal_year": 2025,
+            "fiscal_period": "Q4",
+            "filing_date": "2025-10-31",
+            "accession_number": "0000320193-25-000079",
+            "form_type": "10-K",
+        },
+        {
+            "fiscal_year": 2026,
+            "fiscal_period": "Q1",
+            "filing_date": "2026-01-30",
+            "accession_number": "0000320193-26-000006",
+            "form_type": "10-Q",
+        },
+        {
+            "fiscal_year": 2026,
+            "fiscal_period": "Q2",
+            "filing_date": "2026-05-01",
+            "accession_number": "0000320193-26-000013",
+            "form_type": "10-Q",
+        },
     ]
     assert body == {
         "cik": "0000320193",
@@ -504,6 +569,9 @@ def test_financials_ttm(client: TestClient, golden) -> None:
             "value": 451442000000.0,
             "unit": "USD",
             "as_of_date": "2026-03-28",
+            # the TTM through 2026-03-28 became publicly knowable when its last
+            # source fact was filed: the Q2 FY26 10-Q on 2026-05-01
+            "public_date": "2026-05-01",
             "periods": current_window,
             "has_gaps": False,
             "has_calculated_q4": True,
@@ -515,6 +583,7 @@ def test_financials_ttm(client: TestClient, golden) -> None:
             "value": 122575000000.0,
             "unit": "USD",
             "as_of_date": "2026-03-28",
+            "public_date": "2026-05-01",
             "periods": current_window,
             "has_gaps": False,
             "has_calculated_q4": True,
@@ -548,12 +617,41 @@ def test_financials_ttm_concept_and_as_of(client: TestClient, golden) -> None:
     # comparative-period facts with the reporting filing's FY). So this historical
     # as_of window reads as four consecutive quarters Q3'24..Q2'25, matching how
     # calculate_ttm_trend derives label years (GH #793).
+    # Provenance shows the VINTAGE actually consumed: the library backs these
+    # historical quarters with comparative facts re-reported in FY25/FY26 filings,
+    # not the original FY24 10-Qs - which is why public_date (2026-05-01) postdates
+    # the window and must never be read as "earliest knowable".
     assert metric["periods"] == [
-        {"fiscal_year": 2024, "fiscal_period": "Q3"},
-        {"fiscal_year": 2024, "fiscal_period": "Q4"},
-        {"fiscal_year": 2025, "fiscal_period": "Q1"},
-        {"fiscal_year": 2025, "fiscal_period": "Q2"},
+        {
+            "fiscal_year": 2024,
+            "fiscal_period": "Q3",
+            "filing_date": "2025-08-01",
+            "accession_number": "0000320193-25-000073",
+            "form_type": "10-Q",
+        },
+        {
+            "fiscal_year": 2024,
+            "fiscal_period": "Q4",
+            "filing_date": "2025-10-31",
+            "accession_number": "0000320193-25-000079",
+            "form_type": "10-K",
+        },
+        {
+            "fiscal_year": 2025,
+            "fiscal_period": "Q1",
+            "filing_date": "2026-01-30",
+            "accession_number": "0000320193-26-000006",
+            "form_type": "10-Q",
+        },
+        {
+            "fiscal_year": 2025,
+            "fiscal_period": "Q2",
+            "filing_date": "2026-05-01",
+            "accession_number": "0000320193-26-000013",
+            "form_type": "10-Q",
+        },
     ]
+    assert metric["public_date"] == "2026-05-01"
     golden("company_financials_ttm", "aapl_grossprofit_2025q1", body)
 
 

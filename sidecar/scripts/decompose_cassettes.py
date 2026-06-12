@@ -89,6 +89,8 @@ def main() -> int:
             response = interaction["response"]
             status = response.get("status", {})
             code = status.get("code") if isinstance(status, dict) else status
+            if code is None:
+                raise SystemExit(f"interaction without a status code: {method} {url} ({cassette.name})")
             body = _body_bytes(response)
             digest = hashlib.sha256(body).hexdigest()
             slot = variants[url].setdefault(

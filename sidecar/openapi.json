@@ -248,9 +248,8 @@
             "in": "query",
             "required": false,
             "schema": {
-              "type": "integer",
-              "default": 40,
-              "title": "Page Size"
+              "$ref": "#/components/schemas/CurrentPageSize",
+              "default": 40
             }
           }
         ],
@@ -710,6 +709,16 @@
               "default": false,
               "title": "Dimensions"
             }
+          },
+          {
+            "name": "amendments",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Amendments"
+            }
           }
         ],
         "responses": {
@@ -762,6 +771,16 @@
               "type": "string",
               "default": "annual",
               "title": "Period"
+            }
+          },
+          {
+            "name": "amendments",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Amendments"
             }
           }
         ],
@@ -851,6 +870,16 @@
               "type": "boolean",
               "default": false,
               "title": "Dimensions"
+            }
+          },
+          {
+            "name": "amendments",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Amendments"
             }
           }
         ],
@@ -1906,6 +1935,18 @@
         ],
         "title": "CurrentFilingsPage"
       },
+      "CurrentPageSize": {
+        "type": "integer",
+        "enum": [
+          10,
+          20,
+          40,
+          80,
+          100
+        ],
+        "title": "CurrentPageSize",
+        "description": "The getcurrent feed only serves these page sizes; anything else would be silently clamped."
+      },
       "DocumentRef": {
         "properties": {
           "sequence": {
@@ -2410,6 +2451,18 @@
               }
             ],
             "title": "Period Of Report"
+          },
+          "superseded_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Superseded By",
+            "description": "Accession of the latest later-filed amendment covering the same report period; null when this filing stands as-is."
           }
         },
         "additionalProperties": false,
@@ -2418,7 +2471,8 @@
           "form",
           "accession_number",
           "filing_date",
-          "period_of_report"
+          "period_of_report",
+          "superseded_by"
         ],
         "title": "FilingProvenance"
       },
@@ -2623,6 +2677,18 @@
             ],
             "title": "Period Of Report"
           },
+          "superseded_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Superseded By",
+            "description": "Accession of the latest later-filed amendment covering the same report period; null when this filing stands as-is."
+          },
           "period": {
             "type": "string",
             "enum": [
@@ -2630,6 +2696,10 @@
               "quarterly"
             ],
             "title": "Period"
+          },
+          "amendments": {
+            "type": "boolean",
+            "title": "Amendments"
           },
           "revenue": {
             "anyOf": [
@@ -2806,7 +2876,9 @@
           "accession_number",
           "filing_date",
           "period_of_report",
+          "superseded_by",
           "period",
+          "amendments",
           "revenue",
           "operating_income",
           "net_income",
@@ -2894,6 +2966,18 @@
             ],
             "title": "Period Of Report"
           },
+          "superseded_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Superseded By",
+            "description": "Accession of the latest later-filed amendment covering the same report period; null when this filing stands as-is."
+          },
           "period": {
             "type": "string",
             "enum": [
@@ -2913,6 +2997,10 @@
           "dimensions": {
             "type": "boolean",
             "title": "Dimensions"
+          },
+          "amendments": {
+            "type": "boolean",
+            "title": "Amendments"
           },
           "income_statement": {
             "anyOf": [
@@ -2984,9 +3072,11 @@
           "accession_number",
           "filing_date",
           "period_of_report",
+          "superseded_by",
           "period",
           "view",
           "dimensions",
+          "amendments",
           "income_statement",
           "balance_sheet",
           "cashflow_statement",
@@ -3370,6 +3460,7 @@
             "title": "Identity Set"
           }
         },
+        "additionalProperties": false,
         "type": "object",
         "required": [
           "status",
@@ -3416,6 +3507,10 @@
             "type": "boolean",
             "title": "Dimensions"
           },
+          "amendments": {
+            "type": "boolean",
+            "title": "Amendments"
+          },
           "filings": {
             "items": {
               "$ref": "#/components/schemas/FilingProvenance"
@@ -3452,6 +3547,26 @@
                 "type": "null"
               }
             ]
+          },
+          "statement_of_equity": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/StitchedFinancialStatement"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "comprehensive_income": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/StitchedFinancialStatement"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "additionalProperties": false,
@@ -3462,10 +3577,13 @@
           "period",
           "view",
           "dimensions",
+          "amendments",
           "filings",
           "income_statement",
           "balance_sheet",
-          "cashflow_statement"
+          "cashflow_statement",
+          "statement_of_equity",
+          "comprehensive_income"
         ],
         "title": "MultiFinancialsResponse"
       },
@@ -3867,6 +3985,18 @@
             "type": "string",
             "format": "date",
             "title": "Period End"
+          },
+          "period_months": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Period Months",
+            "description": "Approximate duration in whole months (3=quarter, 12=annual); null for instant periods."
           }
         },
         "additionalProperties": false,
@@ -3876,7 +4006,8 @@
           "label",
           "period_type",
           "period_start",
-          "period_end"
+          "period_end",
+          "period_months"
         ],
         "title": "StatementPeriod"
       },
@@ -3903,7 +4034,8 @@
           },
           "level": {
             "type": "integer",
-            "title": "Level"
+            "title": "Level",
+            "description": "Presentation indent depth within the statement hierarchy."
           },
           "is_abstract": {
             "type": "boolean",
@@ -3974,7 +4106,8 @@
                 "type": "null"
               }
             ],
-            "title": "Balance"
+            "title": "Balance",
+            "description": "XBRL balance attribute of the concept; with weight, determines how the value aggregates."
           },
           "weight": {
             "anyOf": [
@@ -3985,7 +4118,8 @@
                 "type": "null"
               }
             ],
-            "title": "Weight"
+            "title": "Weight",
+            "description": "Calculation-arc weight toward the parent total (e.g. -1.0 subtracts); null when the concept is not in a calculation tree."
           },
           "preferred_sign": {
             "anyOf": [
@@ -3996,7 +4130,8 @@
                 "type": "null"
               }
             ],
-            "title": "Preferred Sign"
+            "title": "Preferred Sign",
+            "description": "Display sign multiplier from the presentation linkbase: apply to values to reproduce SEC HTML display (e.g. -1.0 shows outflows as negative). Values ship raw."
           },
           "parent_concept": {
             "anyOf": [
@@ -4029,7 +4164,20 @@
                 "type": "null"
               }
             ],
-            "title": "Unit"
+            "title": "Unit",
+            "description": "Normalized unit: usd, shares, usdPerShare, number, ..."
+          },
+          "currency": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Currency",
+            "description": "ISO 4217 code when the unit is monetary (incl. per-share); null for shares/pure numbers."
           },
           "point_in_time": {
             "anyOf": [
@@ -4070,6 +4218,7 @@
           "parent_concept",
           "parent_abstract_concept",
           "unit",
+          "currency",
           "point_in_time",
           "values"
         ],
@@ -4093,14 +4242,32 @@
                 "type": "null"
               }
             ],
-            "title": "Value"
+            "title": "Value",
+            "description": "RAW XBRL instance value, never sign-adjusted for display: numeric fact, text fact (cover page, flags), or null when absent."
+          },
+          "value_type": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "number",
+                  "text"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value Type",
+            "description": "Discriminator for value: 'number', 'text', or null when value is null."
           }
         },
         "additionalProperties": false,
         "type": "object",
         "required": [
           "period_key",
-          "value"
+          "value",
+          "value_type"
         ],
         "title": "StatementValue"
       },
@@ -4152,7 +4319,8 @@
           },
           "level": {
             "type": "integer",
-            "title": "Level"
+            "title": "Level",
+            "description": "Presentation indent depth within the statement hierarchy."
           },
           "is_abstract": {
             "type": "boolean",
@@ -4161,6 +4329,34 @@
           "is_total": {
             "type": "boolean",
             "title": "Is Total"
+          },
+          "balance": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "debit",
+                  "credit"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Balance",
+            "description": "XBRL balance attribute of the concept; with weight, determines how the value aggregates."
+          },
+          "weight": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Weight",
+            "description": "Calculation-arc weight toward the parent total (e.g. -1.0 subtracts); null when the concept is not in a calculation tree."
           },
           "preferred_sign": {
             "anyOf": [
@@ -4171,7 +4367,32 @@
                 "type": "null"
               }
             ],
-            "title": "Preferred Sign"
+            "title": "Preferred Sign",
+            "description": "Display sign multiplier from the presentation linkbase: apply to values to reproduce SEC HTML display. Values ship raw."
+          },
+          "unit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unit",
+            "description": "Normalized unit: usd, shares, usdPerShare, number, ..."
+          },
+          "currency": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Currency",
+            "description": "ISO 4217 code when the unit is monetary (incl. per-share); null for shares/pure numbers."
           },
           "values": {
             "items": {
@@ -4190,7 +4411,11 @@
           "level",
           "is_abstract",
           "is_total",
+          "balance",
+          "weight",
           "preferred_sign",
+          "unit",
+          "currency",
           "values"
         ],
         "title": "StitchedStatementRecord"
@@ -4430,6 +4655,19 @@
             "format": "date",
             "title": "As Of Date"
           },
+          "public_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Public Date",
+            "description": "Latest filing_date across the facts used in the calculation: when this data vintage was fully on file. The library may back a historical window with comparative facts re-reported in later filings, so this is the vintage's publication date, not necessarily the earliest date a TTM for the window was knowable. Null when fact provenance is missing."
+          },
           "periods": {
             "items": {
               "$ref": "#/components/schemas/TTMPeriod"
@@ -4465,6 +4703,7 @@
           "value",
           "unit",
           "as_of_date",
+          "public_date",
           "periods",
           "has_gaps",
           "has_calculated_q4",
@@ -4481,13 +4720,50 @@
           "fiscal_period": {
             "type": "string",
             "title": "Fiscal Period"
+          },
+          "filing_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Filing Date"
+          },
+          "accession_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Accession Number"
+          },
+          "form_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Form Type"
           }
         },
         "additionalProperties": false,
         "type": "object",
         "required": [
           "fiscal_year",
-          "fiscal_period"
+          "fiscal_period",
+          "filing_date",
+          "accession_number",
+          "form_type"
         ],
         "title": "TTMPeriod"
       },

@@ -17,9 +17,7 @@ def _rel(url: str) -> str:
 
 def test_plain_path_maps_to_host_dir_and_filename() -> None:
     assert _rel("https://data.sec.gov/submissions/CIK0000320193.json") == "data.sec.gov/submissions/CIK0000320193.json"
-    assert _rel("https://www.sec.gov/Archives/edgar/full-index/2025/QTR1/form.gz") == (
-        "www.sec.gov/Archives/edgar/full-index/2025/QTR1/form.gz"
-    )
+    assert _rel("https://www.sec.gov/Archives/edgar/full-index/2025/QTR1/form.gz") == ("www.sec.gov/Archives/edgar/full-index/2025/QTR1/form.gz")
 
 
 def test_root_or_empty_path_uses_index_filename() -> None:
@@ -59,9 +57,7 @@ def test_distinct_queries_get_distinct_files() -> None:
 
 def test_blank_query_value_is_preserved_in_key() -> None:
     # type= (empty) must not collapse onto a no-type request
-    assert _rel("https://www.sec.gov/cgi-bin/browse-edgar?action=x&type=") != _rel(
-        "https://www.sec.gov/cgi-bin/browse-edgar?action=x"
-    )
+    assert _rel("https://www.sec.gov/cgi-bin/browse-edgar?action=x&type=") != _rel("https://www.sec.gov/cgi-bin/browse-edgar?action=x")
 
 
 def test_real_corpus_urls_do_not_collide() -> None:

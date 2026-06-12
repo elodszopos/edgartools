@@ -48,4 +48,5 @@ def test_financials_query_params() -> None:
         "period": False,
         "view": False,
         "dimensions": False,
+        "amendments": False,
     }

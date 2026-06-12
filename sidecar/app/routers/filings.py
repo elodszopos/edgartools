@@ -14,9 +14,9 @@ from fastapi import APIRouter, HTTPException, Query
 
 from app.cik import parse_entity_id
 from app.converters.filings import current_filings_page, filings_page
-from app.deps import StartParam
+from app.deps import PageSizeParam, StartParam
 from app.models.common import FilingsPage
-from app.models.filings import CurrentFilingsPage
+from app.models.filings import CurrentFilingsPage, CurrentPageSize
 
 router = APIRouter()
 
@@ -31,7 +31,7 @@ def list_filings(
     date_to: date | None = None,
     id: str | None = None,
     start: StartParam = 0,
-    page_size: Annotated[int, Query(ge=1, le=1000)] = 50,
+    page_size: PageSizeParam = 50,
 ) -> FilingsPage:
     if (date_from or date_to) and (year or quarter):
         raise HTTPException(status_code=422, detail="use either year/quarter or date_from/date_to, not both")
@@ -61,12 +61,9 @@ def list_current_filings(
     owner: Literal["include", "exclude", "only"] = "include",
     amendments: bool = True,
     start: StartParam = 0,
-    page_size: int = 40,
+    page_size: CurrentPageSize = CurrentPageSize.FORTY,
 ) -> CurrentFilingsPage:
-    if page_size not in (10, 20, 40, 80, 100):
-        # the getcurrent feed only serves these page sizes; anything else would be silently clamped
-        raise HTTPException(status_code=422, detail="page_size must be one of 10, 20, 40, 80, 100")
-    entries = get_current_entries_on_page(count=page_size, start=start, form=form, owner=owner)
+    entries = get_current_entries_on_page(count=int(page_size), start=start, form=form, owner=owner)
     if not entries:
         return CurrentFilingsPage(filings=[], start=start, page_size=page_size, has_more=False, next_start=None)
     filings = Filings(pa.Table.from_pylist(entries))

@@ -9,8 +9,12 @@ from fastapi import HTTPException, Query
 
 from app.cik import parse_entity_id
 
-# common offset cursor for every list endpoint; per-endpoint page_size bounds stay local
+# common offset cursor for every list endpoint
 StartParam = Annotated[int, Query(ge=0)]
+
+# common page size for index-backed list endpoints; endpoints whose source dictates
+# other bounds (tickers dump, EFTS window, getcurrent fixed sizes) declare their own
+PageSizeParam = Annotated[int, Query(ge=1, le=1000)]
 
 
 def lookup_company(id: str) -> Company:

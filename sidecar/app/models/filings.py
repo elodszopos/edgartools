@@ -3,8 +3,19 @@
 from __future__ import annotations
 
 from datetime import datetime
+from enum import IntEnum
 
 from app.models.common import FilingRef, WireModel
+
+
+class CurrentPageSize(IntEnum):
+    """The getcurrent feed only serves these page sizes; anything else would be silently clamped."""
+
+    TEN = 10
+    TWENTY = 20
+    FORTY = 40
+    EIGHTY = 80
+    HUNDRED = 100
 
 
 class CurrentFilingRef(FilingRef):
