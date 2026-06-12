@@ -9,6 +9,8 @@ from typing import Any, Dict, List, Optional
 
 import pandas as pd
 
+from edgar.xbrl.core import extract_uniform_preferred_sign
+
 
 def render_stitched_statement(
     stitched_data: Dict[str, Any],
@@ -110,10 +112,8 @@ def to_pandas(stitched_data: Dict[str, Any], presentation: bool = True) -> pd.Da
         data['concept'].append(item['concept'])
         data['standard_concept'].append(item.get('standard_concept'))
 
-        # Extract concept-level preferred_sign (same for all periods)
-        preferred_signs = item.get('preferred_signs', {})
-        ps = next(iter(preferred_signs.values()), None) if preferred_signs else None
-        data['preferred_sign'].append(ps)
+        # Extract concept-level preferred_sign (same for all periods, variance fails loudly)
+        data['preferred_sign'].append(extract_uniform_preferred_sign(item.get('preferred_signs', {})))
 
         # Add values for each period in the correct order
         for period_id, _period_label in stitched_data['periods']:

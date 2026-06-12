@@ -15,6 +15,7 @@ from rich import box
 from rich.table import Table
 
 from edgar.richtools import repr_rich
+from edgar.xbrl.core import extract_uniform_preferred_sign
 from edgar.xbrl.dimensions import is_breakdown_dimension
 from edgar.xbrl.exceptions import StatementNotFound
 from edgar.xbrl.presentation import StatementView, ViewType, normalize_view
@@ -3243,6 +3244,8 @@ class StitchedLineItem:
     """A row in a stitched statement; ``period_values`` is keyed by XBRL period id.
 
     ``preferred_sign`` is the concept-level sign the stitcher fans out across periods.
+    ``unit``/``balance``/``weight`` are concept-level attributes taken from the first
+    filing in the stitch that carries them.
     """
     concept: str
     label: str
@@ -3251,6 +3254,9 @@ class StitchedLineItem:
     is_abstract: bool
     is_total: bool
     preferred_sign: Optional[float]
+    unit: Optional[str]
+    balance: Optional[str]
+    weight: Optional[float]
     period_values: Dict[str, Any]
 
 
@@ -3355,7 +3361,10 @@ class StitchedStatement:
                 level=item['level'],
                 is_abstract=item['is_abstract'],
                 is_total=item['is_total'],
-                preferred_sign=next(iter(item['preferred_signs'].values()), None),
+                preferred_sign=extract_uniform_preferred_sign(item['preferred_signs']),
+                unit=item.get('unit'),
+                balance=item.get('balance'),
+                weight=item.get('weight'),
                 period_values=item['values'],
             )
             for item in self.statement_data['statement_data']

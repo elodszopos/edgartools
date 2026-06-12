@@ -10,7 +10,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
-from edgar.xbrl.core import format_date, parse_date
+from edgar.xbrl.core import extract_uniform_preferred_sign, format_date, get_unit_display_name, parse_date
 from edgar.xbrl.exceptions import StatementNotFound
 from edgar.xbrl.standardization import standardize_statement
 from edgar.xbrl.stitching.ordering import StatementOrderingManager
@@ -462,6 +462,9 @@ class StatementStitcher:
                     'latest_label': label,  # Store the original label too
                     'standard_concept': item.get('standard_concept'),
                     'preferred_sign': self._extract_preferred_sign(item),
+                    'unit': self._extract_unit(item),
+                    'balance': item.get('balance'),
+                    'weight': item.get('weight'),
                 }
             else:
                 # For existing concepts, update the label to use the most recent one
@@ -493,6 +496,15 @@ class StatementStitcher:
                         if ps is not None:
                             self.concept_metadata[concept_key]['preferred_sign'] = ps
 
+                # Fill concept-level attributes from any filing that carries them
+                metadata = self.concept_metadata[concept_key]
+                if metadata.get('unit') is None:
+                    metadata['unit'] = self._extract_unit(item)
+                if metadata.get('balance') is None:
+                    metadata['balance'] = item.get('balance')
+                if metadata.get('weight') is None:
+                    metadata['weight'] = item.get('weight')
+
             # Store values for relevant periods
             for period_id in relevant_periods:
                 if period_id in self.periods:  # Only include selected periods
@@ -505,14 +517,19 @@ class StatementStitcher:
 
     @staticmethod
     def _extract_preferred_sign(item: Dict[str, Any]) -> Optional[int]:
-        """Extract concept-level preferred_sign from a statement item.
+        """Concept-level preferred_sign; per-period variance fails loudly."""
+        return extract_uniform_preferred_sign(item.get('preferred_signs', {}))
 
-        preferred_signs is a dict of {period_id: sign_value} but the sign is the same
-        for all periods (it's a concept-level attribute), so we just take the first value.
+    @staticmethod
+    def _extract_unit(item: Dict[str, Any]) -> Optional[str]:
+        """Normalized display unit from the item's per-period unit refs.
+
+        units is {period_id: unit_ref}; the unit is concept-level in practice, so the
+        first non-empty ref wins - same normalization Statement.to_dataframe applies.
         """
-        preferred_signs = item.get('preferred_signs', {})
-        if preferred_signs:
-            return next(iter(preferred_signs.values()))
+        for unit_ref in item.get('units', {}).values():
+            if unit_ref:
+                return get_unit_display_name(unit_ref)
         return None
 
     @staticmethod
@@ -578,12 +595,13 @@ class StatementStitcher:
         for period_id, value_data in secondary_data.items():
             if period_id not in self.data[primary_key]:
                 self.data[primary_key][period_id] = value_data
-        # Propagate preferred_sign from secondary if primary doesn't have one
+        # Propagate concept-level attributes from secondary where primary lacks them
         if secondary_key in self.concept_metadata:
-            if self.concept_metadata[primary_key].get('preferred_sign') is None:
-                secondary_ps = self.concept_metadata[secondary_key].get('preferred_sign')
-                if secondary_ps is not None:
-                    self.concept_metadata[primary_key]['preferred_sign'] = secondary_ps
+            primary_meta = self.concept_metadata[primary_key]
+            secondary_meta = self.concept_metadata[secondary_key]
+            for attr in ('preferred_sign', 'unit', 'balance', 'weight'):
+                if primary_meta.get(attr) is None and secondary_meta.get(attr) is not None:
+                    primary_meta[attr] = secondary_meta[attr]
         # Remove the secondary entry
         if secondary_key in self.data:
             del self.data[secondary_key]
@@ -906,6 +924,9 @@ class StatementStitcher:
                 'is_total': metadata['is_total'],
                 'concept': metadata['original_concept'],
                 'standard_concept': metadata.get('standard_concept'),
+                'unit': metadata.get('unit'),
+                'balance': metadata.get('balance'),
+                'weight': metadata.get('weight'),
                 'values': {},
                 'decimals': {}
             }

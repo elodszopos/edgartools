@@ -476,6 +476,19 @@ def get_unit_display_name(unit_ref: Optional[str]) -> Optional[str]:
     return simplified.lower()
 
 
+def extract_uniform_preferred_sign(preferred_signs: Dict[str, Any]) -> Optional[int]:
+    """Collapse per-period preferred_signs to the single concept-level sign.
+
+    The sign is a concept-level presentation attribute fanned out per period; if the
+    periods ever disagree, picking one silently would sign-mangle values downstream,
+    so variance fails loudly instead.
+    """
+    signs = set(preferred_signs.values())
+    if len(signs) > 1:
+        raise ValueError(f"preferred_signs vary across periods for one concept: {preferred_signs}")
+    return next(iter(signs), None)
+
+
 def is_point_in_time(period_type: Optional[str]) -> Optional[bool]:
     """
     Determine if a period type represents a point-in-time value.
