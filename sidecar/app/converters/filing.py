@@ -23,6 +23,10 @@ from edgar.sgml.sgml_header import (
 
 from app.cik import pad_cik
 from app.models.filing import (
+    AttachmentContentResponse,
+    AttachmentFormat,
+    AttachmentInfo,
+    AttachmentsResponse,
     CompanyInfo,
     ContentFormat,
     ContentResponse,
@@ -210,6 +214,70 @@ def sections_response(filing: Filing, fmt: SectionFormat) -> SectionsResponse:
                 )
             )
     return SectionsResponse(accession_number=filing.accession_no, fmt=fmt, total=len(sections), sections=sections)
+
+
+class BinaryAttachmentError(Exception):
+    """Raised when raw content is requested for an attachment that decodes to bytes."""
+
+    def __init__(self, url: str) -> None:
+        super().__init__(url)
+        self.url = url
+
+
+def _attachment_info(attachment: Attachment, *, is_primary: bool, group: str) -> AttachmentInfo:
+    return AttachmentInfo(
+        sequence=attachment.sequence_number,
+        document=to_str(attachment.document),
+        description=to_str(attachment.description),
+        display_description=to_str(attachment.display_description),
+        purpose=to_str(attachment.purpose),
+        document_type=to_str(attachment.document_type),
+        size=to_int(attachment.size),
+        ixbrl=bool(attachment.ixbrl),
+        extension=to_str(attachment.extension),
+        is_binary=attachment.is_binary(),
+        is_primary=is_primary,
+        group="document" if group == "document" else "data_file",
+        url=attachment.url if not attachment.empty else None,
+    )
+
+
+def attachments_response(filing: Filing) -> AttachmentsResponse:
+    # sgml-sourced attachments: documents first, then data files (the SGML build latches
+    # everything after the first XML data file into data_files); primary = sequence-1 docs
+    attachments = filing.attachments
+    primary = attachments.primary_documents
+    rows = [_attachment_info(a, is_primary=any(a is p for p in primary), group="document") for a in attachments.documents]
+    rows += [_attachment_info(a, is_primary=any(a is p for p in primary), group="data_file") for a in attachments.data_files or []]
+    return AttachmentsResponse(accession_number=filing.accession_no, total=len(rows), attachments=rows)
+
+
+def attachment_content_response(filing: Filing, sequence: str, fmt: AttachmentFormat) -> AttachmentContentResponse:
+    # raises KeyError when the sequence is absent (router maps to 404)
+    attachment = filing.attachments.get_by_sequence(sequence)
+    content: str | None
+    if fmt == "raw":
+        if attachment.is_binary():
+            raise BinaryAttachmentError(attachment.url)
+        raw = attachment.content
+        if isinstance(raw, bytes):
+            # text-extension document whose SGML block was uuencoded anyway
+            raise BinaryAttachmentError(attachment.url)
+        content = raw if isinstance(raw, str) else None
+    elif fmt == "text":
+        # untyped upstream: binary docs yield None, everything else extracts to str
+        text = attachment.text()
+        content = text if isinstance(text, str) else None
+    else:
+        content = attachment.markdown()
+    return AttachmentContentResponse(
+        accession_number=filing.accession_no,
+        sequence=attachment.sequence_number,
+        document=to_str(attachment.document),
+        document_type=to_str(attachment.document_type),
+        fmt=fmt,
+        content=content,
+    )
 
 
 def filing_envelope(filing: Filing) -> FilingEnvelope:

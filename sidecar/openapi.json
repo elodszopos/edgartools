@@ -437,6 +437,111 @@
         }
       }
     },
+    "/filing/{accession}/attachments": {
+      "get": {
+        "summary": "List Attachments",
+        "operationId": "list_attachments_filing__accession__attachments_get",
+        "parameters": [
+          {
+            "name": "accession",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d{10}-\\d{2}-\\d{6}$",
+              "title": "Accession"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttachmentsResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/filing/{accession}/attachments/{sequence}": {
+      "get": {
+        "summary": "Get Attachment Content",
+        "operationId": "get_attachment_content_filing__accession__attachments__sequence__get",
+        "parameters": [
+          {
+            "name": "accession",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d{10}-\\d{2}-\\d{6}$",
+              "title": "Accession"
+            }
+          },
+          {
+            "name": "sequence",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d{1,4}$",
+              "title": "Sequence"
+            }
+          },
+          {
+            "name": "fmt",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "raw",
+                "text",
+                "markdown"
+              ],
+              "type": "string",
+              "default": "text",
+              "title": "Fmt"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttachmentContentResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/search": {
       "get": {
         "summary": "Search",
@@ -644,6 +749,235 @@
   },
   "components": {
     "schemas": {
+      "AttachmentContentResponse": {
+        "properties": {
+          "accession_number": {
+            "type": "string",
+            "pattern": "^\\d{10}-\\d{2}-\\d{6}$",
+            "title": "Accession Number"
+          },
+          "sequence": {
+            "type": "string",
+            "title": "Sequence"
+          },
+          "document": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Document"
+          },
+          "document_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Document Type"
+          },
+          "fmt": {
+            "type": "string",
+            "enum": [
+              "raw",
+              "text",
+              "markdown"
+            ],
+            "title": "Fmt"
+          },
+          "content": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "accession_number",
+          "sequence",
+          "document",
+          "document_type",
+          "fmt",
+          "content"
+        ],
+        "title": "AttachmentContentResponse"
+      },
+      "AttachmentInfo": {
+        "properties": {
+          "sequence": {
+            "type": "string",
+            "title": "Sequence"
+          },
+          "document": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Document"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "display_description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Display Description"
+          },
+          "purpose": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Purpose"
+          },
+          "document_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Document Type"
+          },
+          "size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Size"
+          },
+          "ixbrl": {
+            "type": "boolean",
+            "title": "Ixbrl"
+          },
+          "extension": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Extension"
+          },
+          "is_binary": {
+            "type": "boolean",
+            "title": "Is Binary"
+          },
+          "is_primary": {
+            "type": "boolean",
+            "title": "Is Primary"
+          },
+          "group": {
+            "type": "string",
+            "enum": [
+              "document",
+              "data_file"
+            ],
+            "title": "Group"
+          },
+          "url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Url"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "sequence",
+          "document",
+          "description",
+          "display_description",
+          "purpose",
+          "document_type",
+          "size",
+          "ixbrl",
+          "extension",
+          "is_binary",
+          "is_primary",
+          "group",
+          "url"
+        ],
+        "title": "AttachmentInfo",
+        "description": "One submission document; richer than the envelope's lean DocumentRef."
+      },
+      "AttachmentsResponse": {
+        "properties": {
+          "accession_number": {
+            "type": "string",
+            "pattern": "^\\d{10}-\\d{2}-\\d{6}$",
+            "title": "Accession Number"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "attachments": {
+            "items": {
+              "$ref": "#/components/schemas/AttachmentInfo"
+            },
+            "type": "array",
+            "title": "Attachments"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "accession_number",
+          "total",
+          "attachments"
+        ],
+        "title": "AttachmentsResponse"
+      },
       "CompanyInfo": {
         "properties": {
           "name": {

@@ -4,6 +4,52 @@
  */
 import * as zod from 'zod';
 
+export const attachmentContentResponseAccessionNumberRegExp = new RegExp('^\\d{10}-\\d{2}-\\d{6}$');
+
+
+export const AttachmentContentResponse = zod.strictObject({
+  "accession_number": zod.string().regex(attachmentContentResponseAccessionNumberRegExp),
+  "sequence": zod.string(),
+  "document": zod.union([zod.string(),zod.null()]),
+  "document_type": zod.union([zod.string(),zod.null()]),
+  "fmt": zod.enum(['raw', 'text', 'markdown']),
+  "content": zod.union([zod.string(),zod.null()])
+});
+
+export type AttachmentContentResponse = zod.input<typeof AttachmentContentResponse>;
+export type AttachmentContentResponseOutput = zod.output<typeof AttachmentContentResponse>;
+
+export const AttachmentInfo = zod.strictObject({
+  "sequence": zod.string(),
+  "document": zod.union([zod.string(),zod.null()]),
+  "description": zod.union([zod.string(),zod.null()]),
+  "display_description": zod.union([zod.string(),zod.null()]),
+  "purpose": zod.union([zod.string(),zod.null()]),
+  "document_type": zod.union([zod.string(),zod.null()]),
+  "size": zod.union([zod.number(),zod.null()]),
+  "ixbrl": zod.boolean(),
+  "extension": zod.union([zod.string(),zod.null()]),
+  "is_binary": zod.boolean(),
+  "is_primary": zod.boolean(),
+  "group": zod.enum(['document', 'data_file']),
+  "url": zod.union([zod.string(),zod.null()])
+}).describe('One submission document; richer than the envelope\'s lean DocumentRef.');
+
+export type AttachmentInfo = zod.input<typeof AttachmentInfo>;
+export type AttachmentInfoOutput = zod.output<typeof AttachmentInfo>;
+
+export const attachmentsResponseAccessionNumberRegExp = new RegExp('^\\d{10}-\\d{2}-\\d{6}$');
+
+
+export const AttachmentsResponse = zod.strictObject({
+  "accession_number": zod.string().regex(attachmentsResponseAccessionNumberRegExp),
+  "total": zod.number(),
+  "attachments": zod.array(AttachmentInfo)
+});
+
+export type AttachmentsResponse = zod.input<typeof AttachmentsResponse>;
+export type AttachmentsResponseOutput = zod.output<typeof AttachmentsResponse>;
+
 export const companyInfoCikOneRegExp = new RegExp('^\\d{10}$');
 
 
@@ -473,6 +519,40 @@ export const GetFilingSectionsFilingAccessionSectionsGetQueryParams = zod.strict
 })
 
 export const GetFilingSectionsFilingAccessionSectionsGetResponse = SectionsResponse
+
+
+/**
+ * @summary List Attachments
+ */
+export const listAttachmentsFilingAccessionAttachmentsGetPathAccessionRegExp = new RegExp('^\\d{10}-\\d{2}-\\d{6}$');
+
+
+export const ListAttachmentsFilingAccessionAttachmentsGetParams = zod.strictObject({
+  "accession": zod.string().regex(listAttachmentsFilingAccessionAttachmentsGetPathAccessionRegExp)
+})
+
+export const ListAttachmentsFilingAccessionAttachmentsGetResponse = AttachmentsResponse
+
+
+/**
+ * @summary Get Attachment Content
+ */
+export const getAttachmentContentFilingAccessionAttachmentsSequenceGetPathAccessionRegExp = new RegExp('^\\d{10}-\\d{2}-\\d{6}$');
+export const getAttachmentContentFilingAccessionAttachmentsSequenceGetPathSequenceRegExp = new RegExp('^\\d{1,4}$');
+
+
+export const GetAttachmentContentFilingAccessionAttachmentsSequenceGetParams = zod.strictObject({
+  "accession": zod.string().regex(getAttachmentContentFilingAccessionAttachmentsSequenceGetPathAccessionRegExp),
+  "sequence": zod.string().regex(getAttachmentContentFilingAccessionAttachmentsSequenceGetPathSequenceRegExp)
+})
+
+export const getAttachmentContentFilingAccessionAttachmentsSequenceGetQueryFmtDefault = `text`;
+
+export const GetAttachmentContentFilingAccessionAttachmentsSequenceGetQueryParams = zod.strictObject({
+  "fmt": zod.enum(['raw', 'text', 'markdown']).default(getAttachmentContentFilingAccessionAttachmentsSequenceGetQueryFmtDefault)
+})
+
+export const GetAttachmentContentFilingAccessionAttachmentsSequenceGetResponse = AttachmentContentResponse
 
 
 /**

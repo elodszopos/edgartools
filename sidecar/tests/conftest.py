@@ -3,6 +3,7 @@ identity defaults for replay, and the golden-dump helper (plan: edgar-sidecar.md
 
 from __future__ import annotations
 
+import inspect
 import json
 import os
 from collections.abc import Callable
@@ -20,7 +21,15 @@ _new_recordings = {"count": 0}
 
 
 def _budget_guard(response: dict) -> dict:
-    # vcrpy before_record_response: fires only while RECORDING, never on replay
+    # vcrpy runs before_record_response on BOTH record-appends and cassette loads
+    # (Cassette._load replays every stored interaction through append) - count only
+    # true recordings, or shared multi-test cassettes blow the budget on replay alone
+    frame = inspect.currentframe()
+    while frame is not None:
+        code = frame.f_code
+        if code.co_name == "_load" and code.co_filename.endswith("cassette.py"):
+            return response
+        frame = frame.f_back
     _new_recordings["count"] += 1
     if _new_recordings["count"] > SEC_RECORDING_BUDGET:
         raise RuntimeError(

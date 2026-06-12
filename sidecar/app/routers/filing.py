@@ -7,13 +7,30 @@ from typing import Annotated
 from edgar._filings import Filing, get_by_accession_number_enriched
 from fastapi import APIRouter, HTTPException, Path
 
-from app.converters.filing import content_response, filing_envelope, sections_response
+from app.converters.filing import (
+    BinaryAttachmentError,
+    attachment_content_response,
+    attachments_response,
+    content_response,
+    filing_envelope,
+    sections_response,
+)
 from app.models.common import ACCESSION_PATTERN
-from app.models.filing import ContentFormat, ContentResponse, FilingEnvelope, SectionFormat, SectionsResponse
+from app.models.filing import (
+    AttachmentContentResponse,
+    AttachmentFormat,
+    AttachmentsResponse,
+    ContentFormat,
+    ContentResponse,
+    FilingEnvelope,
+    SectionFormat,
+    SectionsResponse,
+)
 
 router = APIRouter()
 
 AccessionParam = Annotated[str, Path(pattern=ACCESSION_PATTERN)]
+SequenceParam = Annotated[str, Path(pattern=r"^\d{1,4}$")]
 
 
 def _lookup(accession: str) -> Filing:
@@ -45,3 +62,22 @@ def get_filing_content(
 @router.get("/filing/{accession}/sections")
 def get_filing_sections(accession: AccessionParam, fmt: SectionFormat = "text") -> SectionsResponse:
     return sections_response(_lookup(accession), fmt=fmt)
+
+
+@router.get("/filing/{accession}/attachments")
+def list_attachments(accession: AccessionParam) -> AttachmentsResponse:
+    return attachments_response(_lookup(accession))
+
+
+@router.get("/filing/{accession}/attachments/{sequence}")
+def get_attachment_content(
+    accession: AccessionParam,
+    sequence: SequenceParam,
+    fmt: AttachmentFormat = "text",
+) -> AttachmentContentResponse:
+    try:
+        return attachment_content_response(_lookup(accession), sequence=sequence, fmt=fmt)
+    except KeyError as error:
+        raise HTTPException(status_code=404, detail=f"no attachment with sequence {sequence} in {accession}") from error
+    except BinaryAttachmentError as error:
+        raise HTTPException(status_code=422, detail=f"binary attachment has no JSON content; fetch {error.url}") from error

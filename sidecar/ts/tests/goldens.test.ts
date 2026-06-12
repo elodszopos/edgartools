@@ -8,10 +8,12 @@ import { join } from 'node:path';
 import { describe, expect, test } from 'bun:test';
 import type { z } from 'zod';
 import {
+  GetAttachmentContentFilingAccessionAttachmentsSequenceGetResponse,
   GetFilingContentFilingAccessionContentGetResponse,
   GetFilingFilingAccessionGetResponse,
   GetFilingSectionsFilingAccessionSectionsGetResponse,
   HealthHealthGetResponse,
+  ListAttachmentsFilingAccessionAttachmentsGetResponse,
   ListCurrentFilingsFilingsCurrentGetResponse,
   ListFilingsFilingsGetResponse,
   ListTickersTickersGetResponse,
@@ -24,6 +26,8 @@ const FIXTURES = join(import.meta.dir, '..', 'fixtures', 'responses');
 const RESPONSE_SCHEMAS: Record<string, z.ZodType> = {
   health: HealthHealthGetResponse,
   filing: GetFilingFilingAccessionGetResponse,
+  filing_attachment_content: GetAttachmentContentFilingAccessionAttachmentsSequenceGetResponse,
+  filing_attachments: ListAttachmentsFilingAccessionAttachmentsGetResponse,
   filing_content: GetFilingContentFilingAccessionContentGetResponse,
   filing_sections: GetFilingSectionsFilingAccessionSectionsGetResponse,
   filings: ListFilingsFilingsGetResponse,

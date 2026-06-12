@@ -1,4 +1,4 @@
-"""/filing/{accession} family: envelope, rendered content, and detected sections."""
+"""/filing/{accession} family: envelope, rendered content, detected sections, attachments."""
 
 from __future__ import annotations
 
@@ -11,6 +11,7 @@ from app.models.common import ACCESSION_PATTERN, CIK_PATTERN, WireModel
 
 ContentFormat = Literal["markdown", "text", "html"]
 SectionFormat = Literal["text", "markdown"]
+AttachmentFormat = Literal["raw", "text", "markdown"]
 
 
 class HeaderAddress(WireModel):
@@ -146,3 +147,39 @@ class SectionsResponse(WireModel):
     fmt: SectionFormat
     total: int
     sections: list[SectionInfo]
+
+
+class AttachmentInfo(WireModel):
+    """One submission document; richer than the envelope's lean DocumentRef."""
+
+    sequence: str
+    document: str | None
+    description: str | None
+    # purpose-aware enhanced description (FilingSummary report name or standard exhibit text)
+    display_description: str | None
+    purpose: str | None
+    document_type: str | None
+    size: int | None
+    ixbrl: bool
+    extension: str | None
+    # binary attachments have no JSON-safe content - fetch via url
+    is_binary: bool
+    is_primary: bool
+    group: Literal["document", "data_file"]
+    url: str | None
+
+
+class AttachmentsResponse(WireModel):
+    accession_number: str = Field(pattern=ACCESSION_PATTERN)
+    total: int
+    attachments: list[AttachmentInfo]
+
+
+class AttachmentContentResponse(WireModel):
+    accession_number: str = Field(pattern=ACCESSION_PATTERN)
+    sequence: str
+    document: str | None
+    document_type: str | None
+    fmt: AttachmentFormat
+    # null when extraction yields nothing for the format (e.g. markdown of a non-HTML doc)
+    content: str | None
