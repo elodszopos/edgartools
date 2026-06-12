@@ -2,22 +2,18 @@
 
 Statements come from Statement.to_dataframe(presentation=False) - raw instance values,
 standardized labels per the view param. Period columns are unpivoted into typed
-values[] records via the same period-selection + column-naming logic the library uses
-(determine_periods_to_display + the (FY)/(Qn)/(YTD) suffix rules in
-edgar/xbrl/statements.py _build_dataframe_from_raw_data); the library exposes no public
-period->column mapping, so the naming is mirrored here and every lookup is BY NAME -
-a library rename breaks tests loudly instead of mislabeling periods.
+values[] records keyed by XBRL period key via df.attrs["period_columns"], the
+column -> (period_key, period_label) mapping the library stamps at DataFrame build -
+no column-name parsing here; a missing stamp raises KeyError loudly.
 """
 
 from __future__ import annotations
 
 import re
-from datetime import datetime
 from typing import TYPE_CHECKING, Literal
 
 import pandas as pd
 from edgar.financials import Financials
-from edgar.xbrl.periods import determine_periods_to_display
 from edgar.xbrl.presentation import StatementView
 from edgar.xbrl.statements import Statement, StatementValidationError
 
@@ -45,61 +41,6 @@ if TYPE_CHECKING:
     from edgar.entity.core import Company
     from edgar.ttm.calculator import TTMMetric
     from edgar.xbrl.statements import StitchedStatement
-
-# every non-period column to_dataframe(include_unit, include_point_in_time) can emit;
-# the remaining columns are period values in determine_periods_to_display order
-_METADATA_COLUMNS = frozenset(
-    {
-        "concept",
-        "label",
-        "standard_concept",
-        "unit",
-        "point_in_time",
-        "level",
-        "abstract",
-        "dimension",
-        "is_breakdown",
-        "dimension_axis",
-        "dimension_member",
-        "dimension_member_label",
-        "dimension_label",
-        "balance",
-        "weight",
-        "preferred_sign",
-        "parent_concept",
-        "parent_abstract_concept",
-    }
-)
-
-
-def _period_column_name(period_key: str, period_label: str, fiscal_year_end_month: int | None) -> str:
-    # mirrors the column naming in Statement._build_dataframe_from_raw_data
-    parts = period_key.split("_")
-    if period_key.startswith("duration_") and len(parts) >= 3:
-        start_date, end_date = parts[1], parts[2]
-        name = end_date
-        try:
-            d0 = datetime.strptime(start_date, "%Y-%m-%d")
-            d1 = datetime.strptime(end_date, "%Y-%m-%d")
-            days = (d1 - d0).days
-            if 80 <= days <= 100:
-                if fiscal_year_end_month:
-                    month_offset = (d1.month - fiscal_year_end_month - 1) % 12
-                    quarter = f"Q{(month_offset // 3) + 1}"
-                else:
-                    month = d1.month
-                    quarter = "Q1" if month <= 3 or month == 12 else "Q2" if month <= 6 else "Q3" if month <= 9 else "Q4"
-                name = f"{end_date} ({quarter})"
-            elif 175 <= days <= 285:
-                name = f"{end_date} (YTD)"
-            elif days > 350:
-                name = f"{end_date} (FY)"
-        except (ValueError, TypeError):
-            pass
-        return name
-    if period_key.startswith("instant_") and len(parts) >= 2:
-        return parts[1]
-    return period_label
 
 
 def _statement_period(period_key: str, period_label: str) -> StatementPeriod:
@@ -196,24 +137,10 @@ def _statement(stmt: Statement | None, *, standard: bool, dimensions: bool) -> F
     if df is None or isinstance(df, str) or df.empty:
         return FinancialStatement(periods=[], records=[])
 
-    xbrl = stmt.xbrl
-    statement_type = stmt.canonical_type if stmt.canonical_type else stmt.role_or_type
-    fiscal_year_end_month = (xbrl.entity_info or {}).get("fiscal_year_end_month")
-    selected = determine_periods_to_display(xbrl, statement_type)
-
-    # transition periods can collapse onto one column (library issue #582) - keep first
-    column_to_period: dict[str, tuple[str, str]] = {}
-    for period_key, period_label in selected:
-        column = _period_column_name(period_key, period_label, fiscal_year_end_month)
-        column_to_period.setdefault(column, (period_key, period_label))
-
-    period_columns = [column for column in df.columns if column not in _METADATA_COLUMNS]
-    unmapped = [column for column in period_columns if column not in column_to_period]
-    if unmapped:
-        raise RuntimeError(
-            f"statement period columns {unmapped} have no period mapping for {statement_type}; "
-            "the mirrored column-naming logic has drifted from edgar.xbrl.statements"
-        )
+    # column -> (period_key, period_label), stamped by the library at DataFrame build;
+    # a missing stamp means the library contract broke - KeyError is the loud failure we want
+    column_to_period: dict[str, tuple[str, str]] = df.attrs["period_columns"]
+    period_columns = list(column_to_period)
 
     periods = [_statement_period(*column_to_period[column]) for column in period_columns]
     records = []
