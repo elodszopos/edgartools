@@ -9,6 +9,8 @@ import { describe, expect, test } from 'bun:test';
 import type { z } from 'zod';
 import {
   GetAttachmentContentFilingAccessionAttachmentsSequenceGetResponse,
+  GetCompanyCompanyIdGetResponse,
+  GetCompanySubmissionsCompanyIdSubmissionsGetResponse,
   GetFilingContentFilingAccessionContentGetResponse,
   GetFilingFilingAccessionGetResponse,
   GetFilingSectionsFilingAccessionSectionsGetResponse,
@@ -25,6 +27,8 @@ const FIXTURES = join(import.meta.dir, '..', 'fixtures', 'responses');
 // endpoint dir name -> generated response schema; extend with every new endpoint
 const RESPONSE_SCHEMAS: Record<string, z.ZodType> = {
   health: HealthHealthGetResponse,
+  company: GetCompanyCompanyIdGetResponse,
+  company_submissions: GetCompanySubmissionsCompanyIdSubmissionsGetResponse,
   filing: GetFilingFilingAccessionGetResponse,
   filing_attachment_content: GetAttachmentContentFilingAccessionAttachmentsSequenceGetResponse,
   filing_attachments: ListAttachmentsFilingAccessionAttachmentsGetResponse,

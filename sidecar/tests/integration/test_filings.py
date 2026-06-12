@@ -1,8 +1,9 @@
 """Integration: /filings (quarterly index) and /filings/current (getcurrent feed).
 
 One VCR test per endpoint: the quarterly index download is the expensive interaction, so
-every index-touching scenario shares a single cassette (the in-session HTTP cache serves
-repeat index reads; tests stay runnable standalone).
+every index-touching scenario shares a single cassette. The disk HTTP cache judges
+freshness from the RECORDED Date header (index TTL: 30 min), so once a cassette ages
+past that, repeat index reads re-hit VCR - hence allow_playback_repeats.
 """
 
 from __future__ import annotations
@@ -21,7 +22,7 @@ def client():
         yield test_client
 
 
-@pytest.mark.vcr
+@pytest.mark.vcr(allow_playback_repeats=True)
 def test_filings_index_paging_and_filters(client: TestClient, golden) -> None:
     # page 1 of 10-K filings in a one-week window
     response = client.get("/filings", params={**WINDOW, "form": "10-K", "page_size": 5})

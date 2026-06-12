@@ -4,6 +4,7 @@ import httpx
 from edgar import DataObjectException, Filing
 from edgar.core import TooManyRequestsException
 from edgar.dates import InvalidDateException
+from edgar.entity.core import CompanyNotFoundError
 from edgar.enums import ValidationError as EdgarValidationError
 from edgar.httprequests import IdentityNotSetException, TooManyRequestsError
 
@@ -80,6 +81,14 @@ def test_data_object_exception_maps_to_502():
     status, detail = _must_map(DataObjectException(filing))
     assert status == 502
     assert "0000320193-24-000123" in detail
+
+
+def test_company_not_found_maps_to_404_with_suggestions():
+    error = CompanyNotFoundError("APPL", suggestions=[{"ticker": "AAPL", "company": "Apple Inc."}])
+    status, detail = _must_map(error)
+    assert status == 404
+    assert "Company not found: 'APPL'" in detail
+    assert "'AAPL' (Apple Inc.)" in detail
 
 
 def test_unknown_exception_is_unmapped():

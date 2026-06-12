@@ -55,6 +55,11 @@ def vcr_config():
         "filter_headers": ["User-Agent", "Authorization"],
         "decode_compressed_response": True,
         "before_record_response": _budget_guard,
+        # NOTE: the disk cache judges freshness from the RECORDED Date header, so any
+        # cassette older than the URL's TTL (submissions/tickers: 30s per issue #471,
+        # indexes: 30min) stops deduping repeat in-test requests - mark such tests
+        # @pytest.mark.vcr(allow_playback_repeats=True); that kwarg is use_cassette-only
+        # and must flow via the marker, not this config
     }
 
 

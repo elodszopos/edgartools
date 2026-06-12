@@ -1,0 +1,71 @@
+{
+  "cik": "0000320193",
+  "company": "Apple Inc.",
+  "total": 2234,
+  "start": 2230,
+  "page_size": 100,
+  "has_more": false,
+  "next_start": null,
+  "filings": [
+    {
+      "accession_number": "0000918983-94-000004",
+      "form": "SC 13G/A",
+      "filing_date": "1994-02-17",
+      "report_date": null,
+      "acceptance_datetime": "1994-02-17T20:20:43Z",
+      "act": null,
+      "file_number": "005-33632",
+      "items": [],
+      "size": 1735,
+      "is_xbrl": false,
+      "is_inline_xbrl": false,
+      "primary_document": null,
+      "primary_doc_description": null
+    },
+    {
+      "accession_number": "0000950150-94-000252",
+      "form": "SC 13G/A",
+      "filing_date": "1994-02-10",
+      "report_date": null,
+      "acceptance_datetime": "1994-02-10T05:00:00Z",
+      "act": null,
+      "file_number": "005-33632",
+      "items": [],
+      "size": 14228,
+      "is_xbrl": false,
+      "is_inline_xbrl": false,
+      "primary_document": null,
+      "primary_doc_description": "SCHEDULE 13G - AMENDMENT #2"
+    },
+    {
+      "accession_number": "0000891618-94-000021",
+      "form": "424B5",
+      "filing_date": "1994-01-26",
+      "report_date": null,
+      "acceptance_datetime": "1994-01-26T05:00:00Z",
+      "act": null,
+      "file_number": "033-62310",
+      "items": [],
+      "size": 109243,
+      "is_xbrl": false,
+      "is_inline_xbrl": false,
+      "primary_document": null,
+      "primary_doc_description": "APPLE 424B5"
+    },
+    {
+      "accession_number": "0000320193-94-000002",
+      "form": "10-Q",
+      "filing_date": "1994-01-26",
+      "report_date": "1993-12-31",
+      "acceptance_datetime": "1994-01-26T05:00:00Z",
+      "act": null,
+      "file_number": "000-10030",
+      "items": [],
+      "size": 233311,
+      "is_xbrl": false,
+      "is_inline_xbrl": false,
+      "primary_document": null,
+      "primary_doc_description": null
+    }
+  ]
+}

@@ -65,6 +65,66 @@ export const CompanyInfo = zod.strictObject({
 export type CompanyInfo = zod.input<typeof CompanyInfo>;
 export type CompanyInfoOutput = zod.output<typeof CompanyInfo>;
 
+export const EntityAddress = zod.strictObject({
+  "street1": zod.union([zod.string(),zod.null()]),
+  "street2": zod.union([zod.string(),zod.null()]),
+  "city": zod.union([zod.string(),zod.null()]),
+  "state_or_country": zod.union([zod.string(),zod.null()]),
+  "state_or_country_description": zod.union([zod.string(),zod.null()]),
+  "zipcode": zod.union([zod.string(),zod.null()])
+});
+
+export type EntityAddress = zod.input<typeof EntityAddress>;
+export type EntityAddressOutput = zod.output<typeof EntityAddress>;
+
+export const EntityFormerName = zod.strictObject({
+  "name": zod.union([zod.string(),zod.null()]),
+  "from_date": zod.union([zod.iso.date(),zod.null()]),
+  "to_date": zod.union([zod.iso.date(),zod.null()])
+});
+
+export type EntityFormerName = zod.input<typeof EntityFormerName>;
+export type EntityFormerNameOutput = zod.output<typeof EntityFormerName>;
+
+export const companyProfileCikRegExp = new RegExp('^\\d{10}$');
+
+
+export const CompanyProfile = zod.strictObject({
+  "cik": zod.string().regex(companyProfileCikRegExp),
+  "name": zod.union([zod.string(),zod.null()]),
+  "display_name": zod.union([zod.string(),zod.null()]),
+  "entity_type": zod.union([zod.string(),zod.null()]),
+  "tickers": zod.array(zod.string()),
+  "exchanges": zod.array(zod.union([zod.string(),zod.null()])),
+  "sic": zod.union([zod.string(),zod.null()]),
+  "sic_description": zod.union([zod.string(),zod.null()]),
+  "category": zod.union([zod.string(),zod.null()]),
+  "filer_status": zod.union([zod.string(),zod.null()]),
+  "is_smaller_reporting_company": zod.boolean(),
+  "is_emerging_growth_company": zod.boolean(),
+  "fiscal_year_end": zod.union([zod.string(),zod.null()]),
+  "ein": zod.union([zod.string(),zod.null()]),
+  "phone": zod.union([zod.string(),zod.null()]),
+  "description": zod.union([zod.string(),zod.null()]),
+  "website": zod.union([zod.string(),zod.null()]),
+  "investor_website": zod.union([zod.string(),zod.null()]),
+  "state_of_incorporation": zod.union([zod.string(),zod.null()]),
+  "state_of_incorporation_description": zod.union([zod.string(),zod.null()]),
+  "is_foreign": zod.union([zod.boolean(),zod.null()]),
+  "flags": zod.union([zod.string(),zod.null()]),
+  "business_address": zod.union([EntityAddress,zod.null()]),
+  "mailing_address": zod.union([EntityAddress,zod.null()]),
+  "former_names": zod.array(EntityFormerName),
+  "insider_transaction_for_owner_exists": zod.boolean(),
+  "insider_transaction_for_issuer_exists": zod.boolean(),
+  "is_company": zod.boolean(),
+  "is_individual": zod.boolean(),
+  "is_bdc": zod.boolean()
+}).describe('Everything the SEC submissions JSON says about the entity - no cross-filing fetches.');
+
+export type CompanyProfile = zod.input<typeof CompanyProfile>;
+export type CompanyProfileOutput = zod.output<typeof CompanyProfile>;
+
 export const contentResponseAccessionNumberRegExp = new RegExp('^\\d{10}-\\d{2}-\\d{6}$');
 
 
@@ -384,6 +444,45 @@ export const SectionsResponse = zod.strictObject({
 export type SectionsResponse = zod.input<typeof SectionsResponse>;
 export type SectionsResponseOutput = zod.output<typeof SectionsResponse>;
 
+export const submissionFilingAccessionNumberRegExp = new RegExp('^\\d{10}-\\d{2}-\\d{6}$');
+
+
+export const SubmissionFiling = zod.strictObject({
+  "accession_number": zod.string().regex(submissionFilingAccessionNumberRegExp),
+  "form": zod.string(),
+  "filing_date": zod.iso.date(),
+  "report_date": zod.union([zod.iso.date(),zod.null()]),
+  "acceptance_datetime": zod.union([zod.iso.datetime({"offset":true}),zod.null()]),
+  "act": zod.union([zod.string(),zod.null()]),
+  "file_number": zod.union([zod.string(),zod.null()]),
+  "items": zod.array(zod.string()),
+  "size": zod.union([zod.number(),zod.null()]),
+  "is_xbrl": zod.union([zod.boolean(),zod.null()]),
+  "is_inline_xbrl": zod.union([zod.boolean(),zod.null()]),
+  "primary_document": zod.union([zod.string(),zod.null()]),
+  "primary_doc_description": zod.union([zod.string(),zod.null()])
+}).describe('One row of the entity\'s filing history (richer than quarterly-index rows).');
+
+export type SubmissionFiling = zod.input<typeof SubmissionFiling>;
+export type SubmissionFilingOutput = zod.output<typeof SubmissionFiling>;
+
+export const submissionsPageCikRegExp = new RegExp('^\\d{10}$');
+
+
+export const SubmissionsPage = zod.strictObject({
+  "cik": zod.string().regex(submissionsPageCikRegExp),
+  "company": zod.union([zod.string(),zod.null()]),
+  "total": zod.number(),
+  "start": zod.number(),
+  "page_size": zod.number(),
+  "has_more": zod.boolean(),
+  "next_start": zod.union([zod.number(),zod.null()]),
+  "filings": zod.array(SubmissionFiling)
+});
+
+export type SubmissionsPage = zod.input<typeof SubmissionsPage>;
+export type SubmissionsPageOutput = zod.output<typeof SubmissionsPage>;
+
 export const tickerRefCikRegExp = new RegExp('^\\d{10}$');
 
 
@@ -553,6 +652,40 @@ export const GetAttachmentContentFilingAccessionAttachmentsSequenceGetQueryParam
 })
 
 export const GetAttachmentContentFilingAccessionAttachmentsSequenceGetResponse = AttachmentContentResponse
+
+
+/**
+ * @summary Get Company
+ */
+export const GetCompanyCompanyIdGetParams = zod.strictObject({
+  "id": zod.string()
+})
+
+export const GetCompanyCompanyIdGetResponse = CompanyProfile
+
+
+/**
+ * @summary Get Company Submissions
+ */
+export const GetCompanySubmissionsCompanyIdSubmissionsGetParams = zod.strictObject({
+  "id": zod.string()
+})
+
+export const getCompanySubmissionsCompanyIdSubmissionsGetQueryStartDefault = 0;
+export const getCompanySubmissionsCompanyIdSubmissionsGetQueryStartMin = 0;
+
+export const getCompanySubmissionsCompanyIdSubmissionsGetQueryPageSizeDefault = 100;
+export const getCompanySubmissionsCompanyIdSubmissionsGetQueryPageSizeMax = 1000;
+
+
+
+export const GetCompanySubmissionsCompanyIdSubmissionsGetQueryParams = zod.strictObject({
+  "form": zod.union([zod.string(),zod.null()]).optional(),
+  "start": zod.number().min(getCompanySubmissionsCompanyIdSubmissionsGetQueryStartMin).default(getCompanySubmissionsCompanyIdSubmissionsGetQueryStartDefault),
+  "page_size": zod.number().min(1).max(getCompanySubmissionsCompanyIdSubmissionsGetQueryPageSizeMax).default(getCompanySubmissionsCompanyIdSubmissionsGetQueryPageSizeDefault)
+})
+
+export const GetCompanySubmissionsCompanyIdSubmissionsGetResponse = SubmissionsPage
 
 
 /**

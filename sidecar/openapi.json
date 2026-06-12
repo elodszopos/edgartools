@@ -542,6 +542,123 @@
         }
       }
     },
+    "/company/{id}": {
+      "get": {
+        "summary": "Get Company",
+        "operationId": "get_company_company__id__get",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompanyProfile"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/company/{id}/submissions": {
+      "get": {
+        "summary": "Get Company Submissions",
+        "operationId": "get_company_submissions_company__id__submissions_get",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Id"
+            }
+          },
+          {
+            "name": "form",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Form"
+            }
+          },
+          {
+            "name": "start",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0,
+              "title": "Start"
+            }
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 1000,
+              "minimum": 1,
+              "default": 100,
+              "title": "Page Size"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubmissionsPage"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/search": {
       "get": {
         "summary": "Search",
@@ -1060,6 +1177,314 @@
         ],
         "title": "CompanyInfo"
       },
+      "CompanyProfile": {
+        "properties": {
+          "cik": {
+            "type": "string",
+            "pattern": "^\\d{10}$",
+            "title": "Cik"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "display_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Display Name"
+          },
+          "entity_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Entity Type"
+          },
+          "tickers": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Tickers"
+          },
+          "exchanges": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Exchanges"
+          },
+          "sic": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sic"
+          },
+          "sic_description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sic Description"
+          },
+          "category": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Category"
+          },
+          "filer_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Filer Status"
+          },
+          "is_smaller_reporting_company": {
+            "type": "boolean",
+            "title": "Is Smaller Reporting Company"
+          },
+          "is_emerging_growth_company": {
+            "type": "boolean",
+            "title": "Is Emerging Growth Company"
+          },
+          "fiscal_year_end": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fiscal Year End"
+          },
+          "ein": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ein"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "website": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Website"
+          },
+          "investor_website": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Investor Website"
+          },
+          "state_of_incorporation": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "State Of Incorporation"
+          },
+          "state_of_incorporation_description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "State Of Incorporation Description"
+          },
+          "is_foreign": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Foreign"
+          },
+          "flags": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Flags"
+          },
+          "business_address": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EntityAddress"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "mailing_address": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EntityAddress"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "former_names": {
+            "items": {
+              "$ref": "#/components/schemas/EntityFormerName"
+            },
+            "type": "array",
+            "title": "Former Names"
+          },
+          "insider_transaction_for_owner_exists": {
+            "type": "boolean",
+            "title": "Insider Transaction For Owner Exists"
+          },
+          "insider_transaction_for_issuer_exists": {
+            "type": "boolean",
+            "title": "Insider Transaction For Issuer Exists"
+          },
+          "is_company": {
+            "type": "boolean",
+            "title": "Is Company"
+          },
+          "is_individual": {
+            "type": "boolean",
+            "title": "Is Individual"
+          },
+          "is_bdc": {
+            "type": "boolean",
+            "title": "Is Bdc"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "cik",
+          "name",
+          "display_name",
+          "entity_type",
+          "tickers",
+          "exchanges",
+          "sic",
+          "sic_description",
+          "category",
+          "filer_status",
+          "is_smaller_reporting_company",
+          "is_emerging_growth_company",
+          "fiscal_year_end",
+          "ein",
+          "phone",
+          "description",
+          "website",
+          "investor_website",
+          "state_of_incorporation",
+          "state_of_incorporation_description",
+          "is_foreign",
+          "flags",
+          "business_address",
+          "mailing_address",
+          "former_names",
+          "insider_transaction_for_owner_exists",
+          "insider_transaction_for_issuer_exists",
+          "is_company",
+          "is_individual",
+          "is_bdc"
+        ],
+        "title": "CompanyProfile",
+        "description": "Everything the SEC submissions JSON says about the entity - no cross-filing fetches."
+      },
       "ContentResponse": {
         "properties": {
           "accession_number": {
@@ -1269,6 +1694,134 @@
           "url"
         ],
         "title": "DocumentRef"
+      },
+      "EntityAddress": {
+        "properties": {
+          "street1": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Street1"
+          },
+          "street2": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Street2"
+          },
+          "city": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "City"
+          },
+          "state_or_country": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "State Or Country"
+          },
+          "state_or_country_description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "State Or Country Description"
+          },
+          "zipcode": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Zipcode"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "street1",
+          "street2",
+          "city",
+          "state_or_country",
+          "state_or_country_description",
+          "zipcode"
+        ],
+        "title": "EntityAddress"
+      },
+      "EntityFormerName": {
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "from_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "From Date"
+          },
+          "to_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "To Date"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "name",
+          "from_date",
+          "to_date"
+        ],
+        "title": "EntityFormerName"
       },
       "FacetBucket": {
         "properties": {
@@ -2442,6 +2995,218 @@
           "sections"
         ],
         "title": "SectionsResponse"
+      },
+      "SubmissionFiling": {
+        "properties": {
+          "accession_number": {
+            "type": "string",
+            "pattern": "^\\d{10}-\\d{2}-\\d{6}$",
+            "title": "Accession Number"
+          },
+          "form": {
+            "type": "string",
+            "title": "Form"
+          },
+          "filing_date": {
+            "type": "string",
+            "format": "date",
+            "title": "Filing Date"
+          },
+          "report_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Report Date"
+          },
+          "acceptance_datetime": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Acceptance Datetime"
+          },
+          "act": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Act"
+          },
+          "file_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Number"
+          },
+          "items": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Size"
+          },
+          "is_xbrl": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Xbrl"
+          },
+          "is_inline_xbrl": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Inline Xbrl"
+          },
+          "primary_document": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Primary Document"
+          },
+          "primary_doc_description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Primary Doc Description"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "accession_number",
+          "form",
+          "filing_date",
+          "report_date",
+          "acceptance_datetime",
+          "act",
+          "file_number",
+          "items",
+          "size",
+          "is_xbrl",
+          "is_inline_xbrl",
+          "primary_document",
+          "primary_doc_description"
+        ],
+        "title": "SubmissionFiling",
+        "description": "One row of the entity's filing history (richer than quarterly-index rows)."
+      },
+      "SubmissionsPage": {
+        "properties": {
+          "cik": {
+            "type": "string",
+            "pattern": "^\\d{10}$",
+            "title": "Cik"
+          },
+          "company": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Company"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "start": {
+            "type": "integer",
+            "title": "Start"
+          },
+          "page_size": {
+            "type": "integer",
+            "title": "Page Size"
+          },
+          "has_more": {
+            "type": "boolean",
+            "title": "Has More"
+          },
+          "next_start": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Start"
+          },
+          "filings": {
+            "items": {
+              "$ref": "#/components/schemas/SubmissionFiling"
+            },
+            "type": "array",
+            "title": "Filings"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "cik",
+          "company",
+          "total",
+          "start",
+          "page_size",
+          "has_more",
+          "next_start",
+          "filings"
+        ],
+        "title": "SubmissionsPage"
       },
       "TickerRef": {
         "properties": {

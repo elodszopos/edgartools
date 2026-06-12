@@ -11,6 +11,7 @@ import httpx
 from edgar import DataObjectException
 from edgar.core import TooManyRequestsException
 from edgar.dates import InvalidDateException
+from edgar.entity.core import CompanyNotFoundError
 from edgar.enums import ValidationError as EdgarValidationError
 from edgar.httprequests import IdentityNotSetException, TooManyRequestsError
 from fastapi import FastAPI
@@ -26,6 +27,7 @@ _HANDLED_TYPES: tuple[type[Exception], ...] = (
     InvalidDateException,
     EdgarValidationError,
     DataObjectException,
+    CompanyNotFoundError,
     httpx.HTTPError,
 )
 
@@ -34,6 +36,9 @@ def status_for_exception(exc: Exception) -> tuple[int, str] | None:
     """Return (status, detail) for exceptions the sidecar owns, None for everything else."""
     if isinstance(exc, (TooManyRequestsError, TooManyRequestsException)):
         return 429, RATE_LIMIT_DETAIL
+    if isinstance(exc, CompanyNotFoundError):
+        # str(exc) carries "did you mean" ticker suggestions
+        return 404, str(exc)
     if isinstance(exc, IdentityNotSetException):
         return 503, "SEC identity not set; service starting or misconfigured"
     if isinstance(exc, (InvalidDateException, EdgarValidationError)):

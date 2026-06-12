@@ -126,6 +126,17 @@ def eastern_naive_to_utc(value: object) -> datetime | None:
     raise TypeError(f"cannot coerce {type(value).__name__} to UTC datetime: {value!r}")
 
 
+def utc_naive_to_utc(value: object) -> datetime | None:
+    """Submissions-store acceptanceDateTime is UTC-Z at source; pyarrow round-trips drop the tz."""
+    if _is_missing(value):
+        return None
+    if isinstance(value, datetime):
+        if value.tzinfo is not None:
+            return value.astimezone(UTC)
+        return value.replace(tzinfo=UTC)
+    raise TypeError(f"cannot coerce {type(value).__name__} to UTC datetime: {value!r}")
+
+
 def to_date(value: object) -> date | None:
     if _is_missing(value):
         return None
