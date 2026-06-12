@@ -1,12 +1,16 @@
-"""/filing/{accession} envelope: index entities + full SEC-HEADER + primary documents."""
+"""/filing/{accession} family: envelope, rendered content, and detected sections."""
 
 from __future__ import annotations
 
 from datetime import date, datetime
+from typing import Literal
 
 from pydantic import Field
 
 from app.models.common import ACCESSION_PATTERN, CIK_PATTERN, WireModel
+
+ContentFormat = Literal["markdown", "text", "html"]
+SectionFormat = Literal["text", "markdown"]
 
 
 class HeaderAddress(WireModel):
@@ -118,3 +122,27 @@ class FilingEnvelope(WireModel):
     text_url: str
     obj_type: str | None
     data: None
+
+
+class ContentResponse(WireModel):
+    accession_number: str = Field(pattern=ACCESSION_PATTERN)
+    fmt: ContentFormat
+    # null when the filing has no renderable document for the format (e.g. scanned paper)
+    content: str | None
+
+
+class SectionInfo(WireModel):
+    name: str
+    title: str
+    part: str | None
+    item: str | None
+    detection_method: str
+    confidence: float
+    content: str
+
+
+class SectionsResponse(WireModel):
+    accession_number: str = Field(pattern=ACCESSION_PATTERN)
+    fmt: SectionFormat
+    total: int
+    sections: list[SectionInfo]

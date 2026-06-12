@@ -19,6 +19,18 @@ export const CompanyInfo = zod.strictObject({
 export type CompanyInfo = zod.input<typeof CompanyInfo>;
 export type CompanyInfoOutput = zod.output<typeof CompanyInfo>;
 
+export const contentResponseAccessionNumberRegExp = new RegExp('^\\d{10}-\\d{2}-\\d{6}$');
+
+
+export const ContentResponse = zod.strictObject({
+  "accession_number": zod.string().regex(contentResponseAccessionNumberRegExp),
+  "fmt": zod.enum(['markdown', 'text', 'html']),
+  "content": zod.union([zod.string(),zod.null()])
+});
+
+export type ContentResponse = zod.input<typeof ContentResponse>;
+export type ContentResponseOutput = zod.output<typeof ContentResponse>;
+
 export const currentFilingRefAccessionNumberRegExp = new RegExp('^\\d{10}-\\d{2}-\\d{6}$');
 export const currentFilingRefCikRegExp = new RegExp('^\\d{10}$');
 
@@ -300,6 +312,32 @@ export const SearchPage = zod.strictObject({
 export type SearchPage = zod.input<typeof SearchPage>;
 export type SearchPageOutput = zod.output<typeof SearchPage>;
 
+export const SectionInfo = zod.strictObject({
+  "name": zod.string(),
+  "title": zod.string(),
+  "part": zod.union([zod.string(),zod.null()]),
+  "item": zod.union([zod.string(),zod.null()]),
+  "detection_method": zod.string(),
+  "confidence": zod.number(),
+  "content": zod.string()
+});
+
+export type SectionInfo = zod.input<typeof SectionInfo>;
+export type SectionInfoOutput = zod.output<typeof SectionInfo>;
+
+export const sectionsResponseAccessionNumberRegExp = new RegExp('^\\d{10}-\\d{2}-\\d{6}$');
+
+
+export const SectionsResponse = zod.strictObject({
+  "accession_number": zod.string().regex(sectionsResponseAccessionNumberRegExp),
+  "fmt": zod.enum(['text', 'markdown']),
+  "total": zod.number(),
+  "sections": zod.array(SectionInfo)
+});
+
+export type SectionsResponse = zod.input<typeof SectionsResponse>;
+export type SectionsResponseOutput = zod.output<typeof SectionsResponse>;
+
 export const tickerRefCikRegExp = new RegExp('^\\d{10}$');
 
 
@@ -395,6 +433,46 @@ export const GetFilingFilingAccessionGetParams = zod.strictObject({
 })
 
 export const GetFilingFilingAccessionGetResponse = FilingEnvelope
+
+
+/**
+ * @summary Get Filing Content
+ */
+export const getFilingContentFilingAccessionContentGetPathAccessionRegExp = new RegExp('^\\d{10}-\\d{2}-\\d{6}$');
+
+
+export const GetFilingContentFilingAccessionContentGetParams = zod.strictObject({
+  "accession": zod.string().regex(getFilingContentFilingAccessionContentGetPathAccessionRegExp)
+})
+
+export const getFilingContentFilingAccessionContentGetQueryFmtDefault = `markdown`;
+export const getFilingContentFilingAccessionContentGetQueryPageBreaksDefault = false;
+
+export const GetFilingContentFilingAccessionContentGetQueryParams = zod.strictObject({
+  "fmt": zod.enum(['markdown', 'text', 'html']).default(getFilingContentFilingAccessionContentGetQueryFmtDefault),
+  "page_breaks": zod.boolean().default(getFilingContentFilingAccessionContentGetQueryPageBreaksDefault)
+})
+
+export const GetFilingContentFilingAccessionContentGetResponse = ContentResponse
+
+
+/**
+ * @summary Get Filing Sections
+ */
+export const getFilingSectionsFilingAccessionSectionsGetPathAccessionRegExp = new RegExp('^\\d{10}-\\d{2}-\\d{6}$');
+
+
+export const GetFilingSectionsFilingAccessionSectionsGetParams = zod.strictObject({
+  "accession": zod.string().regex(getFilingSectionsFilingAccessionSectionsGetPathAccessionRegExp)
+})
+
+export const getFilingSectionsFilingAccessionSectionsGetQueryFmtDefault = `text`;
+
+export const GetFilingSectionsFilingAccessionSectionsGetQueryParams = zod.strictObject({
+  "fmt": zod.enum(['text', 'markdown']).default(getFilingSectionsFilingAccessionSectionsGetQueryFmtDefault)
+})
+
+export const GetFilingSectionsFilingAccessionSectionsGetResponse = SectionsResponse
 
 
 /**

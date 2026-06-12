@@ -1,4 +1,4 @@
-"""edgartools Filing + parsed SGML header -> FilingEnvelope, explicit field-by-field."""
+"""edgartools Filing -> wire models (envelope, content, sections), explicit field-by-field."""
 
 from __future__ import annotations
 
@@ -8,6 +8,8 @@ from datetime import date
 from edgar._filings import Filing
 from edgar._party import Address
 from edgar.attachments import Attachment
+from edgar.core import is_probably_html
+from edgar.documents import HTMLParser, ParserConfig
 from edgar.sgml.sgml_header import (
     CompanyInformation,
     Filer,
@@ -22,6 +24,8 @@ from edgar.sgml.sgml_header import (
 from app.cik import pad_cik
 from app.models.filing import (
     CompanyInfo,
+    ContentFormat,
+    ContentResponse,
     DocumentRef,
     FilingEntity,
     FilingEnvelope,
@@ -33,6 +37,9 @@ from app.models.filing import (
     HeaderIssuer,
     HeaderReportingOwner,
     HeaderSubjectCompany,
+    SectionFormat,
+    SectionInfo,
+    SectionsResponse,
 )
 from app.serialize import eastern_naive_to_utc, to_date, to_int, to_str
 
@@ -170,6 +177,39 @@ def _entities(filing: Filing, primary_date: date) -> list[FilingEntity]:
             )
         )
     return entities
+
+
+def content_response(filing: Filing, fmt: ContentFormat, page_breaks: bool) -> ContentResponse:
+    if fmt == "html":
+        content = filing.html()
+    elif fmt == "text":
+        content = filing.text()
+    else:
+        content = filing.markdown(include_page_breaks=page_breaks)
+    return ContentResponse(accession_number=filing.accession_no, fmt=fmt, content=content)
+
+
+def sections_response(filing: Filing, fmt: SectionFormat) -> SectionsResponse:
+    # modern parser (Filing.sections() still rides the deprecated edgar.files chunker);
+    # forms without section structure (e.g. rendered Form 4 XML) yield an empty list
+    html = filing.html()
+    sections: list[SectionInfo] = []
+    if html and is_probably_html(html):
+        document = HTMLParser(ParserConfig(form=filing.form)).parse(html)
+        ordered = sorted(document.sections.items(), key=lambda kv: (kv[1].start_offset, kv[0]))
+        for name, section in ordered:
+            sections.append(
+                SectionInfo(
+                    name=name,
+                    title=section.title,
+                    part=section.part,
+                    item=section.item,
+                    detection_method=section.detection_method,
+                    confidence=float(section.confidence),
+                    content=section.text() if fmt == "text" else section.markdown(),
+                )
+            )
+    return SectionsResponse(accession_number=filing.accession_no, fmt=fmt, total=len(sections), sections=sections)
 
 
 def filing_envelope(filing: Filing) -> FilingEnvelope:

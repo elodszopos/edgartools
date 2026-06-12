@@ -318,6 +318,125 @@
         }
       }
     },
+    "/filing/{accession}/content": {
+      "get": {
+        "summary": "Get Filing Content",
+        "operationId": "get_filing_content_filing__accession__content_get",
+        "parameters": [
+          {
+            "name": "accession",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d{10}-\\d{2}-\\d{6}$",
+              "title": "Accession"
+            }
+          },
+          {
+            "name": "fmt",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "markdown",
+                "text",
+                "html"
+              ],
+              "type": "string",
+              "default": "markdown",
+              "title": "Fmt"
+            }
+          },
+          {
+            "name": "page_breaks",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Page Breaks"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContentResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/filing/{accession}/sections": {
+      "get": {
+        "summary": "Get Filing Sections",
+        "operationId": "get_filing_sections_filing__accession__sections_get",
+        "parameters": [
+          {
+            "name": "accession",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d{10}-\\d{2}-\\d{6}$",
+              "title": "Accession"
+            }
+          },
+          {
+            "name": "fmt",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "text",
+                "markdown"
+              ],
+              "type": "string",
+              "default": "text",
+              "title": "Fmt"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SectionsResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/search": {
       "get": {
         "summary": "Search",
@@ -606,6 +725,43 @@
           "fiscal_year_end"
         ],
         "title": "CompanyInfo"
+      },
+      "ContentResponse": {
+        "properties": {
+          "accession_number": {
+            "type": "string",
+            "pattern": "^\\d{10}-\\d{2}-\\d{6}$",
+            "title": "Accession Number"
+          },
+          "fmt": {
+            "type": "string",
+            "enum": [
+              "markdown",
+              "text",
+              "html"
+            ],
+            "title": "Fmt"
+          },
+          "content": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "accession_number",
+          "fmt",
+          "content"
+        ],
+        "title": "ContentResponse"
       },
       "CurrentFilingRef": {
         "properties": {
@@ -1857,6 +2013,101 @@
           "inc_state"
         ],
         "title": "SearchResult"
+      },
+      "SectionInfo": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "part": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Part"
+          },
+          "item": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Item"
+          },
+          "detection_method": {
+            "type": "string",
+            "title": "Detection Method"
+          },
+          "confidence": {
+            "type": "number",
+            "title": "Confidence"
+          },
+          "content": {
+            "type": "string",
+            "title": "Content"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "name",
+          "title",
+          "part",
+          "item",
+          "detection_method",
+          "confidence",
+          "content"
+        ],
+        "title": "SectionInfo"
+      },
+      "SectionsResponse": {
+        "properties": {
+          "accession_number": {
+            "type": "string",
+            "pattern": "^\\d{10}-\\d{2}-\\d{6}$",
+            "title": "Accession Number"
+          },
+          "fmt": {
+            "type": "string",
+            "enum": [
+              "text",
+              "markdown"
+            ],
+            "title": "Fmt"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "sections": {
+            "items": {
+              "$ref": "#/components/schemas/SectionInfo"
+            },
+            "type": "array",
+            "title": "Sections"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "accession_number",
+          "fmt",
+          "total",
+          "sections"
+        ],
+        "title": "SectionsResponse"
       },
       "TickerRef": {
         "properties": {

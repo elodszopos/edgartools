@@ -1,9 +1,12 @@
-"""Integration: /filing/{accession} envelope.
+"""Integration: /filing/{accession} envelope + /content + /sections.
 
-One VCR test: the 2025 Q1 index download is the expensive interaction, so every
-envelope scenario (single-entity, joint filers, Form 4 owner/issuer, 404) shares one
-cassette via the in-session HTTP cache. The 404 case uses a 1995 accession so the
-not-found scan stays in the small early-EDGAR indexes.
+All VCR tests in this module share ONE cassette (filing_p2_fixtures.yaml) via the
+vcr_cassette_name override: the 2025 Q1 index download is the expensive interaction
+and the in-session HTTP cache serves repeat reads, so each test stays runnable
+standalone without re-recording the index. Appending new fixtures to the shared
+cassette requires `--vcr-record=new_episodes` for that one recording run.
+The 404 case uses a 1995 accession so the not-found scan stays in the small
+early-EDGAR indexes.
 """
 
 from __future__ import annotations
@@ -12,6 +15,11 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app.main import app
+
+
+@pytest.fixture
+def vcr_cassette_name():
+    return "filing_p2_fixtures"
 
 
 @pytest.fixture(scope="module")
@@ -159,6 +167,102 @@ def test_filing_envelope_entities_header_and_missing(client: TestClient, golden)
     assert "0000000000-95-654321" in response.json()["detail"]
 
 
+@pytest.mark.vcr
+def test_filing_content_formats(client: TestClient, golden) -> None:
+    # markdown (default): whole-document render of the primary HTML
+    response = client.get("/filing/0001193125-25-004072/content")
+    assert response.status_code == 200
+    md = response.json()
+    assert md["accession_number"] == "0001193125-25-004072"
+    assert md["fmt"] == "markdown"
+    assert md["content"].startswith("UNITED STATES SECURITIES AND EXCHANGE COMMISSION Washington, D.C. 20549 FORM 8-K")
+    golden("filing_content", "walgreens_8k_markdown", md)
+
+    # text view of the same document
+    response = client.get("/filing/0001193125-25-004072/content", params={"fmt": "text"})
+    text = response.json()
+    assert text["fmt"] == "text"
+    assert "Results of Operations and Financial Condition" in text["content"]
+    assert "Walgreens Boots Alliance, Inc." in text["content"]
+
+    # raw html view
+    response = client.get("/filing/0001193125-25-004072/content", params={"fmt": "html"})
+    html = response.json()
+    assert html["fmt"] == "html"
+    assert "SECURITIES AND EXCHANGE COMMISSION" in html["content"]
+    assert "<" in html["content"]
+
+    # XML-native Form 4 renders through the ownership object to html/text/markdown
+    response = client.get("/filing/0001045810-25-000002/content", params={"fmt": "text"})
+    nvda = response.json()
+    assert nvda["fmt"] == "text"
+    assert "FORM 4" in nvda["content"]
+    assert "Puri" in nvda["content"]
+    golden("filing_content", "nvidia_form4_text", nvda)
+
+    # page_breaks only makes sense for markdown
+    response = client.get("/filing/0001193125-25-004072/content", params={"fmt": "text", "page_breaks": "true"})
+    assert response.status_code == 422
+
+    # unknown fmt rejected
+    response = client.get("/filing/0001193125-25-004072/content", params={"fmt": "pdf"})
+    assert response.status_code == 422
+
+
+@pytest.mark.vcr
+def test_filing_sections_detection(client: TestClient, golden) -> None:
+    # 10-K with TOC-detected sections across Parts I-IV (Anixa Biosciences FY2024)
+    response = client.get("/filing/0001493152-25-001787/sections")
+    assert response.status_code == 200
+    tenk = response.json()
+    assert tenk["fmt"] == "text"
+    assert tenk["total"] == 22
+    first = tenk["sections"][0]
+    assert first["name"] == "part_i_item_1"
+    assert first["part"] == "I"
+    assert first["item"] == "1"
+    assert first["detection_method"] == "toc"
+    assert first["confidence"] == 0.95
+    assert first["content"].startswith("Item 1. Business\n\nOverview\n\nAnixa Biosciences, Inc. is a biotechnology")
+    names = [s["name"] for s in tenk["sections"]]
+    assert names[-1] == "part_iv_item_16"
+    assert "part_ii_item_7" in names  # MD&A present
+    golden("filing_sections", "anixa_10k_text", tenk)
+
+    # markdown variant preserves table/list syntax per section
+    response = client.get(
+        "/filing/0001493152-25-001787/sections",
+        params={"fmt": "markdown"},
+    )
+    tenk_md = response.json()
+    assert tenk_md["fmt"] == "markdown"
+    assert tenk_md["total"] == 22
+    assert tenk_md["sections"][0]["content"].startswith("<u>Business</u>")
+
+    # 8-K items detected by pattern
+    response = client.get("/filing/0001193125-25-004072/sections")
+    eightk = response.json()
+    assert eightk["total"] == 3
+    assert [s["name"] for s in eightk["sections"]] == ["item_202", "item_701", "item_901"]
+    item202 = eightk["sections"][0]
+    assert item202["title"] == "Item 2.02 - Results of Operations"
+    assert item202["item"] == "202"
+    assert item202["part"] is None
+    assert item202["detection_method"] == "pattern"
+    assert item202["confidence"] == 0.7
+    # the space after "Item" below is U+2009 (thin space) as rendered from the source html
+    assert item202["content"].startswith("Item 2.02. Results of Operations and Financial Condition.")
+    golden("filing_sections", "walgreens_8k_text", eightk)
+
+    # rendered Form 4 has no section structure - empty, not an error
+    response = client.get("/filing/0001045810-25-000002/sections")
+    form4 = response.json()
+    assert form4["total"] == 0
+    assert form4["sections"] == []
+
+
 def test_filing_accession_format_validation(client: TestClient) -> None:
     response = client.get("/filing/not-an-accession")
+    assert response.status_code == 422
+    response = client.get("/filing/0001193125-25-004072/sections", params={"fmt": "html"})
     assert response.status_code == 422
