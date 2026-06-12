@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from app.serialize import to_bool, to_date, to_float, to_int, to_str, to_utc_datetime
+from app.serialize import eastern_naive_to_utc, to_bool, to_date, to_float, to_int, to_str, to_utc_datetime
 
 
 def test_to_int_numpy_int():
@@ -201,3 +201,29 @@ def test_to_utc_datetime_naive_raises():
 def test_to_utc_datetime_date_raises():
     with pytest.raises(TypeError):
         to_utc_datetime(date(2026, 6, 11))
+
+
+def test_eastern_naive_to_utc_winter_is_est():
+    converted = eastern_naive_to_utc(datetime(2025, 1, 10, 7, 15, 33))
+    assert converted is not None
+    assert converted.isoformat() == "2025-01-10T12:15:33+00:00"
+
+
+def test_eastern_naive_to_utc_summer_is_edt():
+    converted = eastern_naive_to_utc(datetime(2025, 7, 10, 7, 15, 33))
+    assert converted is not None
+    assert converted.isoformat() == "2025-07-10T11:15:33+00:00"
+
+
+def test_eastern_naive_to_utc_none_is_null():
+    assert eastern_naive_to_utc(None) is None
+
+
+def test_eastern_naive_to_utc_aware_raises():
+    with pytest.raises(ValueError, match="aware datetime"):
+        eastern_naive_to_utc(datetime.fromisoformat("2025-01-10T07:15:33-05:00"))
+
+
+def test_eastern_naive_to_utc_date_raises():
+    with pytest.raises(TypeError):
+        eastern_naive_to_utc(date(2025, 1, 10))

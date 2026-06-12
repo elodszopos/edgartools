@@ -278,6 +278,46 @@
         }
       }
     },
+    "/filing/{accession}": {
+      "get": {
+        "summary": "Get Filing",
+        "operationId": "get_filing_filing__accession__get",
+        "parameters": [
+          {
+            "name": "accession",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d{10}-\\d{2}-\\d{6}$",
+              "title": "Accession"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FilingEnvelope"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/search": {
       "get": {
         "summary": "Search",
@@ -485,6 +525,88 @@
   },
   "components": {
     "schemas": {
+      "CompanyInfo": {
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "cik": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^\\d{10}$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cik"
+          },
+          "sic": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sic"
+          },
+          "irs_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Irs Number"
+          },
+          "state_of_incorporation": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "State Of Incorporation"
+          },
+          "fiscal_year_end": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fiscal Year End"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "name",
+          "cik",
+          "sic",
+          "irs_number",
+          "state_of_incorporation",
+          "fiscal_year_end"
+        ],
+        "title": "CompanyInfo"
+      },
       "CurrentFilingRef": {
         "properties": {
           "accession_number": {
@@ -579,6 +701,85 @@
         ],
         "title": "CurrentFilingsPage"
       },
+      "DocumentRef": {
+        "properties": {
+          "sequence": {
+            "type": "string",
+            "title": "Sequence"
+          },
+          "document": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Document"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "document_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Document Type"
+          },
+          "size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Size"
+          },
+          "ixbrl": {
+            "type": "boolean",
+            "title": "Ixbrl"
+          },
+          "url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Url"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "sequence",
+          "document",
+          "description",
+          "document_type",
+          "size",
+          "ixbrl",
+          "url"
+        ],
+        "title": "DocumentRef"
+      },
       "FacetBucket": {
         "properties": {
           "key": {
@@ -597,6 +798,257 @@
           "count"
         ],
         "title": "FacetBucket"
+      },
+      "FilingEntity": {
+        "properties": {
+          "cik": {
+            "type": "string",
+            "pattern": "^\\d{10}$",
+            "title": "Cik"
+          },
+          "company": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Company"
+          },
+          "form": {
+            "type": "string",
+            "title": "Form"
+          },
+          "filing_date": {
+            "type": "string",
+            "format": "date",
+            "title": "Filing Date"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "cik",
+          "company",
+          "form",
+          "filing_date"
+        ],
+        "title": "FilingEntity",
+        "description": "One quarterly-index row for the accession (primary entity first)."
+      },
+      "FilingEnvelope": {
+        "properties": {
+          "accession_number": {
+            "type": "string",
+            "pattern": "^\\d{10}-\\d{2}-\\d{6}$",
+            "title": "Accession Number"
+          },
+          "form": {
+            "type": "string",
+            "title": "Form"
+          },
+          "cik": {
+            "type": "string",
+            "pattern": "^\\d{10}$",
+            "title": "Cik"
+          },
+          "company": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Company"
+          },
+          "filing_date": {
+            "type": "string",
+            "format": "date",
+            "title": "Filing Date"
+          },
+          "is_multi_entity": {
+            "type": "boolean",
+            "title": "Is Multi Entity"
+          },
+          "entities": {
+            "items": {
+              "$ref": "#/components/schemas/FilingEntity"
+            },
+            "type": "array",
+            "title": "Entities"
+          },
+          "header": {
+            "$ref": "#/components/schemas/FilingHeaderModel"
+          },
+          "primary_documents": {
+            "items": {
+              "$ref": "#/components/schemas/DocumentRef"
+            },
+            "type": "array",
+            "title": "Primary Documents"
+          },
+          "homepage_url": {
+            "type": "string",
+            "title": "Homepage Url"
+          },
+          "text_url": {
+            "type": "string",
+            "title": "Text Url"
+          },
+          "obj_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Obj Type"
+          },
+          "data": {
+            "type": "null",
+            "title": "Data"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "accession_number",
+          "form",
+          "cik",
+          "company",
+          "filing_date",
+          "is_multi_entity",
+          "entities",
+          "header",
+          "primary_documents",
+          "homepage_url",
+          "text_url",
+          "obj_type",
+          "data"
+        ],
+        "title": "FilingEnvelope"
+      },
+      "FilingHeaderModel": {
+        "properties": {
+          "acceptance_datetime": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Acceptance Datetime"
+          },
+          "filing_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Filing Date"
+          },
+          "period_of_report": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Period Of Report"
+          },
+          "date_as_of_change": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Date As Of Change"
+          },
+          "document_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Document Count"
+          },
+          "items": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "filers": {
+            "items": {
+              "$ref": "#/components/schemas/HeaderFiler"
+            },
+            "type": "array",
+            "title": "Filers"
+          },
+          "reporting_owners": {
+            "items": {
+              "$ref": "#/components/schemas/HeaderReportingOwner"
+            },
+            "type": "array",
+            "title": "Reporting Owners"
+          },
+          "issuer": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/HeaderIssuer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "subject_companies": {
+            "items": {
+              "$ref": "#/components/schemas/HeaderSubjectCompany"
+            },
+            "type": "array",
+            "title": "Subject Companies"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "acceptance_datetime",
+          "filing_date",
+          "period_of_report",
+          "date_as_of_change",
+          "document_count",
+          "items",
+          "filers",
+          "reporting_owners",
+          "issuer",
+          "subject_companies"
+        ],
+        "title": "FilingHeaderModel"
       },
       "FilingRef": {
         "properties": {
@@ -641,6 +1093,63 @@
           "filing_date"
         ],
         "title": "FilingRef"
+      },
+      "FilingValues": {
+        "properties": {
+          "form": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Form"
+          },
+          "file_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Number"
+          },
+          "sec_act": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sec Act"
+          },
+          "film_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Film Number"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "form",
+          "file_number",
+          "sec_act",
+          "film_number"
+        ],
+        "title": "FilingValues"
       },
       "FilingsPage": {
         "properties": {
@@ -698,6 +1207,40 @@
         ],
         "title": "FilingsPage"
       },
+      "FormerName": {
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "date_of_change": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Date Of Change"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "name",
+          "date_of_change"
+        ],
+        "title": "FormerName"
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -710,6 +1253,317 @@
         },
         "type": "object",
         "title": "HTTPValidationError"
+      },
+      "HeaderAddress": {
+        "properties": {
+          "street1": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Street1"
+          },
+          "street2": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Street2"
+          },
+          "city": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "City"
+          },
+          "state_or_country": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "State Or Country"
+          },
+          "zipcode": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Zipcode"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "street1",
+          "street2",
+          "city",
+          "state_or_country",
+          "zipcode"
+        ],
+        "title": "HeaderAddress"
+      },
+      "HeaderFiler": {
+        "properties": {
+          "company": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CompanyInfo"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "filing_values": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/FilingValues"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "business_address": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/HeaderAddress"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "mailing_address": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/HeaderAddress"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "former_names": {
+            "items": {
+              "$ref": "#/components/schemas/FormerName"
+            },
+            "type": "array",
+            "title": "Former Names"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "company",
+          "filing_values",
+          "business_address",
+          "mailing_address",
+          "former_names"
+        ],
+        "title": "HeaderFiler"
+      },
+      "HeaderIssuer": {
+        "properties": {
+          "company": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CompanyInfo"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "business_address": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/HeaderAddress"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "mailing_address": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/HeaderAddress"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "company",
+          "business_address",
+          "mailing_address"
+        ],
+        "title": "HeaderIssuer"
+      },
+      "HeaderReportingOwner": {
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "cik": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^\\d{10}$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cik"
+          },
+          "company": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CompanyInfo"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "filing_values": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/FilingValues"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "business_address": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/HeaderAddress"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "mailing_address": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/HeaderAddress"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "name",
+          "cik",
+          "company",
+          "filing_values",
+          "business_address",
+          "mailing_address"
+        ],
+        "title": "HeaderReportingOwner"
+      },
+      "HeaderSubjectCompany": {
+        "properties": {
+          "company": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CompanyInfo"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "filing_values": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/FilingValues"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "business_address": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/HeaderAddress"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "mailing_address": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/HeaderAddress"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "former_names": {
+            "items": {
+              "$ref": "#/components/schemas/FormerName"
+            },
+            "type": "array",
+            "title": "Former Names"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "company",
+          "filing_values",
+          "business_address",
+          "mailing_address",
+          "former_names"
+        ],
+        "title": "HeaderSubjectCompany"
       },
       "Health": {
         "properties": {

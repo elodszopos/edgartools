@@ -8,6 +8,7 @@ import { join } from 'node:path';
 import { describe, expect, test } from 'bun:test';
 import type { z } from 'zod';
 import {
+  GetFilingFilingAccessionGetResponse,
   HealthHealthGetResponse,
   ListCurrentFilingsFilingsCurrentGetResponse,
   ListFilingsFilingsGetResponse,
@@ -20,6 +21,7 @@ const FIXTURES = join(import.meta.dir, '..', 'fixtures', 'responses');
 // endpoint dir name -> generated response schema; extend with every new endpoint
 const RESPONSE_SCHEMAS: Record<string, z.ZodType> = {
   health: HealthHealthGetResponse,
+  filing: GetFilingFilingAccessionGetResponse,
   filings: ListFilingsFilingsGetResponse,
   filings_current: ListCurrentFilingsFilingsCurrentGetResponse,
   search: SearchSearchGetResponse,

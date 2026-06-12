@@ -11,6 +11,7 @@ from __future__ import annotations
 import math
 from datetime import UTC, date, datetime
 from decimal import Decimal
+from zoneinfo import ZoneInfo
 
 import numpy as np
 import pandas as pd
@@ -18,6 +19,8 @@ from pandas.api.typing import NaTType
 
 _TRUE_STRINGS = ("1", "true", "yes")
 _FALSE_STRINGS = ("0", "false", "no")
+
+_EASTERN = ZoneInfo("America/New_York")
 
 
 def _is_missing(value: object) -> bool:
@@ -109,6 +112,17 @@ def to_utc_datetime(value: object) -> datetime | None:
             # naive timestamps are ambiguous (SEC mixes Eastern and UTC sources) - never guess
             raise ValueError(f"naive datetime is ambiguous on the wire: {value!r}")
         return value.astimezone(UTC)
+    raise TypeError(f"cannot coerce {type(value).__name__} to UTC datetime: {value!r}")
+
+
+def eastern_naive_to_utc(value: object) -> datetime | None:
+    """EDGAR SEC-HEADER timestamps (ACCEPTANCE-DATETIME) carry no offset and are US Eastern."""
+    if _is_missing(value):
+        return None
+    if isinstance(value, datetime):
+        if value.tzinfo is not None:
+            raise ValueError(f"aware datetime belongs in to_utc_datetime, not here: {value!r}")
+        return value.replace(tzinfo=_EASTERN).astimezone(UTC)
     raise TypeError(f"cannot coerce {type(value).__name__} to UTC datetime: {value!r}")
 
 

@@ -37,15 +37,3 @@ class FilingsPage(WireModel):
     page_size: int
     has_more: bool
     next_start: int | None
-
-
-class FilingEnvelope(WireModel):
-    # TODO(DEFERRED): U20 adds header/multi-entity fields; `data` becomes the typed-form
-    # discriminated union when the first P4 unit (U40) lands.
-    accession_number: str = Field(pattern=ACCESSION_PATTERN)
-    form: str
-    cik: str = Field(pattern=CIK_PATTERN)
-    company: str | None = None
-    filing_date: date
-    obj_type: str | None = None
-    data: None = None

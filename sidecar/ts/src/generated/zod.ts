@@ -4,6 +4,21 @@
  */
 import * as zod from 'zod';
 
+export const companyInfoCikOneRegExp = new RegExp('^\\d{10}$');
+
+
+export const CompanyInfo = zod.strictObject({
+  "name": zod.union([zod.string(),zod.null()]),
+  "cik": zod.union([zod.string().regex(companyInfoCikOneRegExp),zod.null()]),
+  "sic": zod.union([zod.string(),zod.null()]),
+  "irs_number": zod.union([zod.string(),zod.null()]),
+  "state_of_incorporation": zod.union([zod.string(),zod.null()]),
+  "fiscal_year_end": zod.union([zod.string(),zod.null()])
+});
+
+export type CompanyInfo = zod.input<typeof CompanyInfo>;
+export type CompanyInfoOutput = zod.output<typeof CompanyInfo>;
+
 export const currentFilingRefAccessionNumberRegExp = new RegExp('^\\d{10}-\\d{2}-\\d{6}$');
 export const currentFilingRefCikRegExp = new RegExp('^\\d{10}$');
 
@@ -31,6 +46,19 @@ export const CurrentFilingsPage = zod.strictObject({
 export type CurrentFilingsPage = zod.input<typeof CurrentFilingsPage>;
 export type CurrentFilingsPageOutput = zod.output<typeof CurrentFilingsPage>;
 
+export const DocumentRef = zod.strictObject({
+  "sequence": zod.string(),
+  "document": zod.union([zod.string(),zod.null()]),
+  "description": zod.union([zod.string(),zod.null()]),
+  "document_type": zod.union([zod.string(),zod.null()]),
+  "size": zod.union([zod.number(),zod.null()]),
+  "ixbrl": zod.boolean(),
+  "url": zod.union([zod.string(),zod.null()])
+});
+
+export type DocumentRef = zod.input<typeof DocumentRef>;
+export type DocumentRefOutput = zod.output<typeof DocumentRef>;
+
 export const FacetBucket = zod.strictObject({
   "key": zod.string(),
   "count": zod.number()
@@ -38,6 +66,133 @@ export const FacetBucket = zod.strictObject({
 
 export type FacetBucket = zod.input<typeof FacetBucket>;
 export type FacetBucketOutput = zod.output<typeof FacetBucket>;
+
+export const filingEntityCikRegExp = new RegExp('^\\d{10}$');
+
+
+export const FilingEntity = zod.strictObject({
+  "cik": zod.string().regex(filingEntityCikRegExp),
+  "company": zod.union([zod.string(),zod.null()]),
+  "form": zod.string(),
+  "filing_date": zod.iso.date()
+}).describe('One quarterly-index row for the accession (primary entity first).');
+
+export type FilingEntity = zod.input<typeof FilingEntity>;
+export type FilingEntityOutput = zod.output<typeof FilingEntity>;
+
+export const FilingValues = zod.strictObject({
+  "form": zod.union([zod.string(),zod.null()]),
+  "file_number": zod.union([zod.string(),zod.null()]),
+  "sec_act": zod.union([zod.string(),zod.null()]),
+  "film_number": zod.union([zod.string(),zod.null()])
+});
+
+export type FilingValues = zod.input<typeof FilingValues>;
+export type FilingValuesOutput = zod.output<typeof FilingValues>;
+
+export const HeaderAddress = zod.strictObject({
+  "street1": zod.union([zod.string(),zod.null()]),
+  "street2": zod.union([zod.string(),zod.null()]),
+  "city": zod.union([zod.string(),zod.null()]),
+  "state_or_country": zod.union([zod.string(),zod.null()]),
+  "zipcode": zod.union([zod.string(),zod.null()])
+});
+
+export type HeaderAddress = zod.input<typeof HeaderAddress>;
+export type HeaderAddressOutput = zod.output<typeof HeaderAddress>;
+
+export const FormerName = zod.strictObject({
+  "name": zod.union([zod.string(),zod.null()]),
+  "date_of_change": zod.union([zod.iso.date(),zod.null()])
+});
+
+export type FormerName = zod.input<typeof FormerName>;
+export type FormerNameOutput = zod.output<typeof FormerName>;
+
+export const HeaderFiler = zod.strictObject({
+  "company": zod.union([CompanyInfo,zod.null()]),
+  "filing_values": zod.union([FilingValues,zod.null()]),
+  "business_address": zod.union([HeaderAddress,zod.null()]),
+  "mailing_address": zod.union([HeaderAddress,zod.null()]),
+  "former_names": zod.array(FormerName)
+});
+
+export type HeaderFiler = zod.input<typeof HeaderFiler>;
+export type HeaderFilerOutput = zod.output<typeof HeaderFiler>;
+
+export const headerReportingOwnerCikOneRegExp = new RegExp('^\\d{10}$');
+
+
+export const HeaderReportingOwner = zod.strictObject({
+  "name": zod.union([zod.string(),zod.null()]),
+  "cik": zod.union([zod.string().regex(headerReportingOwnerCikOneRegExp),zod.null()]),
+  "company": zod.union([CompanyInfo,zod.null()]),
+  "filing_values": zod.union([FilingValues,zod.null()]),
+  "business_address": zod.union([HeaderAddress,zod.null()]),
+  "mailing_address": zod.union([HeaderAddress,zod.null()])
+});
+
+export type HeaderReportingOwner = zod.input<typeof HeaderReportingOwner>;
+export type HeaderReportingOwnerOutput = zod.output<typeof HeaderReportingOwner>;
+
+export const HeaderIssuer = zod.strictObject({
+  "company": zod.union([CompanyInfo,zod.null()]),
+  "business_address": zod.union([HeaderAddress,zod.null()]),
+  "mailing_address": zod.union([HeaderAddress,zod.null()])
+});
+
+export type HeaderIssuer = zod.input<typeof HeaderIssuer>;
+export type HeaderIssuerOutput = zod.output<typeof HeaderIssuer>;
+
+export const HeaderSubjectCompany = zod.strictObject({
+  "company": zod.union([CompanyInfo,zod.null()]),
+  "filing_values": zod.union([FilingValues,zod.null()]),
+  "business_address": zod.union([HeaderAddress,zod.null()]),
+  "mailing_address": zod.union([HeaderAddress,zod.null()]),
+  "former_names": zod.array(FormerName)
+});
+
+export type HeaderSubjectCompany = zod.input<typeof HeaderSubjectCompany>;
+export type HeaderSubjectCompanyOutput = zod.output<typeof HeaderSubjectCompany>;
+
+export const FilingHeaderModel = zod.strictObject({
+  "acceptance_datetime": zod.union([zod.iso.datetime({"offset":true}),zod.null()]),
+  "filing_date": zod.union([zod.iso.date(),zod.null()]),
+  "period_of_report": zod.union([zod.iso.date(),zod.null()]),
+  "date_as_of_change": zod.union([zod.iso.date(),zod.null()]),
+  "document_count": zod.union([zod.number(),zod.null()]),
+  "items": zod.array(zod.string()),
+  "filers": zod.array(HeaderFiler),
+  "reporting_owners": zod.array(HeaderReportingOwner),
+  "issuer": zod.union([HeaderIssuer,zod.null()]),
+  "subject_companies": zod.array(HeaderSubjectCompany)
+});
+
+export type FilingHeaderModel = zod.input<typeof FilingHeaderModel>;
+export type FilingHeaderModelOutput = zod.output<typeof FilingHeaderModel>;
+
+export const filingEnvelopeAccessionNumberRegExp = new RegExp('^\\d{10}-\\d{2}-\\d{6}$');
+export const filingEnvelopeCikRegExp = new RegExp('^\\d{10}$');
+
+
+export const FilingEnvelope = zod.strictObject({
+  "accession_number": zod.string().regex(filingEnvelopeAccessionNumberRegExp),
+  "form": zod.string(),
+  "cik": zod.string().regex(filingEnvelopeCikRegExp),
+  "company": zod.union([zod.string(),zod.null()]),
+  "filing_date": zod.iso.date(),
+  "is_multi_entity": zod.boolean(),
+  "entities": zod.array(FilingEntity),
+  "header": FilingHeaderModel,
+  "primary_documents": zod.array(DocumentRef),
+  "homepage_url": zod.string(),
+  "text_url": zod.string(),
+  "obj_type": zod.union([zod.string(),zod.null()]),
+  "data": zod.null()
+});
+
+export type FilingEnvelope = zod.input<typeof FilingEnvelope>;
+export type FilingEnvelopeOutput = zod.output<typeof FilingEnvelope>;
 
 export const filingRefAccessionNumberRegExp = new RegExp('^\\d{10}-\\d{2}-\\d{6}$');
 export const filingRefCikRegExp = new RegExp('^\\d{10}$');
@@ -227,6 +382,19 @@ export const ListCurrentFilingsFilingsCurrentGetQueryParams = zod.strictObject({
 })
 
 export const ListCurrentFilingsFilingsCurrentGetResponse = CurrentFilingsPage
+
+
+/**
+ * @summary Get Filing
+ */
+export const getFilingFilingAccessionGetPathAccessionRegExp = new RegExp('^\\d{10}-\\d{2}-\\d{6}$');
+
+
+export const GetFilingFilingAccessionGetParams = zod.strictObject({
+  "accession": zod.string().regex(getFilingFilingAccessionGetPathAccessionRegExp)
+})
+
+export const GetFilingFilingAccessionGetResponse = FilingEnvelope
 
 
 /**
