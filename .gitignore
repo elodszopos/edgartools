@@ -25,3 +25,5 @@ ratelimiter.sqlite*
 .pyscn/
 # Training output (generated, not tracked)
 training/output/
+# sidecar TS toolchain
+sidecar/ts/node_modules/

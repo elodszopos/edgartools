@@ -50,5 +50,5 @@ typeCheckingMode = "standard"
 pythonVersion = "3.12"
 venvPath = "."
 venv = ".venv"
-include = ["app", "tests"]
+include = ["app", "tests", "scripts"]
 exclude = [".venv"]
