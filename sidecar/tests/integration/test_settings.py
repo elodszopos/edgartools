@@ -17,7 +17,9 @@ from app.settings import Settings, apply_settings
 
 
 def _current_limit() -> int:
-    return HTTP_MGR.rate_limiter.buckets()[0].rates[0].limit
+    limiter = HTTP_MGR.rate_limiter
+    assert limiter is not None
+    return limiter.buckets()[0].rates[0].limit
 
 
 def test_apply_settings_reconfigures_live_rate_limit() -> None:

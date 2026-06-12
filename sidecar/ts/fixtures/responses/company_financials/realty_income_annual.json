@@ -3449,7 +3449,7 @@
       {
         "concept": "us-gaap_PaymentsOfDividendsCommonStock",
         "label": "Cash distributions to common stockholders",
-        "standard_concept": "NetCashFromFinancingActivities",
+        "standard_concept": "CommonDividendsPaid",
         "level": 5,
         "is_abstract": false,
         "is_dimension": false,
@@ -3483,7 +3483,7 @@
       {
         "concept": "us-gaap_PaymentsOfDividendsPreferredStockAndPreferenceStock",
         "label": "Cash distributions to preferred stockholders",
-        "standard_concept": "NetCashFromFinancingActivities",
+        "standard_concept": "PreferredDividendExpense",
         "level": 5,
         "is_abstract": false,
         "is_dimension": false,

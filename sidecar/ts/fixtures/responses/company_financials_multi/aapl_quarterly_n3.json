@@ -1877,7 +1877,7 @@
       {
         "concept": "us-gaap_PaymentsOfDividends",
         "label": "Payments for dividends and dividend equivalents",
-        "standard_concept": "DistributionsToMinorityInterests",
+        "standard_concept": "CommonDividendsPaid",
         "level": 3,
         "is_abstract": false,
         "is_total": false,

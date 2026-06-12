@@ -125,7 +125,9 @@ def test_meta_and_body_roundtrip(temp_store) -> None:
     assert newly is True
     assert sec_replay.write_fixture(url, 200, "application/json", body) is False  # idempotent
 
-    status, headers, read_body = sec_replay.read_fixture(url)
+    fixture = sec_replay.read_fixture(url)
+    assert fixture is not None
+    status, headers, read_body = fixture
     assert status == 200
     assert headers == {"content-type": "application/json"}
     assert read_body == body
@@ -135,8 +137,9 @@ def test_binary_body_roundtrip_is_byte_exact(temp_store) -> None:
     url = "https://www.sec.gov/Archives/edgar/full-index/1995/QTR1/form.gz"
     body = b"\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\x03rawgzip\xff\x00"
     sec_replay.write_fixture(url, 200, "binary/octet-stream", body)
-    _, _, read_body = sec_replay.read_fixture(url)
-    assert read_body == body
+    fixture = sec_replay.read_fixture(url)
+    assert fixture is not None
+    assert fixture[2] == body
 
 
 def test_read_fixture_missing_returns_none(temp_store) -> None:

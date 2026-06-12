@@ -4801,7 +4801,7 @@
       {
         "concept": "ifrs-full_DividendsPaidToNoncontrollingInterestsClassifiedAsFinancingActivities",
         "label": "Payment of dividends to non-controlling interests of subsidiary",
-        "standard_concept": "CommonDividendsPaid",
+        "standard_concept": "DistributionsToMinorityInterests",
         "level": 3,
         "is_abstract": false,
         "is_dimension": false,
