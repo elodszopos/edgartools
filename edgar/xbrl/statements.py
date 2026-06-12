@@ -8,7 +8,7 @@ import re
 import warnings
 from dataclasses import dataclass
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import pandas as pd
 from rich import box
@@ -1500,7 +1500,16 @@ class Statement:
 
             df_rows.append(row)
 
-        return pd.DataFrame(df_rows)
+        df = pd.DataFrame(df_rows)
+        # Publish machine-readable period addressing: column name -> (period_key, period_label).
+        # Column names are display-oriented and can collide (#582 transition periods);
+        # first period wins, matching the don't-overwrite cell-fill rule above.
+        period_columns: Dict[str, Tuple[str, str]] = {}
+        for period_key, period_label in periods_to_display:
+            column_name = _period_column_names.get(period_key, period_label)
+            period_columns.setdefault(column_name, (period_key, period_label))
+        df.attrs['period_columns'] = period_columns
+        return df
 
     def _to_df(self,
                columns: Optional[List[str]] = None,
