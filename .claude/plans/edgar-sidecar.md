@@ -25,7 +25,7 @@
 
 ## Loop-session rules (unattended operation)
 
-- **No subagents.** Never spawn Agent/Task in loop sessions — work directly. (Agent spawns require a context-injection MCP that may be down overnight; a blocked spawn stalls the loop. Determinism beats parallelism here.)
+- **Subagents: read-only research only (user lifted full ban, 2026-06-12).** Explore-type spawns for pre-reading edgar source / form docs for the NEXT unit or group are allowed; spawned agents must never write files, record SEC interactions, or commit. Spawn prompts must satisfy the context-injection hook. A failed or stalled spawn must NEVER block the loop — fall back to working directly, immediately. All implementation work stays in the main session.
 - **Standing authorization.** This plan pre-approves, inside this repo only: the quality-gate commands, `sidecar/scripts/*`, pytest (incl. VCR recording within the SEC budget), codegen, `uv`/`bun` installs scoped to `sidecar/`, and `git add`/`git commit`. Anything outside that set (pushes, KD writes, library rewrites, new external services) -> `blocked(user)`.
 - **Precedence.** For `sidecar/` work this plan supersedes the fork's `CLAUDE.md` workflow ceremony (beads issue tracking, triage commands — skip them). Fork `CLAUDE.md` still governs style when touching `edgar/` library code.
 - **Anti-spin halt.** If no executable unit remains (everything `done`/`blocked`), or an iteration ends with zero state change twice in a row, append `HALT <reason>` to the Log, commit, and END the loop — do not idle-reschedule.
@@ -157,10 +157,23 @@ Commit per unit on green: `git add <unit files> && git commit -m "sidecar: U## <
 5. Run ALL quality gates. Green -> state `done`, append one Log line (`U## | done | key findings/decisions`), commit.
 6. Failure: max 3 fix attempts -> state `blocked(<reason>)` + Log line with all 3 attempts' evidence, commit safe artifacts only, move on.
 7. Edit only: Units states, splits, Log, Open decisions. Design sections are STABLE — changing them requires the user.
-8. Stop the iteration after ONE unit (or when blocked). All units done -> final Log line `ALL DONE` and report. No executable unit left, or two consecutive zero-progress iterations -> `HALT <reason>` per Loop-session rules and end the loop.
+8. Stop the iteration after ONE unit GROUP (or when blocked). Groups (user-approved 2026-06-12, measured: warm follow-on units run 5-15m vs 25-86m cold): a group is one iteration's scope; within a group still execute units IN ORDER, each with its own gates-green -> `done` -> Log line -> commit (bisectability preserved). If mid-group context runs low, stop after the current unit's commit — the rest of the group is just the next iteration. Units not listed below are their own group.
+
+   | Group | Units | Shared machinery |
+   |---|---|---|
+   | G1 | U31+U32 | XBRL statements stack |
+   | G2 | U33+U34 | facts/xbrl per-filing stack |
+   | G3 | U40+U41+U42 | ownership forms 4/3/5 |
+   | G4 | U46+U47 | 10-K/10-Q items+sections |
+   | G5 | U49+U50+U51 | small notice/offering forms |
+   | G6 | U53+U54+U55 | registration/prospectus family |
+   | G7 | U56+U57 | fund report family |
+
+   All units done -> final Log line `ALL DONE` and report. No executable unit left, or two consecutive zero-progress iterations -> `HALT <reason>` per Loop-session rules and end the loop.
 
 ## Form Unit Recipe (every P4 unit)
 
+0. **Harness first (U40 only, user-approved 2026-06-12)**: before any form work, U40 establishes the shared P4 harness and WRITES IT DOWN as a new STABLE plan section `## P4 typed-form harness` (envelope `data` union wiring + `kind` discriminator registration, converter/model module layout, parity-gate test template, cassette+golden naming conventions, goldens.test.ts mapping recipe). Every later P4 unit follows that section verbatim instead of re-deriving — deviations require a Log-recorded reason.
 1. **Inventory**: read fork docs for the form (`docs/*.md`) + the data object source. Form docs are comprehensive but MAYBE slightly outdated or inaccurate (user, 2026-06-12) — verify every documented claim against the data object source and real filings, never trust blindly; record discrepancies in the unit Log. Write the field manifest as the parity-gate test skeleton (every public attr/property listed: captured | excluded+why).
 2. **Models**: `app/models/forms/<form>.py` — full fidelity, `kind` literal, nested models for tables/footnotes/signatures. Register in envelope union.
 3. **Converter**: `app/converters/forms/<form>.py` — explicit field-by-field from the edgartools object. No `vars()`, no `getattr` loops.
