@@ -339,6 +339,115 @@ export const FilingsPage = zod.strictObject({
 export type FilingsPage = zod.input<typeof FilingsPage>;
 export type FilingsPageOutput = zod.output<typeof FilingsPage>;
 
+export const financialMetricsCikRegExp = new RegExp('^\\d{10}$');
+export const financialMetricsAccessionNumberRegExp = new RegExp('^\\d{10}-\\d{2}-\\d{6}$');
+
+
+export const FinancialMetrics = zod.strictObject({
+  "cik": zod.string().regex(financialMetricsCikRegExp),
+  "company": zod.union([zod.string(),zod.null()]),
+  "form": zod.string(),
+  "accession_number": zod.string().regex(financialMetricsAccessionNumberRegExp),
+  "filing_date": zod.iso.date(),
+  "period_of_report": zod.union([zod.iso.date(),zod.null()]),
+  "period": zod.enum(['annual', 'quarterly']),
+  "revenue": zod.union([zod.number(),zod.null()]),
+  "operating_income": zod.union([zod.number(),zod.null()]),
+  "net_income": zod.union([zod.number(),zod.null()]),
+  "total_assets": zod.union([zod.number(),zod.null()]),
+  "total_liabilities": zod.union([zod.number(),zod.null()]),
+  "stockholders_equity": zod.union([zod.number(),zod.null()]),
+  "current_assets": zod.union([zod.number(),zod.null()]),
+  "current_liabilities": zod.union([zod.number(),zod.null()]),
+  "operating_cash_flow": zod.union([zod.number(),zod.null()]),
+  "capital_expenditures": zod.union([zod.number(),zod.null()]),
+  "free_cash_flow": zod.union([zod.number(),zod.null()]),
+  "shares_outstanding_basic": zod.union([zod.number(),zod.null()]),
+  "shares_outstanding_diluted": zod.union([zod.number(),zod.null()]),
+  "current_ratio": zod.union([zod.number(),zod.null()]),
+  "debt_to_assets": zod.union([zod.number(),zod.null()])
+});
+
+export type FinancialMetrics = zod.input<typeof FinancialMetrics>;
+export type FinancialMetricsOutput = zod.output<typeof FinancialMetrics>;
+
+export const StatementPeriod = zod.strictObject({
+  "key": zod.string(),
+  "label": zod.string(),
+  "period_type": zod.enum(['duration', 'instant']),
+  "period_start": zod.union([zod.iso.date(),zod.null()]),
+  "period_end": zod.iso.date()
+});
+
+export type StatementPeriod = zod.input<typeof StatementPeriod>;
+export type StatementPeriodOutput = zod.output<typeof StatementPeriod>;
+
+export const StatementValue = zod.strictObject({
+  "period_key": zod.string(),
+  "value": zod.union([zod.number(),zod.string(),zod.null()])
+});
+
+export type StatementValue = zod.input<typeof StatementValue>;
+export type StatementValueOutput = zod.output<typeof StatementValue>;
+
+export const StatementRecord = zod.strictObject({
+  "concept": zod.string(),
+  "label": zod.string(),
+  "standard_concept": zod.union([zod.string(),zod.null()]),
+  "level": zod.number(),
+  "is_abstract": zod.boolean(),
+  "is_dimension": zod.boolean(),
+  "is_breakdown": zod.boolean(),
+  "dimension_axis": zod.union([zod.string(),zod.null()]),
+  "dimension_member": zod.union([zod.string(),zod.null()]),
+  "dimension_member_label": zod.union([zod.string(),zod.null()]),
+  "dimension_label": zod.union([zod.string(),zod.null()]),
+  "balance": zod.union([zod.enum(['debit', 'credit']),zod.null()]),
+  "weight": zod.union([zod.number(),zod.null()]),
+  "preferred_sign": zod.union([zod.number(),zod.null()]),
+  "parent_concept": zod.union([zod.string(),zod.null()]),
+  "parent_abstract_concept": zod.union([zod.string(),zod.null()]),
+  "unit": zod.union([zod.string(),zod.null()]),
+  "point_in_time": zod.union([zod.boolean(),zod.null()]),
+  "values": zod.array(StatementValue)
+});
+
+export type StatementRecord = zod.input<typeof StatementRecord>;
+export type StatementRecordOutput = zod.output<typeof StatementRecord>;
+
+export const FinancialStatement = zod.strictObject({
+  "periods": zod.array(StatementPeriod),
+  "records": zod.array(StatementRecord)
+});
+
+export type FinancialStatement = zod.input<typeof FinancialStatement>;
+export type FinancialStatementOutput = zod.output<typeof FinancialStatement>;
+
+export const financialsResponseCikRegExp = new RegExp('^\\d{10}$');
+export const financialsResponseAccessionNumberRegExp = new RegExp('^\\d{10}-\\d{2}-\\d{6}$');
+
+
+export const FinancialsResponse = zod.strictObject({
+  "cik": zod.string().regex(financialsResponseCikRegExp),
+  "company": zod.union([zod.string(),zod.null()]),
+  "form": zod.string(),
+  "accession_number": zod.string().regex(financialsResponseAccessionNumberRegExp),
+  "filing_date": zod.iso.date(),
+  "period_of_report": zod.union([zod.iso.date(),zod.null()]),
+  "period": zod.enum(['annual', 'quarterly']),
+  "view": zod.enum(['raw', 'standardized']),
+  "dimensions": zod.boolean(),
+  "income_statement": zod.union([FinancialStatement,zod.null()]),
+  "balance_sheet": zod.union([FinancialStatement,zod.null()]),
+  "cashflow_statement": zod.union([FinancialStatement,zod.null()]),
+  "statement_of_equity": zod.union([FinancialStatement,zod.null()]),
+  "comprehensive_income": zod.union([FinancialStatement,zod.null()]),
+  "cover": zod.union([FinancialStatement,zod.null()])
+});
+
+export type FinancialsResponse = zod.input<typeof FinancialsResponse>;
+export type FinancialsResponseOutput = zod.output<typeof FinancialsResponse>;
+
 export const ValidationError = zod.strictObject({
   "loc": zod.array(zod.union([zod.string(),zod.number()])),
   "msg": zod.string(),
@@ -686,6 +795,42 @@ export const GetCompanySubmissionsCompanyIdSubmissionsGetQueryParams = zod.stric
 })
 
 export const GetCompanySubmissionsCompanyIdSubmissionsGetResponse = SubmissionsPage
+
+
+/**
+ * @summary Get Company Financials
+ */
+export const GetCompanyFinancialsCompanyIdFinancialsGetParams = zod.strictObject({
+  "id": zod.string()
+})
+
+export const getCompanyFinancialsCompanyIdFinancialsGetQueryPeriodDefault = `annual`;
+export const getCompanyFinancialsCompanyIdFinancialsGetQueryViewDefault = `standardized`;
+export const getCompanyFinancialsCompanyIdFinancialsGetQueryDimensionsDefault = false;
+
+export const GetCompanyFinancialsCompanyIdFinancialsGetQueryParams = zod.strictObject({
+  "period": zod.enum(['annual', 'quarterly']).default(getCompanyFinancialsCompanyIdFinancialsGetQueryPeriodDefault),
+  "view": zod.enum(['raw', 'standardized']).default(getCompanyFinancialsCompanyIdFinancialsGetQueryViewDefault),
+  "dimensions": zod.boolean().default(getCompanyFinancialsCompanyIdFinancialsGetQueryDimensionsDefault)
+})
+
+export const GetCompanyFinancialsCompanyIdFinancialsGetResponse = FinancialsResponse
+
+
+/**
+ * @summary Get Company Financial Metrics
+ */
+export const GetCompanyFinancialMetricsCompanyIdFinancialsMetricsGetParams = zod.strictObject({
+  "id": zod.string()
+})
+
+export const getCompanyFinancialMetricsCompanyIdFinancialsMetricsGetQueryPeriodDefault = `annual`;
+
+export const GetCompanyFinancialMetricsCompanyIdFinancialsMetricsGetQueryParams = zod.strictObject({
+  "period": zod.enum(['annual', 'quarterly']).default(getCompanyFinancialMetricsCompanyIdFinancialsMetricsGetQueryPeriodDefault)
+})
+
+export const GetCompanyFinancialMetricsCompanyIdFinancialsMetricsGetResponse = FinancialMetrics
 
 
 /**

@@ -1,0 +1,4642 @@
+{
+  "cik": "0000320193",
+  "company": "Apple Inc.",
+  "form": "10-Q",
+  "accession_number": "0000320193-26-000013",
+  "filing_date": "2026-05-01",
+  "period_of_report": "2026-03-28",
+  "period": "quarterly",
+  "view": "standardized",
+  "dimensions": false,
+  "income_statement": {
+    "periods": [
+      {
+        "key": "duration_2025-12-28_2026-03-28",
+        "label": "Quarterly: December 28, 2025 to March 28, 2026",
+        "period_type": "duration",
+        "period_start": "2025-12-28",
+        "period_end": "2026-03-28"
+      },
+      {
+        "key": "duration_2024-12-29_2025-03-29",
+        "label": "Quarterly: December 29, 2024 to March 29, 2025",
+        "period_type": "duration",
+        "period_start": "2024-12-29",
+        "period_end": "2025-03-29"
+      },
+      {
+        "key": "duration_2025-09-28_2026-03-28",
+        "label": "Semi-Annual: September 28, 2025 to March 28, 2026",
+        "period_type": "duration",
+        "period_start": "2025-09-28",
+        "period_end": "2026-03-28"
+      },
+      {
+        "key": "duration_2024-09-29_2025-03-29",
+        "label": "Semi-Annual: September 29, 2024 to March 29, 2025",
+        "period_type": "duration",
+        "period_start": "2024-09-29",
+        "period_end": "2025-03-29"
+      }
+    ],
+    "records": [
+      {
+        "concept": "us-gaap_RevenueFromContractWithCustomerExcludingAssessedTax",
+        "label": "Net sales",
+        "standard_concept": "Revenue",
+        "level": 4,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": "credit",
+        "weight": 1.0,
+        "preferred_sign": 1.0,
+        "parent_concept": "us-gaap_GrossProfit",
+        "parent_abstract_concept": "us-gaap_StatementLineItems",
+        "unit": "usd",
+        "point_in_time": false,
+        "values": [
+          {
+            "period_key": "duration_2025-12-28_2026-03-28",
+            "value": 111184000000.0
+          },
+          {
+            "period_key": "duration_2024-12-29_2025-03-29",
+            "value": 95359000000.0
+          },
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": 254940000000.0
+          },
+          {
+            "period_key": "duration_2024-09-29_2025-03-29",
+            "value": 219659000000.0
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_CostOfGoodsAndServicesSold",
+        "label": "Cost of sales",
+        "standard_concept": "CostOfGoodsAndServicesSold",
+        "level": 4,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": "debit",
+        "weight": -1.0,
+        "preferred_sign": 1.0,
+        "parent_concept": "us-gaap_GrossProfit",
+        "parent_abstract_concept": "us-gaap_StatementLineItems",
+        "unit": "usd",
+        "point_in_time": false,
+        "values": [
+          {
+            "period_key": "duration_2025-12-28_2026-03-28",
+            "value": 56403000000.0
+          },
+          {
+            "period_key": "duration_2024-12-29_2025-03-29",
+            "value": 50492000000.0
+          },
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": 130928000000.0
+          },
+          {
+            "period_key": "duration_2024-09-29_2025-03-29",
+            "value": 116517000000.0
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_GrossProfit",
+        "label": "Gross margin",
+        "standard_concept": "GrossProfit",
+        "level": 3,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": "credit",
+        "weight": 1.0,
+        "preferred_sign": 1.0,
+        "parent_concept": "us-gaap_OperatingIncomeLoss",
+        "parent_abstract_concept": "us-gaap_StatementLineItems",
+        "unit": "usd",
+        "point_in_time": false,
+        "values": [
+          {
+            "period_key": "duration_2025-12-28_2026-03-28",
+            "value": 54781000000.0
+          },
+          {
+            "period_key": "duration_2024-12-29_2025-03-29",
+            "value": 44867000000.0
+          },
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": 124012000000.0
+          },
+          {
+            "period_key": "duration_2024-09-29_2025-03-29",
+            "value": 103142000000.0
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_OperatingExpensesAbstract",
+        "label": "Operating expenses:",
+        "standard_concept": null,
+        "level": 3,
+        "is_abstract": true,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": null,
+        "preferred_sign": null,
+        "parent_concept": null,
+        "parent_abstract_concept": "us-gaap_StatementLineItems",
+        "unit": null,
+        "point_in_time": null,
+        "values": [
+          {
+            "period_key": "duration_2025-12-28_2026-03-28",
+            "value": null
+          },
+          {
+            "period_key": "duration_2024-12-29_2025-03-29",
+            "value": null
+          },
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": null
+          },
+          {
+            "period_key": "duration_2024-09-29_2025-03-29",
+            "value": null
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_ResearchAndDevelopmentExpense",
+        "label": "Research and development",
+        "standard_concept": "ResearchAndDevelopmentExpenses",
+        "level": 5,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": "debit",
+        "weight": 1.0,
+        "preferred_sign": 1.0,
+        "parent_concept": "us-gaap_OperatingExpenses",
+        "parent_abstract_concept": "us-gaap_OperatingExpensesAbstract",
+        "unit": "usd",
+        "point_in_time": false,
+        "values": [
+          {
+            "period_key": "duration_2025-12-28_2026-03-28",
+            "value": 11419000000.0
+          },
+          {
+            "period_key": "duration_2024-12-29_2025-03-29",
+            "value": 8550000000.0
+          },
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": 22306000000.0
+          },
+          {
+            "period_key": "duration_2024-09-29_2025-03-29",
+            "value": 16818000000.0
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_SellingGeneralAndAdministrativeExpense",
+        "label": "Selling, general and administrative",
+        "standard_concept": "SellingGeneralAndAdminExpenses",
+        "level": 5,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": "debit",
+        "weight": 1.0,
+        "preferred_sign": 1.0,
+        "parent_concept": "us-gaap_OperatingExpenses",
+        "parent_abstract_concept": "us-gaap_OperatingExpensesAbstract",
+        "unit": "usd",
+        "point_in_time": false,
+        "values": [
+          {
+            "period_key": "duration_2025-12-28_2026-03-28",
+            "value": 7477000000.0
+          },
+          {
+            "period_key": "duration_2024-12-29_2025-03-29",
+            "value": 6728000000.0
+          },
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": 14969000000.0
+          },
+          {
+            "period_key": "duration_2024-09-29_2025-03-29",
+            "value": 13903000000.0
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_OperatingExpenses",
+        "label": "Total operating expenses",
+        "standard_concept": "TotalOperatingExpenses",
+        "level": 5,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": -1.0,
+        "preferred_sign": 1.0,
+        "parent_concept": "us-gaap_OperatingIncomeLoss",
+        "parent_abstract_concept": "us-gaap_OperatingExpensesAbstract",
+        "unit": "usd",
+        "point_in_time": false,
+        "values": [
+          {
+            "period_key": "duration_2025-12-28_2026-03-28",
+            "value": 18896000000.0
+          },
+          {
+            "period_key": "duration_2024-12-29_2025-03-29",
+            "value": 15278000000.0
+          },
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": 37275000000.0
+          },
+          {
+            "period_key": "duration_2024-09-29_2025-03-29",
+            "value": 30721000000.0
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_OperatingIncomeLoss",
+        "label": "Operating income",
+        "standard_concept": "OperatingIncomeLoss",
+        "level": 4,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": "credit",
+        "weight": 1.0,
+        "preferred_sign": 1.0,
+        "parent_concept": "us-gaap_IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest",
+        "parent_abstract_concept": "us-gaap_StatementLineItems",
+        "unit": "usd",
+        "point_in_time": false,
+        "values": [
+          {
+            "period_key": "duration_2025-12-28_2026-03-28",
+            "value": 35885000000.0
+          },
+          {
+            "period_key": "duration_2024-12-29_2025-03-29",
+            "value": 29589000000.0
+          },
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": 86737000000.0
+          },
+          {
+            "period_key": "duration_2024-09-29_2025-03-29",
+            "value": 72421000000.0
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_NonoperatingIncomeExpense",
+        "label": "Other income/(expense), net",
+        "standard_concept": "NonoperatingIncomeExpense",
+        "level": 4,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": 1.0,
+        "preferred_sign": 1.0,
+        "parent_concept": "us-gaap_IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest",
+        "parent_abstract_concept": "us-gaap_StatementLineItems",
+        "unit": "usd",
+        "point_in_time": false,
+        "values": [
+          {
+            "period_key": "duration_2025-12-28_2026-03-28",
+            "value": -52000000.0
+          },
+          {
+            "period_key": "duration_2024-12-29_2025-03-29",
+            "value": -279000000.0
+          },
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": 98000000.0
+          },
+          {
+            "period_key": "duration_2024-09-29_2025-03-29",
+            "value": -527000000.0
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest",
+        "label": "Income before provision for income taxes",
+        "standard_concept": "PretaxIncomeLoss",
+        "level": 3,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": "credit",
+        "weight": 1.0,
+        "preferred_sign": 1.0,
+        "parent_concept": "us-gaap_NetIncomeLoss",
+        "parent_abstract_concept": "us-gaap_StatementLineItems",
+        "unit": "usd",
+        "point_in_time": false,
+        "values": [
+          {
+            "period_key": "duration_2025-12-28_2026-03-28",
+            "value": 35833000000.0
+          },
+          {
+            "period_key": "duration_2024-12-29_2025-03-29",
+            "value": 29310000000.0
+          },
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": 86835000000.0
+          },
+          {
+            "period_key": "duration_2024-09-29_2025-03-29",
+            "value": 71894000000.0
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_IncomeTaxExpenseBenefit",
+        "label": "Provision for income taxes",
+        "standard_concept": "IncomeTaxes",
+        "level": 3,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": "debit",
+        "weight": -1.0,
+        "preferred_sign": 1.0,
+        "parent_concept": "us-gaap_NetIncomeLoss",
+        "parent_abstract_concept": "us-gaap_StatementLineItems",
+        "unit": "usd",
+        "point_in_time": false,
+        "values": [
+          {
+            "period_key": "duration_2025-12-28_2026-03-28",
+            "value": 6255000000.0
+          },
+          {
+            "period_key": "duration_2024-12-29_2025-03-29",
+            "value": 4530000000.0
+          },
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": 15160000000.0
+          },
+          {
+            "period_key": "duration_2024-09-29_2025-03-29",
+            "value": 10784000000.0
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_NetIncomeLoss",
+        "label": "Net income",
+        "standard_concept": "NetIncome",
+        "level": 3,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": "credit",
+        "weight": 1.0,
+        "preferred_sign": 1.0,
+        "parent_concept": null,
+        "parent_abstract_concept": "us-gaap_StatementLineItems",
+        "unit": "usd",
+        "point_in_time": false,
+        "values": [
+          {
+            "period_key": "duration_2025-12-28_2026-03-28",
+            "value": 29578000000.0
+          },
+          {
+            "period_key": "duration_2024-12-29_2025-03-29",
+            "value": 24780000000.0
+          },
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": 71675000000.0
+          },
+          {
+            "period_key": "duration_2024-09-29_2025-03-29",
+            "value": 61110000000.0
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_EarningsPerShareAbstract",
+        "label": "Earnings per share:",
+        "standard_concept": null,
+        "level": 3,
+        "is_abstract": true,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": null,
+        "preferred_sign": null,
+        "parent_concept": null,
+        "parent_abstract_concept": "us-gaap_StatementLineItems",
+        "unit": null,
+        "point_in_time": null,
+        "values": [
+          {
+            "period_key": "duration_2025-12-28_2026-03-28",
+            "value": null
+          },
+          {
+            "period_key": "duration_2024-12-29_2025-03-29",
+            "value": null
+          },
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": null
+          },
+          {
+            "period_key": "duration_2024-09-29_2025-03-29",
+            "value": null
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_EarningsPerShareBasic",
+        "label": "Basic (in dollars per share)",
+        "standard_concept": null,
+        "level": 4,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": null,
+        "preferred_sign": 1.0,
+        "parent_concept": null,
+        "parent_abstract_concept": "us-gaap_EarningsPerShareAbstract",
+        "unit": "usdPerShare",
+        "point_in_time": false,
+        "values": [
+          {
+            "period_key": "duration_2025-12-28_2026-03-28",
+            "value": 2.02
+          },
+          {
+            "period_key": "duration_2024-12-29_2025-03-29",
+            "value": 1.65
+          },
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": 4.87
+          },
+          {
+            "period_key": "duration_2024-09-29_2025-03-29",
+            "value": 4.06
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_EarningsPerShareDiluted",
+        "label": "Diluted (in dollars per share)",
+        "standard_concept": null,
+        "level": 4,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": null,
+        "preferred_sign": 1.0,
+        "parent_concept": null,
+        "parent_abstract_concept": "us-gaap_EarningsPerShareAbstract",
+        "unit": "usdPerShare",
+        "point_in_time": false,
+        "values": [
+          {
+            "period_key": "duration_2025-12-28_2026-03-28",
+            "value": 2.01
+          },
+          {
+            "period_key": "duration_2024-12-29_2025-03-29",
+            "value": 1.65
+          },
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": 4.85
+          },
+          {
+            "period_key": "duration_2024-09-29_2025-03-29",
+            "value": 4.05
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_WeightedAverageNumberOfSharesOutstandingAbstract",
+        "label": "Shares used in computing earnings per share:",
+        "standard_concept": null,
+        "level": 3,
+        "is_abstract": true,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": null,
+        "preferred_sign": null,
+        "parent_concept": null,
+        "parent_abstract_concept": "us-gaap_StatementLineItems",
+        "unit": null,
+        "point_in_time": null,
+        "values": [
+          {
+            "period_key": "duration_2025-12-28_2026-03-28",
+            "value": null
+          },
+          {
+            "period_key": "duration_2024-12-29_2025-03-29",
+            "value": null
+          },
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": null
+          },
+          {
+            "period_key": "duration_2024-09-29_2025-03-29",
+            "value": null
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_WeightedAverageNumberOfSharesOutstandingBasic",
+        "label": "Basic (in shares)",
+        "standard_concept": "SharesAverage",
+        "level": 4,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": 1.0,
+        "preferred_sign": 1.0,
+        "parent_concept": "us-gaap_WeightedAverageNumberOfDilutedSharesOutstanding",
+        "parent_abstract_concept": "us-gaap_WeightedAverageNumberOfSharesOutstandingAbstract",
+        "unit": "shares",
+        "point_in_time": false,
+        "values": [
+          {
+            "period_key": "duration_2025-12-28_2026-03-28",
+            "value": 14673278000.0
+          },
+          {
+            "period_key": "duration_2024-12-29_2025-03-29",
+            "value": 14994082000.0
+          },
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": 14710718000.0
+          },
+          {
+            "period_key": "duration_2024-09-29_2025-03-29",
+            "value": 15037903000.0
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_WeightedAverageNumberOfDilutedSharesOutstanding",
+        "label": "Diluted (in shares)",
+        "standard_concept": "SharesFullyDilutedAverage",
+        "level": 4,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": 1.0,
+        "preferred_sign": 1.0,
+        "parent_concept": null,
+        "parent_abstract_concept": "us-gaap_WeightedAverageNumberOfSharesOutstandingAbstract",
+        "unit": "shares",
+        "point_in_time": false,
+        "values": [
+          {
+            "period_key": "duration_2025-12-28_2026-03-28",
+            "value": 14725873000.0
+          },
+          {
+            "period_key": "duration_2024-12-29_2025-03-29",
+            "value": 15056133000.0
+          },
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": 14768115000.0
+          },
+          {
+            "period_key": "duration_2024-09-29_2025-03-29",
+            "value": 15103499000.0
+          }
+        ]
+      }
+    ]
+  },
+  "balance_sheet": {
+    "periods": [
+      {
+        "key": "instant_2026-03-28",
+        "label": "March 28, 2026",
+        "period_type": "instant",
+        "period_start": null,
+        "period_end": "2026-03-28"
+      },
+      {
+        "key": "instant_2025-09-27",
+        "label": "September 27, 2025",
+        "period_type": "instant",
+        "period_start": null,
+        "period_end": "2025-09-27"
+      }
+    ],
+    "records": [
+      {
+        "concept": "us-gaap_AssetsAbstract",
+        "label": "ASSETS:",
+        "standard_concept": null,
+        "level": 1,
+        "is_abstract": true,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": null,
+        "preferred_sign": null,
+        "parent_concept": null,
+        "parent_abstract_concept": "us-gaap_StatementOfFinancialPositionAbstract",
+        "unit": null,
+        "point_in_time": null,
+        "values": [
+          {
+            "period_key": "instant_2026-03-28",
+            "value": null
+          },
+          {
+            "period_key": "instant_2025-09-27",
+            "value": null
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_AssetsCurrentAbstract",
+        "label": "Current assets:",
+        "standard_concept": null,
+        "level": 2,
+        "is_abstract": true,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": null,
+        "preferred_sign": null,
+        "parent_concept": null,
+        "parent_abstract_concept": "us-gaap_AssetsAbstract",
+        "unit": null,
+        "point_in_time": null,
+        "values": [
+          {
+            "period_key": "instant_2026-03-28",
+            "value": null
+          },
+          {
+            "period_key": "instant_2025-09-27",
+            "value": null
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_CashAndCashEquivalentsAtCarryingValue",
+        "label": "Cash and cash equivalents",
+        "standard_concept": "CashAndMarketableSecurities",
+        "level": 4,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": "debit",
+        "weight": 1.0,
+        "preferred_sign": 1.0,
+        "parent_concept": "us-gaap_AssetsCurrent",
+        "parent_abstract_concept": "us-gaap_AssetsCurrentAbstract",
+        "unit": "usd",
+        "point_in_time": true,
+        "values": [
+          {
+            "period_key": "instant_2026-03-28",
+            "value": 45572000000.0
+          },
+          {
+            "period_key": "instant_2025-09-27",
+            "value": 35934000000.0
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_MarketableSecuritiesCurrent",
+        "label": "Marketable securities",
+        "standard_concept": "ShortTermInvestments",
+        "level": 4,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": 1.0,
+        "preferred_sign": 1.0,
+        "parent_concept": "us-gaap_AssetsCurrent",
+        "parent_abstract_concept": "us-gaap_AssetsCurrentAbstract",
+        "unit": "usd",
+        "point_in_time": true,
+        "values": [
+          {
+            "period_key": "instant_2026-03-28",
+            "value": 22935000000.0
+          },
+          {
+            "period_key": "instant_2025-09-27",
+            "value": 18763000000.0
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_AccountsReceivableNetCurrent",
+        "label": "Accounts receivable, net",
+        "standard_concept": "TradeReceivables",
+        "level": 4,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": "debit",
+        "weight": 1.0,
+        "preferred_sign": 1.0,
+        "parent_concept": "us-gaap_AssetsCurrent",
+        "parent_abstract_concept": "us-gaap_AssetsCurrentAbstract",
+        "unit": "usd",
+        "point_in_time": true,
+        "values": [
+          {
+            "period_key": "instant_2026-03-28",
+            "value": 30339000000.0
+          },
+          {
+            "period_key": "instant_2025-09-27",
+            "value": 39777000000.0
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_NontradeReceivablesCurrent",
+        "label": "Vendor non-trade receivables",
+        "standard_concept": "OtherNonOperatingCurrentAssets",
+        "level": 4,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": 1.0,
+        "preferred_sign": 1.0,
+        "parent_concept": "us-gaap_AssetsCurrent",
+        "parent_abstract_concept": "us-gaap_AssetsCurrentAbstract",
+        "unit": "usd",
+        "point_in_time": true,
+        "values": [
+          {
+            "period_key": "instant_2026-03-28",
+            "value": 23172000000.0
+          },
+          {
+            "period_key": "instant_2025-09-27",
+            "value": 33180000000.0
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_InventoryNet",
+        "label": "Inventories",
+        "standard_concept": "Inventories",
+        "level": 4,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": "debit",
+        "weight": 1.0,
+        "preferred_sign": 1.0,
+        "parent_concept": "us-gaap_AssetsCurrent",
+        "parent_abstract_concept": "us-gaap_AssetsCurrentAbstract",
+        "unit": "usd",
+        "point_in_time": true,
+        "values": [
+          {
+            "period_key": "instant_2026-03-28",
+            "value": 6747000000.0
+          },
+          {
+            "period_key": "instant_2025-09-27",
+            "value": 5718000000.0
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_OtherAssetsCurrent",
+        "label": "Other current assets",
+        "standard_concept": "OtherNonOperatingCurrentAssets",
+        "level": 4,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": "debit",
+        "weight": 1.0,
+        "preferred_sign": 1.0,
+        "parent_concept": "us-gaap_AssetsCurrent",
+        "parent_abstract_concept": "us-gaap_AssetsCurrentAbstract",
+        "unit": "usd",
+        "point_in_time": true,
+        "values": [
+          {
+            "period_key": "instant_2026-03-28",
+            "value": 15349000000.0
+          },
+          {
+            "period_key": "instant_2025-09-27",
+            "value": 14585000000.0
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_AssetsCurrent",
+        "label": "Total current assets",
+        "standard_concept": "CurrentAssetsTotal",
+        "level": 3,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": "debit",
+        "weight": 1.0,
+        "preferred_sign": 1.0,
+        "parent_concept": "us-gaap_Assets",
+        "parent_abstract_concept": "us-gaap_AssetsCurrentAbstract",
+        "unit": "usd",
+        "point_in_time": true,
+        "values": [
+          {
+            "period_key": "instant_2026-03-28",
+            "value": 144114000000.0
+          },
+          {
+            "period_key": "instant_2025-09-27",
+            "value": 147957000000.0
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_AssetsNoncurrentAbstract",
+        "label": "Non-current assets:",
+        "standard_concept": null,
+        "level": 2,
+        "is_abstract": true,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": null,
+        "preferred_sign": null,
+        "parent_concept": null,
+        "parent_abstract_concept": "us-gaap_AssetsAbstract",
+        "unit": null,
+        "point_in_time": null,
+        "values": [
+          {
+            "period_key": "instant_2026-03-28",
+            "value": null
+          },
+          {
+            "period_key": "instant_2025-09-27",
+            "value": null
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_MarketableSecuritiesNoncurrent",
+        "label": "Marketable securities",
+        "standard_concept": "OtherNonOperatingNonCurrentAssets",
+        "level": 4,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": 1.0,
+        "preferred_sign": 1.0,
+        "parent_concept": "us-gaap_AssetsNoncurrent",
+        "parent_abstract_concept": "us-gaap_AssetsNoncurrentAbstract",
+        "unit": "usd",
+        "point_in_time": true,
+        "values": [
+          {
+            "period_key": "instant_2026-03-28",
+            "value": 78088000000.0
+          },
+          {
+            "period_key": "instant_2025-09-27",
+            "value": 77723000000.0
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_PropertyPlantAndEquipmentNet",
+        "label": "Property, plant and equipment, net",
+        "standard_concept": "PlantPropertyEquipmentNet",
+        "level": 4,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": "debit",
+        "weight": 1.0,
+        "preferred_sign": 1.0,
+        "parent_concept": "us-gaap_AssetsNoncurrent",
+        "parent_abstract_concept": "us-gaap_AssetsNoncurrentAbstract",
+        "unit": "usd",
+        "point_in_time": true,
+        "values": [
+          {
+            "period_key": "instant_2026-03-28",
+            "value": 50116000000.0
+          },
+          {
+            "period_key": "instant_2025-09-27",
+            "value": 49834000000.0
+          }
+        ]
+      },
+      {
+        "concept": "aapl_IntangibleAssetsNetExcludingGoodwillNoncurrent",
+        "label": "Intangible assets, net",
+        "standard_concept": null,
+        "level": 4,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": "debit",
+        "weight": 1.0,
+        "preferred_sign": 1.0,
+        "parent_concept": "us-gaap_AssetsNoncurrent",
+        "parent_abstract_concept": "us-gaap_AssetsNoncurrentAbstract",
+        "unit": "usd",
+        "point_in_time": true,
+        "values": [
+          {
+            "period_key": "instant_2026-03-28",
+            "value": 21334000000.0
+          },
+          {
+            "period_key": "instant_2025-09-27",
+            "value": 11093000000.0
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_OtherAssetsNoncurrent",
+        "label": "Other non-current assets",
+        "standard_concept": "OtherNonOperatingNonCurrentAssets",
+        "level": 4,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": "debit",
+        "weight": 1.0,
+        "preferred_sign": 1.0,
+        "parent_concept": "us-gaap_AssetsNoncurrent",
+        "parent_abstract_concept": "us-gaap_AssetsNoncurrentAbstract",
+        "unit": "usd",
+        "point_in_time": true,
+        "values": [
+          {
+            "period_key": "instant_2026-03-28",
+            "value": 77430000000.0
+          },
+          {
+            "period_key": "instant_2025-09-27",
+            "value": 72634000000.0
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_AssetsNoncurrent",
+        "label": "Total non-current assets",
+        "standard_concept": "NonCurrentAssetsTotal",
+        "level": 3,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": "debit",
+        "weight": 1.0,
+        "preferred_sign": 1.0,
+        "parent_concept": "us-gaap_Assets",
+        "parent_abstract_concept": "us-gaap_AssetsNoncurrentAbstract",
+        "unit": "usd",
+        "point_in_time": true,
+        "values": [
+          {
+            "period_key": "instant_2026-03-28",
+            "value": 226968000000.0
+          },
+          {
+            "period_key": "instant_2025-09-27",
+            "value": 211284000000.0
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_Assets",
+        "label": "Total assets",
+        "standard_concept": "Assets",
+        "level": 2,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": "debit",
+        "weight": 1.0,
+        "preferred_sign": 1.0,
+        "parent_concept": null,
+        "parent_abstract_concept": "us-gaap_AssetsAbstract",
+        "unit": "usd",
+        "point_in_time": true,
+        "values": [
+          {
+            "period_key": "instant_2026-03-28",
+            "value": 371082000000.0
+          },
+          {
+            "period_key": "instant_2025-09-27",
+            "value": 359241000000.0
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_LiabilitiesAndStockholdersEquityAbstract",
+        "label": "LIABILITIES AND SHAREHOLDERS’ EQUITY:",
+        "standard_concept": null,
+        "level": 1,
+        "is_abstract": true,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": null,
+        "preferred_sign": null,
+        "parent_concept": null,
+        "parent_abstract_concept": "us-gaap_StatementOfFinancialPositionAbstract",
+        "unit": null,
+        "point_in_time": null,
+        "values": [
+          {
+            "period_key": "instant_2026-03-28",
+            "value": null
+          },
+          {
+            "period_key": "instant_2025-09-27",
+            "value": null
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_LiabilitiesCurrentAbstract",
+        "label": "Current liabilities:",
+        "standard_concept": null,
+        "level": 2,
+        "is_abstract": true,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": null,
+        "preferred_sign": null,
+        "parent_concept": null,
+        "parent_abstract_concept": "us-gaap_LiabilitiesAndStockholdersEquityAbstract",
+        "unit": null,
+        "point_in_time": null,
+        "values": [
+          {
+            "period_key": "instant_2026-03-28",
+            "value": null
+          },
+          {
+            "period_key": "instant_2025-09-27",
+            "value": null
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_AccountsPayableCurrent",
+        "label": "Accounts payable",
+        "standard_concept": "TradePayables",
+        "level": 4,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": "credit",
+        "weight": 1.0,
+        "preferred_sign": 1.0,
+        "parent_concept": "us-gaap_LiabilitiesCurrent",
+        "parent_abstract_concept": "us-gaap_LiabilitiesCurrentAbstract",
+        "unit": "usd",
+        "point_in_time": true,
+        "values": [
+          {
+            "period_key": "instant_2026-03-28",
+            "value": 57349000000.0
+          },
+          {
+            "period_key": "instant_2025-09-27",
+            "value": 69860000000.0
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_OtherLiabilitiesCurrent",
+        "label": "Other current liabilities",
+        "standard_concept": "OtherNonOperatingCurrentLiabilities",
+        "level": 4,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": "credit",
+        "weight": 1.0,
+        "preferred_sign": 1.0,
+        "parent_concept": "us-gaap_LiabilitiesCurrent",
+        "parent_abstract_concept": "us-gaap_LiabilitiesCurrentAbstract",
+        "unit": "usd",
+        "point_in_time": true,
+        "values": [
+          {
+            "period_key": "instant_2026-03-28",
+            "value": 57654000000.0
+          },
+          {
+            "period_key": "instant_2025-09-27",
+            "value": 66387000000.0
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_ContractWithCustomerLiabilityCurrent",
+        "label": "Deferred revenue",
+        "standard_concept": "OtherOperatingCurrentLiabilities",
+        "level": 4,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": "credit",
+        "weight": 1.0,
+        "preferred_sign": 1.0,
+        "parent_concept": "us-gaap_LiabilitiesCurrent",
+        "parent_abstract_concept": "us-gaap_LiabilitiesCurrentAbstract",
+        "unit": "usd",
+        "point_in_time": true,
+        "values": [
+          {
+            "period_key": "instant_2026-03-28",
+            "value": 9331000000.0
+          },
+          {
+            "period_key": "instant_2025-09-27",
+            "value": 9055000000.0
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_CommercialPaper",
+        "label": "Commercial paper",
+        "standard_concept": "ShortTermDebt",
+        "level": 4,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": "credit",
+        "weight": 1.0,
+        "preferred_sign": 1.0,
+        "parent_concept": "us-gaap_LiabilitiesCurrent",
+        "parent_abstract_concept": "us-gaap_LiabilitiesCurrentAbstract",
+        "unit": "usd",
+        "point_in_time": true,
+        "values": [
+          {
+            "period_key": "instant_2026-03-28",
+            "value": 1997000000.0
+          },
+          {
+            "period_key": "instant_2025-09-27",
+            "value": 7979000000.0
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_LongTermDebtCurrent",
+        "label": "Term debt",
+        "standard_concept": "CurrentPortionOfLongTermDebt",
+        "level": 4,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": "credit",
+        "weight": 1.0,
+        "preferred_sign": 1.0,
+        "parent_concept": "us-gaap_LiabilitiesCurrent",
+        "parent_abstract_concept": "us-gaap_LiabilitiesCurrentAbstract",
+        "unit": "usd",
+        "point_in_time": true,
+        "values": [
+          {
+            "period_key": "instant_2026-03-28",
+            "value": 8310000000.0
+          },
+          {
+            "period_key": "instant_2025-09-27",
+            "value": 12350000000.0
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_LiabilitiesCurrent",
+        "label": "Total current liabilities",
+        "standard_concept": "CurrentLiabilitiesTotal",
+        "level": 3,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": "credit",
+        "weight": 1.0,
+        "preferred_sign": 1.0,
+        "parent_concept": "us-gaap_Liabilities",
+        "parent_abstract_concept": "us-gaap_LiabilitiesCurrentAbstract",
+        "unit": "usd",
+        "point_in_time": true,
+        "values": [
+          {
+            "period_key": "instant_2026-03-28",
+            "value": 134641000000.0
+          },
+          {
+            "period_key": "instant_2025-09-27",
+            "value": 165631000000.0
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_LiabilitiesNoncurrentAbstract",
+        "label": "Non-current liabilities:",
+        "standard_concept": null,
+        "level": 2,
+        "is_abstract": true,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": null,
+        "preferred_sign": null,
+        "parent_concept": null,
+        "parent_abstract_concept": "us-gaap_LiabilitiesAndStockholdersEquityAbstract",
+        "unit": null,
+        "point_in_time": null,
+        "values": [
+          {
+            "period_key": "instant_2026-03-28",
+            "value": null
+          },
+          {
+            "period_key": "instant_2025-09-27",
+            "value": null
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_LongTermDebtNoncurrent",
+        "label": "Term debt",
+        "standard_concept": "LongTermDebt",
+        "level": 4,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": "credit",
+        "weight": 1.0,
+        "preferred_sign": 1.0,
+        "parent_concept": "us-gaap_LiabilitiesNoncurrent",
+        "parent_abstract_concept": "us-gaap_LiabilitiesNoncurrentAbstract",
+        "unit": "usd",
+        "point_in_time": true,
+        "values": [
+          {
+            "period_key": "instant_2026-03-28",
+            "value": 74404000000.0
+          },
+          {
+            "period_key": "instant_2025-09-27",
+            "value": 78328000000.0
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_OtherLiabilitiesNoncurrent",
+        "label": "Other non-current liabilities",
+        "standard_concept": "OtherNonOperatingNonCurrentLiabilities",
+        "level": 4,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": "credit",
+        "weight": 1.0,
+        "preferred_sign": 1.0,
+        "parent_concept": "us-gaap_LiabilitiesNoncurrent",
+        "parent_abstract_concept": "us-gaap_LiabilitiesNoncurrentAbstract",
+        "unit": "usd",
+        "point_in_time": true,
+        "values": [
+          {
+            "period_key": "instant_2026-03-28",
+            "value": 55546000000.0
+          },
+          {
+            "period_key": "instant_2025-09-27",
+            "value": 41549000000.0
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_LiabilitiesNoncurrent",
+        "label": "Total non-current liabilities",
+        "standard_concept": "NonCurrentLiabilitiesTotal",
+        "level": 3,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": "credit",
+        "weight": 1.0,
+        "preferred_sign": 1.0,
+        "parent_concept": "us-gaap_Liabilities",
+        "parent_abstract_concept": "us-gaap_LiabilitiesNoncurrentAbstract",
+        "unit": "usd",
+        "point_in_time": true,
+        "values": [
+          {
+            "period_key": "instant_2026-03-28",
+            "value": 129950000000.0
+          },
+          {
+            "period_key": "instant_2025-09-27",
+            "value": 119877000000.0
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_Liabilities",
+        "label": "Total liabilities",
+        "standard_concept": "Liabilities",
+        "level": 3,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": "credit",
+        "weight": 1.0,
+        "preferred_sign": 1.0,
+        "parent_concept": "us-gaap_LiabilitiesAndStockholdersEquity",
+        "parent_abstract_concept": "us-gaap_LiabilitiesAndStockholdersEquityAbstract",
+        "unit": "usd",
+        "point_in_time": true,
+        "values": [
+          {
+            "period_key": "instant_2026-03-28",
+            "value": 264591000000.0
+          },
+          {
+            "period_key": "instant_2025-09-27",
+            "value": 285508000000.0
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_CommitmentsAndContingencies",
+        "label": "Commitments and contingencies",
+        "standard_concept": null,
+        "level": 3,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": 1.0,
+        "preferred_sign": 1.0,
+        "parent_concept": "us-gaap_LiabilitiesAndStockholdersEquity",
+        "parent_abstract_concept": "us-gaap_LiabilitiesAndStockholdersEquityAbstract",
+        "unit": "usd",
+        "point_in_time": true,
+        "values": [
+          {
+            "period_key": "instant_2026-03-28",
+            "value": ""
+          },
+          {
+            "period_key": "instant_2025-09-27",
+            "value": ""
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_StockholdersEquityAbstract",
+        "label": "Shareholders’ equity:",
+        "standard_concept": null,
+        "level": 2,
+        "is_abstract": true,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": null,
+        "preferred_sign": null,
+        "parent_concept": null,
+        "parent_abstract_concept": "us-gaap_LiabilitiesAndStockholdersEquityAbstract",
+        "unit": null,
+        "point_in_time": null,
+        "values": [
+          {
+            "period_key": "instant_2026-03-28",
+            "value": null
+          },
+          {
+            "period_key": "instant_2025-09-27",
+            "value": null
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_CommonStocksIncludingAdditionalPaidInCapital",
+        "label": "Common stock and additional paid-in capital, $0.00001 par value: 50,400,000 shares authorized; 14,667,688 and 14,773,260 shares issued and outstanding, respectively",
+        "standard_concept": "CommonEquity",
+        "level": 3,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": 1.0,
+        "preferred_sign": 1.0,
+        "parent_concept": "us-gaap_StockholdersEquity",
+        "parent_abstract_concept": "us-gaap_StockholdersEquityAbstract",
+        "unit": "usd",
+        "point_in_time": true,
+        "values": [
+          {
+            "period_key": "instant_2026-03-28",
+            "value": 99507000000.0
+          },
+          {
+            "period_key": "instant_2025-09-27",
+            "value": 93568000000.0
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_RetainedEarningsAccumulatedDeficit",
+        "label": "Retained earnings/(Accumulated deficit)",
+        "standard_concept": "RetainedEarnings",
+        "level": 3,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": "credit",
+        "weight": 1.0,
+        "preferred_sign": 1.0,
+        "parent_concept": "us-gaap_StockholdersEquity",
+        "parent_abstract_concept": "us-gaap_StockholdersEquityAbstract",
+        "unit": "usd",
+        "point_in_time": true,
+        "values": [
+          {
+            "period_key": "instant_2026-03-28",
+            "value": 12359000000.0
+          },
+          {
+            "period_key": "instant_2025-09-27",
+            "value": -14264000000.0
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_AccumulatedOtherComprehensiveIncomeLossNetOfTax",
+        "label": "Accumulated other comprehensive loss",
+        "standard_concept": "AccumulatedOtherComprehensiveIncome",
+        "level": 3,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": "credit",
+        "weight": 1.0,
+        "preferred_sign": 1.0,
+        "parent_concept": "us-gaap_StockholdersEquity",
+        "parent_abstract_concept": "us-gaap_StockholdersEquityAbstract",
+        "unit": "usd",
+        "point_in_time": true,
+        "values": [
+          {
+            "period_key": "instant_2026-03-28",
+            "value": -5375000000.0
+          },
+          {
+            "period_key": "instant_2025-09-27",
+            "value": -5571000000.0
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_StockholdersEquity",
+        "label": "Total shareholders’ equity",
+        "standard_concept": "AllEquityBalance",
+        "level": 3,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": "credit",
+        "weight": 1.0,
+        "preferred_sign": 1.0,
+        "parent_concept": "us-gaap_LiabilitiesAndStockholdersEquity",
+        "parent_abstract_concept": "us-gaap_StockholdersEquityAbstract",
+        "unit": "usd",
+        "point_in_time": true,
+        "values": [
+          {
+            "period_key": "instant_2026-03-28",
+            "value": 106491000000.0
+          },
+          {
+            "period_key": "instant_2025-09-27",
+            "value": 73733000000.0
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_LiabilitiesAndStockholdersEquity",
+        "label": "Total liabilities and shareholders’ equity",
+        "standard_concept": "LiabilitiesAndEquity",
+        "level": 2,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": "credit",
+        "weight": 1.0,
+        "preferred_sign": 1.0,
+        "parent_concept": null,
+        "parent_abstract_concept": "us-gaap_LiabilitiesAndStockholdersEquityAbstract",
+        "unit": "usd",
+        "point_in_time": true,
+        "values": [
+          {
+            "period_key": "instant_2026-03-28",
+            "value": 371082000000.0
+          },
+          {
+            "period_key": "instant_2025-09-27",
+            "value": 359241000000.0
+          }
+        ]
+      }
+    ]
+  },
+  "cashflow_statement": {
+    "periods": [
+      {
+        "key": "duration_2025-09-28_2026-03-28",
+        "label": "Semi-Annual: September 28, 2025 to March 28, 2026",
+        "period_type": "duration",
+        "period_start": "2025-09-28",
+        "period_end": "2026-03-28"
+      },
+      {
+        "key": "duration_2024-09-29_2025-03-29",
+        "label": "Semi-Annual: September 29, 2024 to March 29, 2025",
+        "period_type": "duration",
+        "period_start": "2024-09-29",
+        "period_end": "2025-03-29"
+      }
+    ],
+    "records": [
+      {
+        "concept": "us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents",
+        "label": "Cash, cash equivalents, and restricted cash and cash equivalents, beginning balances",
+        "standard_concept": "CashAndCashEquivalents",
+        "level": 1,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": null,
+        "preferred_sign": 1.0,
+        "parent_concept": null,
+        "parent_abstract_concept": "us-gaap_StatementOfCashFlowsAbstract",
+        "unit": null,
+        "point_in_time": null,
+        "values": [
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": 35934000000.0
+          },
+          {
+            "period_key": "duration_2024-09-29_2025-03-29",
+            "value": 29943000000.0
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_NetCashProvidedByUsedInOperatingActivitiesContinuingOperationsAbstract",
+        "label": "Operating activities:",
+        "standard_concept": null,
+        "level": 1,
+        "is_abstract": true,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": null,
+        "preferred_sign": null,
+        "parent_concept": null,
+        "parent_abstract_concept": "us-gaap_StatementOfCashFlowsAbstract",
+        "unit": null,
+        "point_in_time": null,
+        "values": [
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": null
+          },
+          {
+            "period_key": "duration_2024-09-29_2025-03-29",
+            "value": null
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_NetIncomeLoss",
+        "label": "Net income",
+        "standard_concept": "NetIncome",
+        "level": 3,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": "credit",
+        "weight": 1.0,
+        "preferred_sign": 1.0,
+        "parent_concept": "us-gaap_NetCashProvidedByUsedInOperatingActivities",
+        "parent_abstract_concept": "us-gaap_NetCashProvidedByUsedInOperatingActivitiesContinuingOperationsAbstract",
+        "unit": "usd",
+        "point_in_time": false,
+        "values": [
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": 71675000000.0
+          },
+          {
+            "period_key": "duration_2024-09-29_2025-03-29",
+            "value": 61110000000.0
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_AdjustmentsToReconcileNetIncomeLossToCashProvidedByUsedInOperatingActivitiesAbstract",
+        "label": "Adjustments to reconcile net income to cash generated by operating activities:",
+        "standard_concept": null,
+        "level": 2,
+        "is_abstract": true,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": null,
+        "preferred_sign": null,
+        "parent_concept": null,
+        "parent_abstract_concept": "us-gaap_NetCashProvidedByUsedInOperatingActivitiesContinuingOperationsAbstract",
+        "unit": null,
+        "point_in_time": null,
+        "values": [
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": null
+          },
+          {
+            "period_key": "duration_2024-09-29_2025-03-29",
+            "value": null
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_DepreciationDepletionAndAmortization",
+        "label": "Depreciation and amortization",
+        "standard_concept": "DepreciationExpense",
+        "level": 3,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": "debit",
+        "weight": 1.0,
+        "preferred_sign": 1.0,
+        "parent_concept": "us-gaap_NetCashProvidedByUsedInOperatingActivities",
+        "parent_abstract_concept": "us-gaap_AdjustmentsToReconcileNetIncomeLossToCashProvidedByUsedInOperatingActivitiesAbstract",
+        "unit": "usd",
+        "point_in_time": false,
+        "values": [
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": 6653000000.0
+          },
+          {
+            "period_key": "duration_2024-09-29_2025-03-29",
+            "value": 5741000000.0
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_ShareBasedCompensation",
+        "label": "Share-based compensation expense",
+        "standard_concept": "StockBasedCompensationExpense",
+        "level": 3,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": "debit",
+        "weight": 1.0,
+        "preferred_sign": 1.0,
+        "parent_concept": "us-gaap_NetCashProvidedByUsedInOperatingActivities",
+        "parent_abstract_concept": "us-gaap_AdjustmentsToReconcileNetIncomeLossToCashProvidedByUsedInOperatingActivitiesAbstract",
+        "unit": "usd",
+        "point_in_time": false,
+        "values": [
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": 7122000000.0
+          },
+          {
+            "period_key": "duration_2024-09-29_2025-03-29",
+            "value": 6512000000.0
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_OtherNoncashIncomeExpense",
+        "label": "Other",
+        "standard_concept": "OtherNonCashItemsCF",
+        "level": 3,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": -1.0,
+        "preferred_sign": -1.0,
+        "parent_concept": "us-gaap_NetCashProvidedByUsedInOperatingActivities",
+        "parent_abstract_concept": "us-gaap_AdjustmentsToReconcileNetIncomeLossToCashProvidedByUsedInOperatingActivitiesAbstract",
+        "unit": "usd",
+        "point_in_time": false,
+        "values": [
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": 1717000000.0
+          },
+          {
+            "period_key": "duration_2024-09-29_2025-03-29",
+            "value": 2217000000.0
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_IncreaseDecreaseInOperatingCapitalAbstract",
+        "label": "Changes in operating assets and liabilities:",
+        "standard_concept": null,
+        "level": 3,
+        "is_abstract": true,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": null,
+        "preferred_sign": null,
+        "parent_concept": null,
+        "parent_abstract_concept": "us-gaap_AdjustmentsToReconcileNetIncomeLossToCashProvidedByUsedInOperatingActivitiesAbstract",
+        "unit": null,
+        "point_in_time": null,
+        "values": [
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": null
+          },
+          {
+            "period_key": "duration_2024-09-29_2025-03-29",
+            "value": null
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_IncreaseDecreaseInAccountsReceivable",
+        "label": "Accounts receivable, net",
+        "standard_concept": null,
+        "level": 4,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": -1.0,
+        "preferred_sign": -1.0,
+        "parent_concept": "us-gaap_NetCashProvidedByUsedInOperatingActivities",
+        "parent_abstract_concept": "us-gaap_IncreaseDecreaseInOperatingCapitalAbstract",
+        "unit": "usd",
+        "point_in_time": false,
+        "values": [
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": -9295000000.0
+          },
+          {
+            "period_key": "duration_2024-09-29_2025-03-29",
+            "value": -7266000000.0
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_IncreaseDecreaseInOtherReceivables",
+        "label": "Vendor non-trade receivables",
+        "standard_concept": "ChangeInReceivables",
+        "level": 4,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": -1.0,
+        "preferred_sign": -1.0,
+        "parent_concept": "us-gaap_NetCashProvidedByUsedInOperatingActivities",
+        "parent_abstract_concept": "us-gaap_IncreaseDecreaseInOperatingCapitalAbstract",
+        "unit": "usd",
+        "point_in_time": false,
+        "values": [
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": -10008000000.0
+          },
+          {
+            "period_key": "duration_2024-09-29_2025-03-29",
+            "value": -9171000000.0
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_IncreaseDecreaseInInventories",
+        "label": "Inventories",
+        "standard_concept": null,
+        "level": 4,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": -1.0,
+        "preferred_sign": -1.0,
+        "parent_concept": "us-gaap_NetCashProvidedByUsedInOperatingActivities",
+        "parent_abstract_concept": "us-gaap_IncreaseDecreaseInOperatingCapitalAbstract",
+        "unit": "usd",
+        "point_in_time": false,
+        "values": [
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": 1084000000.0
+          },
+          {
+            "period_key": "duration_2024-09-29_2025-03-29",
+            "value": -858000000.0
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_IncreaseDecreaseInOtherOperatingAssets",
+        "label": "Other current and non-current assets",
+        "standard_concept": null,
+        "level": 4,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": -1.0,
+        "preferred_sign": -1.0,
+        "parent_concept": "us-gaap_NetCashProvidedByUsedInOperatingActivities",
+        "parent_abstract_concept": "us-gaap_IncreaseDecreaseInOperatingCapitalAbstract",
+        "unit": "usd",
+        "point_in_time": false,
+        "values": [
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": 14329000000.0
+          },
+          {
+            "period_key": "duration_2024-09-29_2025-03-29",
+            "value": 4371000000.0
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_IncreaseDecreaseInAccountsPayable",
+        "label": "Accounts payable",
+        "standard_concept": null,
+        "level": 4,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": 1.0,
+        "preferred_sign": 1.0,
+        "parent_concept": "us-gaap_NetCashProvidedByUsedInOperatingActivities",
+        "parent_abstract_concept": "us-gaap_IncreaseDecreaseInOperatingCapitalAbstract",
+        "unit": "usd",
+        "point_in_time": false,
+        "values": [
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": -12297000000.0
+          },
+          {
+            "period_key": "duration_2024-09-29_2025-03-29",
+            "value": -14604000000.0
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_IncreaseDecreaseInOtherOperatingLiabilities",
+        "label": "Other current and non-current liabilities",
+        "standard_concept": "ChangeInOtherWorkingCapital",
+        "level": 4,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": 1.0,
+        "preferred_sign": 1.0,
+        "parent_concept": "us-gaap_NetCashProvidedByUsedInOperatingActivities",
+        "parent_abstract_concept": "us-gaap_IncreaseDecreaseInOperatingCapitalAbstract",
+        "unit": "usd",
+        "point_in_time": false,
+        "values": [
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": 7301000000.0
+          },
+          {
+            "period_key": "duration_2024-09-29_2025-03-29",
+            "value": -15579000000.0
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_NetCashProvidedByUsedInOperatingActivities",
+        "label": "Cash generated by operating activities",
+        "standard_concept": "NetCashFromOperatingActivities",
+        "level": 2,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": "debit",
+        "weight": 1.0,
+        "preferred_sign": 1.0,
+        "parent_concept": "us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect",
+        "parent_abstract_concept": "us-gaap_NetCashProvidedByUsedInOperatingActivitiesContinuingOperationsAbstract",
+        "unit": "usd",
+        "point_in_time": false,
+        "values": [
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": 82627000000.0
+          },
+          {
+            "period_key": "duration_2024-09-29_2025-03-29",
+            "value": 53887000000.0
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_NetCashProvidedByUsedInInvestingActivitiesContinuingOperationsAbstract",
+        "label": "Investing activities:",
+        "standard_concept": null,
+        "level": 1,
+        "is_abstract": true,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": null,
+        "preferred_sign": null,
+        "parent_concept": null,
+        "parent_abstract_concept": "us-gaap_StatementOfCashFlowsAbstract",
+        "unit": null,
+        "point_in_time": null,
+        "values": [
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": null
+          },
+          {
+            "period_key": "duration_2024-09-29_2025-03-29",
+            "value": null
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_PaymentsToAcquireAvailableForSaleSecuritiesDebt",
+        "label": "Purchases of marketable securities",
+        "standard_concept": null,
+        "level": 3,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": -1.0,
+        "preferred_sign": -1.0,
+        "parent_concept": "us-gaap_NetCashProvidedByUsedInInvestingActivities",
+        "parent_abstract_concept": "us-gaap_NetCashProvidedByUsedInInvestingActivitiesContinuingOperationsAbstract",
+        "unit": "usd",
+        "point_in_time": false,
+        "values": [
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": 32432000000.0
+          },
+          {
+            "period_key": "duration_2024-09-29_2025-03-29",
+            "value": 12442000000.0
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_ProceedsFromMaturitiesPrepaymentsAndCallsOfAvailableForSaleSecurities",
+        "label": "Proceeds from maturities of marketable securities",
+        "standard_concept": "InvestmentProceeds",
+        "level": 3,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": 1.0,
+        "preferred_sign": 1.0,
+        "parent_concept": "us-gaap_NetCashProvidedByUsedInInvestingActivities",
+        "parent_abstract_concept": "us-gaap_NetCashProvidedByUsedInInvestingActivitiesContinuingOperationsAbstract",
+        "unit": "usd",
+        "point_in_time": false,
+        "values": [
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": 18691000000.0
+          },
+          {
+            "period_key": "duration_2024-09-29_2025-03-29",
+            "value": 26587000000.0
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_ProceedsFromSaleOfAvailableForSaleSecuritiesDebt",
+        "label": "Proceeds from sales of marketable securities",
+        "standard_concept": "InvestmentProceeds",
+        "level": 3,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": "debit",
+        "weight": 1.0,
+        "preferred_sign": 1.0,
+        "parent_concept": "us-gaap_NetCashProvidedByUsedInInvestingActivities",
+        "parent_abstract_concept": "us-gaap_NetCashProvidedByUsedInInvestingActivitiesContinuingOperationsAbstract",
+        "unit": "usd",
+        "point_in_time": false,
+        "values": [
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": 8615000000.0
+          },
+          {
+            "period_key": "duration_2024-09-29_2025-03-29",
+            "value": 5210000000.0
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_PaymentsToAcquirePropertyPlantAndEquipment",
+        "label": "Payments for acquisition of property, plant and equipment",
+        "standard_concept": "CapitalExpenses",
+        "level": 3,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": "credit",
+        "weight": -1.0,
+        "preferred_sign": -1.0,
+        "parent_concept": "us-gaap_NetCashProvidedByUsedInInvestingActivities",
+        "parent_abstract_concept": "us-gaap_NetCashProvidedByUsedInInvestingActivitiesContinuingOperationsAbstract",
+        "unit": "usd",
+        "point_in_time": false,
+        "values": [
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": 4344000000.0
+          },
+          {
+            "period_key": "duration_2024-09-29_2025-03-29",
+            "value": 6011000000.0
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_PaymentsForProceedsFromOtherInvestingActivities",
+        "label": "Other",
+        "standard_concept": "NetCashFromInvestingActivities",
+        "level": 3,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": -1.0,
+        "preferred_sign": -1.0,
+        "parent_concept": "us-gaap_NetCashProvidedByUsedInInvestingActivities",
+        "parent_abstract_concept": "us-gaap_NetCashProvidedByUsedInInvestingActivitiesContinuingOperationsAbstract",
+        "unit": "usd",
+        "point_in_time": false,
+        "values": [
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": 1584000000.0
+          },
+          {
+            "period_key": "duration_2024-09-29_2025-03-29",
+            "value": 635000000.0
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_NetCashProvidedByUsedInInvestingActivities",
+        "label": "Cash generated by/(used in) investing activities",
+        "standard_concept": "NetCashFromInvestingActivities",
+        "level": 2,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": "debit",
+        "weight": 1.0,
+        "preferred_sign": 1.0,
+        "parent_concept": "us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect",
+        "parent_abstract_concept": "us-gaap_NetCashProvidedByUsedInInvestingActivitiesContinuingOperationsAbstract",
+        "unit": "usd",
+        "point_in_time": false,
+        "values": [
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": -11054000000.0
+          },
+          {
+            "period_key": "duration_2024-09-29_2025-03-29",
+            "value": 12709000000.0
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_NetCashProvidedByUsedInFinancingActivitiesContinuingOperationsAbstract",
+        "label": "Financing activities:",
+        "standard_concept": null,
+        "level": 1,
+        "is_abstract": true,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": null,
+        "preferred_sign": null,
+        "parent_concept": null,
+        "parent_abstract_concept": "us-gaap_StatementOfCashFlowsAbstract",
+        "unit": null,
+        "point_in_time": null,
+        "values": [
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": null
+          },
+          {
+            "period_key": "duration_2024-09-29_2025-03-29",
+            "value": null
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_PaymentsRelatedToTaxWithholdingForShareBasedCompensation",
+        "label": "Payments for taxes related to net share settlement of equity awards",
+        "standard_concept": null,
+        "level": 3,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": -1.0,
+        "preferred_sign": -1.0,
+        "parent_concept": "us-gaap_NetCashProvidedByUsedInFinancingActivities",
+        "parent_abstract_concept": "us-gaap_NetCashProvidedByUsedInFinancingActivitiesContinuingOperationsAbstract",
+        "unit": "usd",
+        "point_in_time": false,
+        "values": [
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": 3252000000.0
+          },
+          {
+            "period_key": "duration_2024-09-29_2025-03-29",
+            "value": 3205000000.0
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_PaymentsOfDividends",
+        "label": "Payments for dividends and dividend equivalents",
+        "standard_concept": "DistributionsToMinorityInterests",
+        "level": 3,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": "credit",
+        "weight": -1.0,
+        "preferred_sign": -1.0,
+        "parent_concept": "us-gaap_NetCashProvidedByUsedInFinancingActivities",
+        "parent_abstract_concept": "us-gaap_NetCashProvidedByUsedInFinancingActivitiesContinuingOperationsAbstract",
+        "unit": "usd",
+        "point_in_time": false,
+        "values": [
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": 7743000000.0
+          },
+          {
+            "period_key": "duration_2024-09-29_2025-03-29",
+            "value": 7614000000.0
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_PaymentsForRepurchaseOfCommonStock",
+        "label": "Repurchases of common stock",
+        "standard_concept": "EquityExpenseIncome(BuybackIssued)",
+        "level": 3,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": "credit",
+        "weight": -1.0,
+        "preferred_sign": -1.0,
+        "parent_concept": "us-gaap_NetCashProvidedByUsedInFinancingActivities",
+        "parent_abstract_concept": "us-gaap_NetCashProvidedByUsedInFinancingActivitiesContinuingOperationsAbstract",
+        "unit": "usd",
+        "point_in_time": false,
+        "values": [
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": 36989000000.0
+          },
+          {
+            "period_key": "duration_2024-09-29_2025-03-29",
+            "value": 49504000000.0
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_RepaymentsOfLongTermDebt",
+        "label": "Repayments of term debt",
+        "standard_concept": "DebtRepayments",
+        "level": 3,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": "credit",
+        "weight": -1.0,
+        "preferred_sign": -1.0,
+        "parent_concept": "us-gaap_NetCashProvidedByUsedInFinancingActivities",
+        "parent_abstract_concept": "us-gaap_NetCashProvidedByUsedInFinancingActivitiesContinuingOperationsAbstract",
+        "unit": "usd",
+        "point_in_time": false,
+        "values": [
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": 7914000000.0
+          },
+          {
+            "period_key": "duration_2024-09-29_2025-03-29",
+            "value": 4009000000.0
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_ProceedsFromRepaymentsOfCommercialPaper",
+        "label": "Total repayments of commercial paper, net",
+        "standard_concept": null,
+        "level": 3,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": 1.0,
+        "preferred_sign": 1.0,
+        "parent_concept": "us-gaap_NetCashProvidedByUsedInFinancingActivities",
+        "parent_abstract_concept": "us-gaap_NetCashProvidedByUsedInFinancingActivitiesContinuingOperationsAbstract",
+        "unit": "usd",
+        "point_in_time": false,
+        "values": [
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": -5911000000.0
+          },
+          {
+            "period_key": "duration_2024-09-29_2025-03-29",
+            "value": -3968000000.0
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_ProceedsFromPaymentsForOtherFinancingActivities",
+        "label": "Other",
+        "standard_concept": "NetCashFromFinancingActivities",
+        "level": 3,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": 1.0,
+        "preferred_sign": 1.0,
+        "parent_concept": "us-gaap_NetCashProvidedByUsedInFinancingActivities",
+        "parent_abstract_concept": "us-gaap_NetCashProvidedByUsedInFinancingActivitiesContinuingOperationsAbstract",
+        "unit": "usd",
+        "point_in_time": false,
+        "values": [
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": -126000000.0
+          },
+          {
+            "period_key": "duration_2024-09-29_2025-03-29",
+            "value": -77000000.0
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_NetCashProvidedByUsedInFinancingActivities",
+        "label": "Cash used in financing activities",
+        "standard_concept": "NetCashFromFinancingActivities",
+        "level": 2,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": "debit",
+        "weight": 1.0,
+        "preferred_sign": 1.0,
+        "parent_concept": "us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect",
+        "parent_abstract_concept": "us-gaap_NetCashProvidedByUsedInFinancingActivitiesContinuingOperationsAbstract",
+        "unit": "usd",
+        "point_in_time": false,
+        "values": [
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": -61935000000.0
+          },
+          {
+            "period_key": "duration_2024-09-29_2025-03-29",
+            "value": -68377000000.0
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect",
+        "label": "Increase/(Decrease) in cash, cash equivalents, and restricted cash and cash equivalents",
+        "standard_concept": "NetChangeInCash",
+        "level": 1,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": 1.0,
+        "preferred_sign": 1.0,
+        "parent_concept": null,
+        "parent_abstract_concept": "us-gaap_StatementOfCashFlowsAbstract",
+        "unit": "usd",
+        "point_in_time": false,
+        "values": [
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": 9638000000.0
+          },
+          {
+            "period_key": "duration_2024-09-29_2025-03-29",
+            "value": -1781000000.0
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents",
+        "label": "Cash, cash equivalents, and restricted cash and cash equivalents, ending balances",
+        "standard_concept": "CashAndCashEquivalents",
+        "level": 1,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": null,
+        "preferred_sign": 1.0,
+        "parent_concept": null,
+        "parent_abstract_concept": "us-gaap_StatementOfCashFlowsAbstract",
+        "unit": null,
+        "point_in_time": null,
+        "values": [
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": 45572000000.0
+          },
+          {
+            "period_key": "duration_2024-09-29_2025-03-29",
+            "value": 28162000000.0
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_SupplementalCashFlowInformationAbstract",
+        "label": "Supplemental cash flow disclosure:",
+        "standard_concept": null,
+        "level": 1,
+        "is_abstract": true,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": null,
+        "preferred_sign": null,
+        "parent_concept": null,
+        "parent_abstract_concept": "us-gaap_StatementOfCashFlowsAbstract",
+        "unit": null,
+        "point_in_time": null,
+        "values": [
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": null
+          },
+          {
+            "period_key": "duration_2024-09-29_2025-03-29",
+            "value": null
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_IncomeTaxesPaidNet",
+        "label": "Cash paid for income taxes, net",
+        "standard_concept": "IncomeTaxes",
+        "level": 2,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": null,
+        "preferred_sign": 1.0,
+        "parent_concept": null,
+        "parent_abstract_concept": "us-gaap_SupplementalCashFlowInformationAbstract",
+        "unit": "usd",
+        "point_in_time": false,
+        "values": [
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": 20397000000.0
+          },
+          {
+            "period_key": "duration_2024-09-29_2025-03-29",
+            "value": 31683000000.0
+          }
+        ]
+      }
+    ]
+  },
+  "statement_of_equity": {
+    "periods": [
+      {
+        "key": "duration_2025-12-28_2026-03-28",
+        "label": "Quarterly: December 28, 2025 to March 28, 2026",
+        "period_type": "duration",
+        "period_start": "2025-12-28",
+        "period_end": "2026-03-28"
+      },
+      {
+        "key": "duration_2024-12-29_2025-03-29",
+        "label": "Quarterly: December 29, 2024 to March 29, 2025",
+        "period_type": "duration",
+        "period_start": "2024-12-29",
+        "period_end": "2025-03-29"
+      },
+      {
+        "key": "duration_2025-09-28_2026-03-28",
+        "label": "Semi-Annual: September 28, 2025 to March 28, 2026",
+        "period_type": "duration",
+        "period_start": "2025-09-28",
+        "period_end": "2026-03-28"
+      },
+      {
+        "key": "duration_2024-09-29_2025-03-29",
+        "label": "Semi-Annual: September 29, 2024 to March 29, 2025",
+        "period_type": "duration",
+        "period_start": "2024-09-29",
+        "period_end": "2025-03-29"
+      }
+    ],
+    "records": [
+      {
+        "concept": "us-gaap_IncreaseDecreaseInStockholdersEquityRollForward",
+        "label": "Increase (Decrease) in Stockholders' Equity [Roll Forward]",
+        "standard_concept": null,
+        "level": 3,
+        "is_abstract": true,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": null,
+        "preferred_sign": null,
+        "parent_concept": null,
+        "parent_abstract_concept": "us-gaap_StatementLineItems",
+        "unit": null,
+        "point_in_time": null,
+        "values": [
+          {
+            "period_key": "duration_2025-12-28_2026-03-28",
+            "value": null
+          },
+          {
+            "period_key": "duration_2024-12-29_2025-03-29",
+            "value": null
+          },
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": null
+          },
+          {
+            "period_key": "duration_2024-09-29_2025-03-29",
+            "value": null
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_StockholdersEquity",
+        "label": "Beginning balances",
+        "standard_concept": "AllEquityBalance",
+        "level": 4,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": "credit",
+        "weight": 1.0,
+        "preferred_sign": 1.0,
+        "parent_concept": "us-gaap_LiabilitiesAndStockholdersEquity",
+        "parent_abstract_concept": "us-gaap_IncreaseDecreaseInStockholdersEquityRollForward",
+        "unit": null,
+        "point_in_time": null,
+        "values": [
+          {
+            "period_key": "duration_2025-12-28_2026-03-28",
+            "value": 88190000000.0
+          },
+          {
+            "period_key": "duration_2024-12-29_2025-03-29",
+            "value": 66758000000.0
+          },
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": 73733000000.0
+          },
+          {
+            "period_key": "duration_2024-09-29_2025-03-29",
+            "value": 56950000000.0
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_StockIssuedDuringPeriodValueNewIssues",
+        "label": "Common stock issued",
+        "standard_concept": "StockIssuancesEquity",
+        "level": 4,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": null,
+        "preferred_sign": 1.0,
+        "parent_concept": null,
+        "parent_abstract_concept": "us-gaap_IncreaseDecreaseInStockholdersEquityRollForward",
+        "unit": "usd",
+        "point_in_time": false,
+        "values": [
+          {
+            "period_key": "duration_2025-12-28_2026-03-28",
+            "value": 878000000.0
+          },
+          {
+            "period_key": "duration_2024-12-29_2025-03-29",
+            "value": 825000000.0
+          },
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": 878000000.0
+          },
+          {
+            "period_key": "duration_2024-09-29_2025-03-29",
+            "value": 825000000.0
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_AdjustmentsRelatedToTaxWithholdingForShareBasedCompensation",
+        "label": "Common stock withheld related to net share settlement of equity awards",
+        "standard_concept": null,
+        "level": 4,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": null,
+        "preferred_sign": -1.0,
+        "parent_concept": null,
+        "parent_abstract_concept": "us-gaap_IncreaseDecreaseInStockholdersEquityRollForward",
+        "unit": "usd",
+        "point_in_time": false,
+        "values": [
+          {
+            "period_key": "duration_2025-12-28_2026-03-28",
+            "value": 338000000.0
+          },
+          {
+            "period_key": "duration_2024-12-29_2025-03-29",
+            "value": 291000000.0
+          },
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": 3332000000.0
+          },
+          {
+            "period_key": "duration_2024-09-29_2025-03-29",
+            "value": 3284000000.0
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_AdjustmentsToAdditionalPaidInCapitalSharebasedCompensationRequisiteServicePeriodRecognitionValue",
+        "label": "Share-based compensation",
+        "standard_concept": "StockCompensationEquityImpact",
+        "level": 4,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": null,
+        "preferred_sign": 1.0,
+        "parent_concept": null,
+        "parent_abstract_concept": "us-gaap_IncreaseDecreaseInStockholdersEquityRollForward",
+        "unit": "usd",
+        "point_in_time": false,
+        "values": [
+          {
+            "period_key": "duration_2025-12-28_2026-03-28",
+            "value": 3658000000.0
+          },
+          {
+            "period_key": "duration_2024-12-29_2025-03-29",
+            "value": 3324000000.0
+          },
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": 7369000000.0
+          },
+          {
+            "period_key": "duration_2024-09-29_2025-03-29",
+            "value": 6707000000.0
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_NetIncomeLoss",
+        "label": "Net income",
+        "standard_concept": "NetIncome",
+        "level": 4,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": "credit",
+        "weight": 1.0,
+        "preferred_sign": 1.0,
+        "parent_concept": null,
+        "parent_abstract_concept": "us-gaap_IncreaseDecreaseInStockholdersEquityRollForward",
+        "unit": "usd",
+        "point_in_time": false,
+        "values": [
+          {
+            "period_key": "duration_2025-12-28_2026-03-28",
+            "value": 29578000000.0
+          },
+          {
+            "period_key": "duration_2024-12-29_2025-03-29",
+            "value": 24780000000.0
+          },
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": 71675000000.0
+          },
+          {
+            "period_key": "duration_2024-09-29_2025-03-29",
+            "value": 61110000000.0
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_Dividends",
+        "label": "Dividends and dividend equivalents declared",
+        "standard_concept": "CommonDividendsPaid",
+        "level": 4,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": null,
+        "preferred_sign": -1.0,
+        "parent_concept": null,
+        "parent_abstract_concept": "us-gaap_IncreaseDecreaseInStockholdersEquityRollForward",
+        "unit": "usd",
+        "point_in_time": false,
+        "values": [
+          {
+            "period_key": "duration_2025-12-28_2026-03-28",
+            "value": 3855000000.0
+          },
+          {
+            "period_key": "duration_2024-12-29_2025-03-29",
+            "value": 3794000000.0
+          },
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": 7735000000.0
+          },
+          {
+            "period_key": "duration_2024-09-29_2025-03-29",
+            "value": 7613000000.0
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_StockRepurchasedAndRetiredDuringPeriodValue",
+        "label": "Common stock repurchased",
+        "standard_concept": "StockRepurchasesEquity",
+        "level": 4,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": null,
+        "preferred_sign": -1.0,
+        "parent_concept": null,
+        "parent_abstract_concept": "us-gaap_IncreaseDecreaseInStockholdersEquityRollForward",
+        "unit": "usd",
+        "point_in_time": false,
+        "values": [
+          {
+            "period_key": "duration_2025-12-28_2026-03-28",
+            "value": 11099000000.0
+          },
+          {
+            "period_key": "duration_2024-12-29_2025-03-29",
+            "value": 25232000000.0
+          },
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": 36000000000.0
+          },
+          {
+            "period_key": "duration_2024-09-29_2025-03-29",
+            "value": 48708000000.0
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_OtherComprehensiveIncomeLossNetOfTaxPortionAttributableToParent",
+        "label": "Other comprehensive income/(loss)",
+        "standard_concept": null,
+        "level": 4,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": 1.0,
+        "preferred_sign": 1.0,
+        "parent_concept": "us-gaap_ComprehensiveIncomeNetOfTax",
+        "parent_abstract_concept": "us-gaap_IncreaseDecreaseInStockholdersEquityRollForward",
+        "unit": "usd",
+        "point_in_time": false,
+        "values": [
+          {
+            "period_key": "duration_2025-12-28_2026-03-28",
+            "value": -521000000.0
+          },
+          {
+            "period_key": "duration_2024-12-29_2025-03-29",
+            "value": 426000000.0
+          },
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": 196000000.0
+          },
+          {
+            "period_key": "duration_2024-09-29_2025-03-29",
+            "value": 809000000.0
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_StockholdersEquity",
+        "label": "Ending balances",
+        "standard_concept": "AllEquityBalance",
+        "level": 4,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": "credit",
+        "weight": 1.0,
+        "preferred_sign": 1.0,
+        "parent_concept": "us-gaap_LiabilitiesAndStockholdersEquity",
+        "parent_abstract_concept": "us-gaap_IncreaseDecreaseInStockholdersEquityRollForward",
+        "unit": null,
+        "point_in_time": null,
+        "values": [
+          {
+            "period_key": "duration_2025-12-28_2026-03-28",
+            "value": 106491000000.0
+          },
+          {
+            "period_key": "duration_2024-12-29_2025-03-29",
+            "value": 66796000000.0
+          },
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": 106491000000.0
+          },
+          {
+            "period_key": "duration_2024-09-29_2025-03-29",
+            "value": 66796000000.0
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_CommonStockDividendsPerShareDeclared",
+        "label": "Dividends and dividend equivalents declared per share or RSU (in dollars per share or RSU)",
+        "standard_concept": "CommonDividendsPerShare",
+        "level": 3,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": null,
+        "preferred_sign": 1.0,
+        "parent_concept": null,
+        "parent_abstract_concept": "us-gaap_StatementLineItems",
+        "unit": "usdPerShare",
+        "point_in_time": false,
+        "values": [
+          {
+            "period_key": "duration_2025-12-28_2026-03-28",
+            "value": 0.26
+          },
+          {
+            "period_key": "duration_2024-12-29_2025-03-29",
+            "value": 0.25
+          },
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": 0.52
+          },
+          {
+            "period_key": "duration_2024-09-29_2025-03-29",
+            "value": 0.5
+          }
+        ]
+      }
+    ]
+  },
+  "comprehensive_income": {
+    "periods": [
+      {
+        "key": "duration_2025-12-28_2026-03-28",
+        "label": "Quarterly: December 28, 2025 to March 28, 2026",
+        "period_type": "duration",
+        "period_start": "2025-12-28",
+        "period_end": "2026-03-28"
+      },
+      {
+        "key": "duration_2024-12-29_2025-03-29",
+        "label": "Quarterly: December 29, 2024 to March 29, 2025",
+        "period_type": "duration",
+        "period_start": "2024-12-29",
+        "period_end": "2025-03-29"
+      },
+      {
+        "key": "duration_2025-09-28_2026-03-28",
+        "label": "Semi-Annual: September 28, 2025 to March 28, 2026",
+        "period_type": "duration",
+        "period_start": "2025-09-28",
+        "period_end": "2026-03-28"
+      },
+      {
+        "key": "duration_2024-09-29_2025-03-29",
+        "label": "Semi-Annual: September 29, 2024 to March 29, 2025",
+        "period_type": "duration",
+        "period_start": "2024-09-29",
+        "period_end": "2025-03-29"
+      }
+    ],
+    "records": [
+      {
+        "concept": "us-gaap_NetIncomeLoss",
+        "label": "Net income",
+        "standard_concept": "NetIncome",
+        "level": 2,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": "credit",
+        "weight": 1.0,
+        "preferred_sign": 1.0,
+        "parent_concept": "us-gaap_ComprehensiveIncomeNetOfTax",
+        "parent_abstract_concept": "us-gaap_StatementOfIncomeAndComprehensiveIncomeAbstract",
+        "unit": "usd",
+        "point_in_time": false,
+        "values": [
+          {
+            "period_key": "duration_2025-12-28_2026-03-28",
+            "value": 29578000000.0
+          },
+          {
+            "period_key": "duration_2024-12-29_2025-03-29",
+            "value": 24780000000.0
+          },
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": 71675000000.0
+          },
+          {
+            "period_key": "duration_2024-09-29_2025-03-29",
+            "value": 61110000000.0
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_ComprehensiveIncomeNetOfTaxAbstract",
+        "label": "Other comprehensive income/(loss):",
+        "standard_concept": null,
+        "level": 1,
+        "is_abstract": true,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": null,
+        "preferred_sign": null,
+        "parent_concept": null,
+        "parent_abstract_concept": "us-gaap_StatementOfIncomeAndComprehensiveIncomeAbstract",
+        "unit": null,
+        "point_in_time": null,
+        "values": [
+          {
+            "period_key": "duration_2025-12-28_2026-03-28",
+            "value": null
+          },
+          {
+            "period_key": "duration_2024-12-29_2025-03-29",
+            "value": null
+          },
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": null
+          },
+          {
+            "period_key": "duration_2024-09-29_2025-03-29",
+            "value": null
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_OtherComprehensiveIncomeLossForeignCurrencyTransactionAndTranslationAdjustmentNetOfTax",
+        "label": "Change in foreign currency translation, net of tax",
+        "standard_concept": null,
+        "level": 2,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": 1.0,
+        "preferred_sign": 1.0,
+        "parent_concept": "us-gaap_OtherComprehensiveIncomeLossNetOfTaxPortionAttributableToParent",
+        "parent_abstract_concept": "us-gaap_ComprehensiveIncomeNetOfTaxAbstract",
+        "unit": "usd",
+        "point_in_time": false,
+        "values": [
+          {
+            "period_key": "duration_2025-12-28_2026-03-28",
+            "value": 67000000.0
+          },
+          {
+            "period_key": "duration_2024-12-29_2025-03-29",
+            "value": 90000000.0
+          },
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": -92000000.0
+          },
+          {
+            "period_key": "duration_2024-09-29_2025-03-29",
+            "value": -535000000.0
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_OtherComprehensiveIncomeDerivativesQualifyingAsHedgesNetOfTaxPeriodIncreaseDecreaseAbstract",
+        "label": "Change in unrealized gains/losses on derivative instruments, net of tax:",
+        "standard_concept": null,
+        "level": 2,
+        "is_abstract": true,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": null,
+        "preferred_sign": null,
+        "parent_concept": null,
+        "parent_abstract_concept": "us-gaap_ComprehensiveIncomeNetOfTaxAbstract",
+        "unit": null,
+        "point_in_time": null,
+        "values": [
+          {
+            "period_key": "duration_2025-12-28_2026-03-28",
+            "value": null
+          },
+          {
+            "period_key": "duration_2024-12-29_2025-03-29",
+            "value": null
+          },
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": null
+          },
+          {
+            "period_key": "duration_2024-09-29_2025-03-29",
+            "value": null
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_OtherComprehensiveIncomeLossCashFlowHedgeGainLossBeforeReclassificationAfterTax",
+        "label": "Change in fair value of derivative instruments",
+        "standard_concept": null,
+        "level": 4,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": 1.0,
+        "preferred_sign": 1.0,
+        "parent_concept": "us-gaap_OtherComprehensiveIncomeLossCashFlowHedgeGainLossAfterReclassificationAndTax",
+        "parent_abstract_concept": "us-gaap_OtherComprehensiveIncomeDerivativesQualifyingAsHedgesNetOfTaxPeriodIncreaseDecreaseAbstract",
+        "unit": "usd",
+        "point_in_time": false,
+        "values": [
+          {
+            "period_key": "duration_2025-12-28_2026-03-28",
+            "value": 162000000.0
+          },
+          {
+            "period_key": "duration_2024-12-29_2025-03-29",
+            "value": -318000000.0
+          },
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": 373000000.0
+          },
+          {
+            "period_key": "duration_2024-09-29_2025-03-29",
+            "value": 1333000000.0
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_OtherComprehensiveIncomeLossCashFlowHedgeGainLossReclassificationAfterTax",
+        "label": "Adjustment for net (gains)/losses realized and included in net income",
+        "standard_concept": "OtherComprehensiveIncomeLoss",
+        "level": 4,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": -1.0,
+        "preferred_sign": -1.0,
+        "parent_concept": "us-gaap_OtherComprehensiveIncomeLossCashFlowHedgeGainLossAfterReclassificationAndTax",
+        "parent_abstract_concept": "us-gaap_OtherComprehensiveIncomeDerivativesQualifyingAsHedgesNetOfTaxPeriodIncreaseDecreaseAbstract",
+        "unit": "usd",
+        "point_in_time": false,
+        "values": [
+          {
+            "period_key": "duration_2025-12-28_2026-03-28",
+            "value": -44000000.0
+          },
+          {
+            "period_key": "duration_2024-12-29_2025-03-29",
+            "value": 628000000.0
+          },
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": -281000000.0
+          },
+          {
+            "period_key": "duration_2024-09-29_2025-03-29",
+            "value": -156000000.0
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_OtherComprehensiveIncomeLossCashFlowHedgeGainLossAfterReclassificationAndTax",
+        "label": "Total change in unrealized gains/losses on derivative instruments",
+        "standard_concept": null,
+        "level": 4,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": 1.0,
+        "preferred_sign": 1.0,
+        "parent_concept": "us-gaap_OtherComprehensiveIncomeLossNetOfTaxPortionAttributableToParent",
+        "parent_abstract_concept": "us-gaap_OtherComprehensiveIncomeDerivativesQualifyingAsHedgesNetOfTaxPeriodIncreaseDecreaseAbstract",
+        "unit": "usd",
+        "point_in_time": false,
+        "values": [
+          {
+            "period_key": "duration_2025-12-28_2026-03-28",
+            "value": 206000000.0
+          },
+          {
+            "period_key": "duration_2024-12-29_2025-03-29",
+            "value": -946000000.0
+          },
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": 654000000.0
+          },
+          {
+            "period_key": "duration_2024-09-29_2025-03-29",
+            "value": 1489000000.0
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_OtherComprehensiveIncomeAvailableForSaleSecuritiesAdjustmentNetOfTaxPeriodIncreaseDecreaseAbstract",
+        "label": "Change in unrealized gains/losses on marketable debt securities, net of tax:",
+        "standard_concept": null,
+        "level": 2,
+        "is_abstract": true,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": null,
+        "preferred_sign": null,
+        "parent_concept": null,
+        "parent_abstract_concept": "us-gaap_ComprehensiveIncomeNetOfTaxAbstract",
+        "unit": null,
+        "point_in_time": null,
+        "values": [
+          {
+            "period_key": "duration_2025-12-28_2026-03-28",
+            "value": null
+          },
+          {
+            "period_key": "duration_2024-12-29_2025-03-29",
+            "value": null
+          },
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": null
+          },
+          {
+            "period_key": "duration_2024-09-29_2025-03-29",
+            "value": null
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_OtherComprehensiveIncomeUnrealizedHoldingGainLossOnSecuritiesArisingDuringPeriodNetOfTax",
+        "label": "Change in fair value of marketable debt securities",
+        "standard_concept": null,
+        "level": 4,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": 1.0,
+        "preferred_sign": 1.0,
+        "parent_concept": "us-gaap_OtherComprehensiveIncomeLossAvailableForSaleSecuritiesAdjustmentNetOfTax",
+        "parent_abstract_concept": "us-gaap_OtherComprehensiveIncomeAvailableForSaleSecuritiesAdjustmentNetOfTaxPeriodIncreaseDecreaseAbstract",
+        "unit": "usd",
+        "point_in_time": false,
+        "values": [
+          {
+            "period_key": "duration_2025-12-28_2026-03-28",
+            "value": -808000000.0
+          },
+          {
+            "period_key": "duration_2024-12-29_2025-03-29",
+            "value": 1097000000.0
+          },
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": -384000000.0
+          },
+          {
+            "period_key": "duration_2024-09-29_2025-03-29",
+            "value": -550000000.0
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_OtherComprehensiveIncomeLossReclassificationAdjustmentFromAOCIForSaleOfSecuritiesNetOfTax",
+        "label": "Adjustment for net (gains)/losses realized and included in net income",
+        "standard_concept": null,
+        "level": 4,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": -1.0,
+        "preferred_sign": -1.0,
+        "parent_concept": "us-gaap_OtherComprehensiveIncomeLossAvailableForSaleSecuritiesAdjustmentNetOfTax",
+        "parent_abstract_concept": "us-gaap_OtherComprehensiveIncomeAvailableForSaleSecuritiesAdjustmentNetOfTaxPeriodIncreaseDecreaseAbstract",
+        "unit": "usd",
+        "point_in_time": false,
+        "values": [
+          {
+            "period_key": "duration_2025-12-28_2026-03-28",
+            "value": -14000000.0
+          },
+          {
+            "period_key": "duration_2024-12-29_2025-03-29",
+            "value": -185000000.0
+          },
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": -18000000.0
+          },
+          {
+            "period_key": "duration_2024-09-29_2025-03-29",
+            "value": -405000000.0
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_OtherComprehensiveIncomeLossAvailableForSaleSecuritiesAdjustmentNetOfTax",
+        "label": "Total change in unrealized gains/losses on marketable debt securities",
+        "standard_concept": null,
+        "level": 4,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": 1.0,
+        "preferred_sign": 1.0,
+        "parent_concept": "us-gaap_OtherComprehensiveIncomeLossNetOfTaxPortionAttributableToParent",
+        "parent_abstract_concept": "us-gaap_OtherComprehensiveIncomeAvailableForSaleSecuritiesAdjustmentNetOfTaxPeriodIncreaseDecreaseAbstract",
+        "unit": "usd",
+        "point_in_time": false,
+        "values": [
+          {
+            "period_key": "duration_2025-12-28_2026-03-28",
+            "value": -794000000.0
+          },
+          {
+            "period_key": "duration_2024-12-29_2025-03-29",
+            "value": 1282000000.0
+          },
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": -366000000.0
+          },
+          {
+            "period_key": "duration_2024-09-29_2025-03-29",
+            "value": -145000000.0
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_OtherComprehensiveIncomeLossNetOfTaxPortionAttributableToParent",
+        "label": "Other comprehensive income/(loss)",
+        "standard_concept": null,
+        "level": 2,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": 1.0,
+        "preferred_sign": 1.0,
+        "parent_concept": "us-gaap_ComprehensiveIncomeNetOfTax",
+        "parent_abstract_concept": "us-gaap_ComprehensiveIncomeNetOfTaxAbstract",
+        "unit": "usd",
+        "point_in_time": false,
+        "values": [
+          {
+            "period_key": "duration_2025-12-28_2026-03-28",
+            "value": -521000000.0
+          },
+          {
+            "period_key": "duration_2024-12-29_2025-03-29",
+            "value": 426000000.0
+          },
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": 196000000.0
+          },
+          {
+            "period_key": "duration_2024-09-29_2025-03-29",
+            "value": 809000000.0
+          }
+        ]
+      },
+      {
+        "concept": "us-gaap_ComprehensiveIncomeNetOfTax",
+        "label": "Total comprehensive income",
+        "standard_concept": null,
+        "level": 1,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": "credit",
+        "weight": 1.0,
+        "preferred_sign": 1.0,
+        "parent_concept": null,
+        "parent_abstract_concept": "us-gaap_StatementOfIncomeAndComprehensiveIncomeAbstract",
+        "unit": "usd",
+        "point_in_time": false,
+        "values": [
+          {
+            "period_key": "duration_2025-12-28_2026-03-28",
+            "value": 29057000000.0
+          },
+          {
+            "period_key": "duration_2024-12-29_2025-03-29",
+            "value": 25206000000.0
+          },
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": 71871000000.0
+          },
+          {
+            "period_key": "duration_2024-09-29_2025-03-29",
+            "value": 61919000000.0
+          }
+        ]
+      }
+    ]
+  },
+  "cover": {
+    "periods": [
+      {
+        "key": "duration_2025-09-28_2026-03-28",
+        "label": "Semi-Annual: September 28, 2025 to March 28, 2026",
+        "period_type": "duration",
+        "period_start": "2025-09-28",
+        "period_end": "2026-03-28"
+      }
+    ],
+    "records": [
+      {
+        "concept": "dei_DocumentType",
+        "label": "Document Type",
+        "standard_concept": null,
+        "level": 3,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": null,
+        "preferred_sign": 1.0,
+        "parent_concept": null,
+        "parent_abstract_concept": "dei_EntityInformationLineItems",
+        "unit": null,
+        "point_in_time": false,
+        "values": [
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": "10-Q"
+          }
+        ]
+      },
+      {
+        "concept": "dei_DocumentQuarterlyReport",
+        "label": "Document Quarterly Report",
+        "standard_concept": null,
+        "level": 3,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": null,
+        "preferred_sign": 1.0,
+        "parent_concept": null,
+        "parent_abstract_concept": "dei_EntityInformationLineItems",
+        "unit": null,
+        "point_in_time": false,
+        "values": [
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": "true"
+          }
+        ]
+      },
+      {
+        "concept": "dei_DocumentPeriodEndDate",
+        "label": "Document Period End Date",
+        "standard_concept": null,
+        "level": 3,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": null,
+        "preferred_sign": 1.0,
+        "parent_concept": null,
+        "parent_abstract_concept": "dei_EntityInformationLineItems",
+        "unit": null,
+        "point_in_time": false,
+        "values": [
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": "2026-03-28"
+          }
+        ]
+      },
+      {
+        "concept": "dei_DocumentTransitionReport",
+        "label": "Document Transition Report",
+        "standard_concept": null,
+        "level": 3,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": null,
+        "preferred_sign": 1.0,
+        "parent_concept": null,
+        "parent_abstract_concept": "dei_EntityInformationLineItems",
+        "unit": null,
+        "point_in_time": false,
+        "values": [
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": "false"
+          }
+        ]
+      },
+      {
+        "concept": "dei_EntityFileNumber",
+        "label": "Entity File Number",
+        "standard_concept": null,
+        "level": 3,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": null,
+        "preferred_sign": 1.0,
+        "parent_concept": null,
+        "parent_abstract_concept": "dei_EntityInformationLineItems",
+        "unit": null,
+        "point_in_time": false,
+        "values": [
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": "001-36743"
+          }
+        ]
+      },
+      {
+        "concept": "dei_EntityRegistrantName",
+        "label": "Entity Registrant Name",
+        "standard_concept": null,
+        "level": 3,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": null,
+        "preferred_sign": 1.0,
+        "parent_concept": null,
+        "parent_abstract_concept": "dei_EntityInformationLineItems",
+        "unit": null,
+        "point_in_time": false,
+        "values": [
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": "Apple Inc."
+          }
+        ]
+      },
+      {
+        "concept": "dei_EntityIncorporationStateCountryCode",
+        "label": "Entity Incorporation, State or Country Code",
+        "standard_concept": null,
+        "level": 3,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": null,
+        "preferred_sign": 1.0,
+        "parent_concept": null,
+        "parent_abstract_concept": "dei_EntityInformationLineItems",
+        "unit": null,
+        "point_in_time": false,
+        "values": [
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": "CA"
+          }
+        ]
+      },
+      {
+        "concept": "dei_EntityTaxIdentificationNumber",
+        "label": "Entity Tax Identification Number",
+        "standard_concept": null,
+        "level": 3,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": null,
+        "preferred_sign": 1.0,
+        "parent_concept": null,
+        "parent_abstract_concept": "dei_EntityInformationLineItems",
+        "unit": null,
+        "point_in_time": false,
+        "values": [
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": "94-2404110"
+          }
+        ]
+      },
+      {
+        "concept": "dei_EntityAddressAddressLine1",
+        "label": "Entity Address, Address Line One",
+        "standard_concept": null,
+        "level": 3,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": null,
+        "preferred_sign": 1.0,
+        "parent_concept": null,
+        "parent_abstract_concept": "dei_EntityInformationLineItems",
+        "unit": null,
+        "point_in_time": false,
+        "values": [
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": "One Apple Park Way"
+          }
+        ]
+      },
+      {
+        "concept": "dei_EntityAddressCityOrTown",
+        "label": "Entity Address, City or Town",
+        "standard_concept": null,
+        "level": 3,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": null,
+        "preferred_sign": 1.0,
+        "parent_concept": null,
+        "parent_abstract_concept": "dei_EntityInformationLineItems",
+        "unit": null,
+        "point_in_time": false,
+        "values": [
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": "Cupertino"
+          }
+        ]
+      },
+      {
+        "concept": "dei_EntityAddressStateOrProvince",
+        "label": "Entity Address, State or Province",
+        "standard_concept": null,
+        "level": 3,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": null,
+        "preferred_sign": 1.0,
+        "parent_concept": null,
+        "parent_abstract_concept": "dei_EntityInformationLineItems",
+        "unit": null,
+        "point_in_time": false,
+        "values": [
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": "CA"
+          }
+        ]
+      },
+      {
+        "concept": "dei_EntityAddressPostalZipCode",
+        "label": "Entity Address, Postal Zip Code",
+        "standard_concept": null,
+        "level": 3,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": null,
+        "preferred_sign": 1.0,
+        "parent_concept": null,
+        "parent_abstract_concept": "dei_EntityInformationLineItems",
+        "unit": null,
+        "point_in_time": false,
+        "values": [
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": 95014.0
+          }
+        ]
+      },
+      {
+        "concept": "dei_CityAreaCode",
+        "label": "City Area Code",
+        "standard_concept": null,
+        "level": 3,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": null,
+        "preferred_sign": 1.0,
+        "parent_concept": null,
+        "parent_abstract_concept": "dei_EntityInformationLineItems",
+        "unit": null,
+        "point_in_time": false,
+        "values": [
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": 408.0
+          }
+        ]
+      },
+      {
+        "concept": "dei_LocalPhoneNumber",
+        "label": "Local Phone Number",
+        "standard_concept": null,
+        "level": 3,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": null,
+        "preferred_sign": 1.0,
+        "parent_concept": null,
+        "parent_abstract_concept": "dei_EntityInformationLineItems",
+        "unit": null,
+        "point_in_time": false,
+        "values": [
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": "996-1010"
+          }
+        ]
+      },
+      {
+        "concept": "dei_Security12bTitle",
+        "label": "Title of 12(b) Security",
+        "standard_concept": null,
+        "level": 3,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": null,
+        "preferred_sign": null,
+        "parent_concept": null,
+        "parent_abstract_concept": "dei_EntityInformationLineItems",
+        "unit": null,
+        "point_in_time": null,
+        "values": [
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": null
+          }
+        ]
+      },
+      {
+        "concept": "dei_TradingSymbol",
+        "label": "Trading Symbol",
+        "standard_concept": null,
+        "level": 3,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": null,
+        "preferred_sign": null,
+        "parent_concept": null,
+        "parent_abstract_concept": "dei_EntityInformationLineItems",
+        "unit": null,
+        "point_in_time": null,
+        "values": [
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": null
+          }
+        ]
+      },
+      {
+        "concept": "dei_NoTradingSymbolFlag",
+        "label": "No Trading Symbol Flag",
+        "standard_concept": null,
+        "level": 3,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": null,
+        "preferred_sign": null,
+        "parent_concept": null,
+        "parent_abstract_concept": "dei_EntityInformationLineItems",
+        "unit": null,
+        "point_in_time": null,
+        "values": [
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": null
+          }
+        ]
+      },
+      {
+        "concept": "dei_SecurityExchangeName",
+        "label": "Security Exchange Name",
+        "standard_concept": null,
+        "level": 3,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": null,
+        "preferred_sign": null,
+        "parent_concept": null,
+        "parent_abstract_concept": "dei_EntityInformationLineItems",
+        "unit": null,
+        "point_in_time": null,
+        "values": [
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": null
+          }
+        ]
+      },
+      {
+        "concept": "dei_EntityCurrentReportingStatus",
+        "label": "Entity Current Reporting Status",
+        "standard_concept": null,
+        "level": 3,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": null,
+        "preferred_sign": 1.0,
+        "parent_concept": null,
+        "parent_abstract_concept": "dei_EntityInformationLineItems",
+        "unit": null,
+        "point_in_time": false,
+        "values": [
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": "Yes"
+          }
+        ]
+      },
+      {
+        "concept": "dei_EntityInteractiveDataCurrent",
+        "label": "Entity Interactive Data Current",
+        "standard_concept": null,
+        "level": 3,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": null,
+        "preferred_sign": 1.0,
+        "parent_concept": null,
+        "parent_abstract_concept": "dei_EntityInformationLineItems",
+        "unit": null,
+        "point_in_time": false,
+        "values": [
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": "Yes"
+          }
+        ]
+      },
+      {
+        "concept": "dei_EntityFilerCategory",
+        "label": "Entity Filer Category",
+        "standard_concept": null,
+        "level": 3,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": null,
+        "preferred_sign": 1.0,
+        "parent_concept": null,
+        "parent_abstract_concept": "dei_EntityInformationLineItems",
+        "unit": null,
+        "point_in_time": false,
+        "values": [
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": "Large Accelerated Filer"
+          }
+        ]
+      },
+      {
+        "concept": "dei_EntitySmallBusiness",
+        "label": "Entity Small Business",
+        "standard_concept": null,
+        "level": 3,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": null,
+        "preferred_sign": 1.0,
+        "parent_concept": null,
+        "parent_abstract_concept": "dei_EntityInformationLineItems",
+        "unit": null,
+        "point_in_time": false,
+        "values": [
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": "false"
+          }
+        ]
+      },
+      {
+        "concept": "dei_EntityEmergingGrowthCompany",
+        "label": "Entity Emerging Growth Company",
+        "standard_concept": null,
+        "level": 3,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": null,
+        "preferred_sign": 1.0,
+        "parent_concept": null,
+        "parent_abstract_concept": "dei_EntityInformationLineItems",
+        "unit": null,
+        "point_in_time": false,
+        "values": [
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": "false"
+          }
+        ]
+      },
+      {
+        "concept": "dei_EntityShellCompany",
+        "label": "Entity Shell Company",
+        "standard_concept": null,
+        "level": 3,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": null,
+        "preferred_sign": 1.0,
+        "parent_concept": null,
+        "parent_abstract_concept": "dei_EntityInformationLineItems",
+        "unit": null,
+        "point_in_time": false,
+        "values": [
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": "false"
+          }
+        ]
+      },
+      {
+        "concept": "dei_EntityCommonStockSharesOutstanding",
+        "label": "Entity Common Stock, Shares Outstanding (in shares)",
+        "standard_concept": null,
+        "level": 3,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": null,
+        "preferred_sign": 1.0,
+        "parent_concept": null,
+        "parent_abstract_concept": "dei_EntityInformationLineItems",
+        "unit": null,
+        "point_in_time": null,
+        "values": [
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": null
+          }
+        ]
+      },
+      {
+        "concept": "dei_AmendmentFlag",
+        "label": "Amendment Flag",
+        "standard_concept": null,
+        "level": 3,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": null,
+        "preferred_sign": 1.0,
+        "parent_concept": null,
+        "parent_abstract_concept": "dei_EntityInformationLineItems",
+        "unit": null,
+        "point_in_time": false,
+        "values": [
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": "false"
+          }
+        ]
+      },
+      {
+        "concept": "dei_DocumentFiscalYearFocus",
+        "label": "Document Fiscal Year Focus",
+        "standard_concept": null,
+        "level": 3,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": null,
+        "preferred_sign": 1.0,
+        "parent_concept": null,
+        "parent_abstract_concept": "dei_EntityInformationLineItems",
+        "unit": null,
+        "point_in_time": false,
+        "values": [
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": 2026.0
+          }
+        ]
+      },
+      {
+        "concept": "dei_DocumentFiscalPeriodFocus",
+        "label": "Document Fiscal Period Focus",
+        "standard_concept": null,
+        "level": 3,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": null,
+        "preferred_sign": 1.0,
+        "parent_concept": null,
+        "parent_abstract_concept": "dei_EntityInformationLineItems",
+        "unit": null,
+        "point_in_time": false,
+        "values": [
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": "Q2"
+          }
+        ]
+      },
+      {
+        "concept": "dei_EntityCentralIndexKey",
+        "label": "Entity Central Index Key",
+        "standard_concept": null,
+        "level": 3,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": null,
+        "preferred_sign": 1.0,
+        "parent_concept": null,
+        "parent_abstract_concept": "dei_EntityInformationLineItems",
+        "unit": null,
+        "point_in_time": false,
+        "values": [
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": 320193.0
+          }
+        ]
+      },
+      {
+        "concept": "dei_CurrentFiscalYearEndDate",
+        "label": "Current Fiscal Year End Date",
+        "standard_concept": null,
+        "level": 3,
+        "is_abstract": false,
+        "is_dimension": false,
+        "is_breakdown": false,
+        "dimension_axis": null,
+        "dimension_member": null,
+        "dimension_member_label": null,
+        "dimension_label": null,
+        "balance": null,
+        "weight": null,
+        "preferred_sign": 1.0,
+        "parent_concept": null,
+        "parent_abstract_concept": "dei_EntityInformationLineItems",
+        "unit": null,
+        "point_in_time": false,
+        "values": [
+          {
+            "period_key": "duration_2025-09-28_2026-03-28",
+            "value": "--09-26"
+          }
+        ]
+      }
+    ]
+  }
+}

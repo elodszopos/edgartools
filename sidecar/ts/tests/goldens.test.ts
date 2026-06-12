@@ -10,6 +10,8 @@ import type { z } from 'zod';
 import {
   GetAttachmentContentFilingAccessionAttachmentsSequenceGetResponse,
   GetCompanyCompanyIdGetResponse,
+  GetCompanyFinancialMetricsCompanyIdFinancialsMetricsGetResponse,
+  GetCompanyFinancialsCompanyIdFinancialsGetResponse,
   GetCompanySubmissionsCompanyIdSubmissionsGetResponse,
   GetFilingContentFilingAccessionContentGetResponse,
   GetFilingFilingAccessionGetResponse,
@@ -28,6 +30,8 @@ const FIXTURES = join(import.meta.dir, '..', 'fixtures', 'responses');
 const RESPONSE_SCHEMAS: Record<string, z.ZodType> = {
   health: HealthHealthGetResponse,
   company: GetCompanyCompanyIdGetResponse,
+  company_financials: GetCompanyFinancialsCompanyIdFinancialsGetResponse,
+  company_financials_metrics: GetCompanyFinancialMetricsCompanyIdFinancialsMetricsGetResponse,
   company_submissions: GetCompanySubmissionsCompanyIdSubmissionsGetResponse,
   filing: GetFilingFilingAccessionGetResponse,
   filing_attachment_content: GetAttachmentContentFilingAccessionAttachmentsSequenceGetResponse,

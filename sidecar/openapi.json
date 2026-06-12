@@ -659,6 +659,136 @@
         }
       }
     },
+    "/company/{id}/financials": {
+      "get": {
+        "summary": "Get Company Financials",
+        "operationId": "get_company_financials_company__id__financials_get",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Id"
+            }
+          },
+          {
+            "name": "period",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "annual",
+                "quarterly"
+              ],
+              "type": "string",
+              "default": "annual",
+              "title": "Period"
+            }
+          },
+          {
+            "name": "view",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "raw",
+                "standardized"
+              ],
+              "type": "string",
+              "default": "standardized",
+              "title": "View"
+            }
+          },
+          {
+            "name": "dimensions",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Dimensions"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinancialsResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/company/{id}/financials/metrics": {
+      "get": {
+        "summary": "Get Company Financial Metrics",
+        "operationId": "get_company_financial_metrics_company__id__financials_metrics_get",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Id"
+            }
+          },
+          {
+            "name": "period",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "annual",
+                "quarterly"
+              ],
+              "type": "string",
+              "default": "annual",
+              "title": "Period"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinancialMetrics"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/search": {
       "get": {
         "summary": "Search",
@@ -2250,6 +2380,423 @@
         ],
         "title": "FilingsPage"
       },
+      "FinancialMetrics": {
+        "properties": {
+          "cik": {
+            "type": "string",
+            "pattern": "^\\d{10}$",
+            "title": "Cik"
+          },
+          "company": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Company"
+          },
+          "form": {
+            "type": "string",
+            "title": "Form"
+          },
+          "accession_number": {
+            "type": "string",
+            "pattern": "^\\d{10}-\\d{2}-\\d{6}$",
+            "title": "Accession Number"
+          },
+          "filing_date": {
+            "type": "string",
+            "format": "date",
+            "title": "Filing Date"
+          },
+          "period_of_report": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Period Of Report"
+          },
+          "period": {
+            "type": "string",
+            "enum": [
+              "annual",
+              "quarterly"
+            ],
+            "title": "Period"
+          },
+          "revenue": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Revenue"
+          },
+          "operating_income": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Operating Income"
+          },
+          "net_income": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Net Income"
+          },
+          "total_assets": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total Assets"
+          },
+          "total_liabilities": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total Liabilities"
+          },
+          "stockholders_equity": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stockholders Equity"
+          },
+          "current_assets": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Current Assets"
+          },
+          "current_liabilities": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Current Liabilities"
+          },
+          "operating_cash_flow": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Operating Cash Flow"
+          },
+          "capital_expenditures": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Capital Expenditures"
+          },
+          "free_cash_flow": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Free Cash Flow"
+          },
+          "shares_outstanding_basic": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Shares Outstanding Basic"
+          },
+          "shares_outstanding_diluted": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Shares Outstanding Diluted"
+          },
+          "current_ratio": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Current Ratio"
+          },
+          "debt_to_assets": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Debt To Assets"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "cik",
+          "company",
+          "form",
+          "accession_number",
+          "filing_date",
+          "period_of_report",
+          "period",
+          "revenue",
+          "operating_income",
+          "net_income",
+          "total_assets",
+          "total_liabilities",
+          "stockholders_equity",
+          "current_assets",
+          "current_liabilities",
+          "operating_cash_flow",
+          "capital_expenditures",
+          "free_cash_flow",
+          "shares_outstanding_basic",
+          "shares_outstanding_diluted",
+          "current_ratio",
+          "debt_to_assets"
+        ],
+        "title": "FinancialMetrics"
+      },
+      "FinancialStatement": {
+        "properties": {
+          "periods": {
+            "items": {
+              "$ref": "#/components/schemas/StatementPeriod"
+            },
+            "type": "array",
+            "title": "Periods"
+          },
+          "records": {
+            "items": {
+              "$ref": "#/components/schemas/StatementRecord"
+            },
+            "type": "array",
+            "title": "Records"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "periods",
+          "records"
+        ],
+        "title": "FinancialStatement"
+      },
+      "FinancialsResponse": {
+        "properties": {
+          "cik": {
+            "type": "string",
+            "pattern": "^\\d{10}$",
+            "title": "Cik"
+          },
+          "company": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Company"
+          },
+          "form": {
+            "type": "string",
+            "title": "Form"
+          },
+          "accession_number": {
+            "type": "string",
+            "pattern": "^\\d{10}-\\d{2}-\\d{6}$",
+            "title": "Accession Number"
+          },
+          "filing_date": {
+            "type": "string",
+            "format": "date",
+            "title": "Filing Date"
+          },
+          "period_of_report": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Period Of Report"
+          },
+          "period": {
+            "type": "string",
+            "enum": [
+              "annual",
+              "quarterly"
+            ],
+            "title": "Period"
+          },
+          "view": {
+            "type": "string",
+            "enum": [
+              "raw",
+              "standardized"
+            ],
+            "title": "View"
+          },
+          "dimensions": {
+            "type": "boolean",
+            "title": "Dimensions"
+          },
+          "income_statement": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/FinancialStatement"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "balance_sheet": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/FinancialStatement"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "cashflow_statement": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/FinancialStatement"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "statement_of_equity": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/FinancialStatement"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "comprehensive_income": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/FinancialStatement"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "cover": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/FinancialStatement"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "cik",
+          "company",
+          "form",
+          "accession_number",
+          "filing_date",
+          "period_of_report",
+          "period",
+          "view",
+          "dimensions",
+          "income_statement",
+          "balance_sheet",
+          "cashflow_statement",
+          "statement_of_equity",
+          "comprehensive_income",
+          "cover"
+        ],
+        "title": "FinancialsResponse"
+      },
       "FormerName": {
         "properties": {
           "name": {
@@ -2995,6 +3542,277 @@
           "sections"
         ],
         "title": "SectionsResponse"
+      },
+      "StatementPeriod": {
+        "properties": {
+          "key": {
+            "type": "string",
+            "title": "Key"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "period_type": {
+            "type": "string",
+            "enum": [
+              "duration",
+              "instant"
+            ],
+            "title": "Period Type"
+          },
+          "period_start": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Period Start"
+          },
+          "period_end": {
+            "type": "string",
+            "format": "date",
+            "title": "Period End"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "key",
+          "label",
+          "period_type",
+          "period_start",
+          "period_end"
+        ],
+        "title": "StatementPeriod"
+      },
+      "StatementRecord": {
+        "properties": {
+          "concept": {
+            "type": "string",
+            "title": "Concept"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "standard_concept": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Standard Concept"
+          },
+          "level": {
+            "type": "integer",
+            "title": "Level"
+          },
+          "is_abstract": {
+            "type": "boolean",
+            "title": "Is Abstract"
+          },
+          "is_dimension": {
+            "type": "boolean",
+            "title": "Is Dimension"
+          },
+          "is_breakdown": {
+            "type": "boolean",
+            "title": "Is Breakdown"
+          },
+          "dimension_axis": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dimension Axis"
+          },
+          "dimension_member": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dimension Member"
+          },
+          "dimension_member_label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dimension Member Label"
+          },
+          "dimension_label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dimension Label"
+          },
+          "balance": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "debit",
+                  "credit"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Balance"
+          },
+          "weight": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Weight"
+          },
+          "preferred_sign": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Preferred Sign"
+          },
+          "parent_concept": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Parent Concept"
+          },
+          "parent_abstract_concept": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Parent Abstract Concept"
+          },
+          "unit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unit"
+          },
+          "point_in_time": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Point In Time"
+          },
+          "values": {
+            "items": {
+              "$ref": "#/components/schemas/StatementValue"
+            },
+            "type": "array",
+            "title": "Values"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "concept",
+          "label",
+          "standard_concept",
+          "level",
+          "is_abstract",
+          "is_dimension",
+          "is_breakdown",
+          "dimension_axis",
+          "dimension_member",
+          "dimension_member_label",
+          "dimension_label",
+          "balance",
+          "weight",
+          "preferred_sign",
+          "parent_concept",
+          "parent_abstract_concept",
+          "unit",
+          "point_in_time",
+          "values"
+        ],
+        "title": "StatementRecord"
+      },
+      "StatementValue": {
+        "properties": {
+          "period_key": {
+            "type": "string",
+            "title": "Period Key"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "period_key",
+          "value"
+        ],
+        "title": "StatementValue"
       },
       "SubmissionFiling": {
         "properties": {

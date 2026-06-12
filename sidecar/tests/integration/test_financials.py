@@ -1,0 +1,385 @@
+"""Integration: /company/{id}/financials statements + /financials/metrics scalars.
+
+All VCR tests share financials_p3_fixtures.yaml. Each company costs ~2 interactions
+(submissions JSON + the filing's SGML .txt); XBRL parses from the in-memory SGML.
+Ground truth verified by hand against the recorded SEC filings (2026-06-12):
+AAPL 10-K 0000320193-25-000079 / 10-Q 0000320193-26-000013, Realty Income 10-K
+0000726728-26-000011, Infosys 20-F 0000950170-25-091925 (IFRS path).
+The cassette's recorded Date header ages past the cache TTLs, so every test
+needs allow_playback_repeats (see the NOTE in conftest.py).
+"""
+
+from __future__ import annotations
+
+import pytest
+from fastapi.testclient import TestClient
+
+from app.main import app
+
+_STATEMENT_KEYS = (
+    "income_statement",
+    "balance_sheet",
+    "cashflow_statement",
+    "statement_of_equity",
+    "comprehensive_income",
+    "cover",
+)
+
+
+@pytest.fixture
+def vcr_cassette_name():
+    return "financials_p3_fixtures"
+
+
+@pytest.fixture(scope="module")
+def client():
+    with TestClient(app) as test_client:
+        yield test_client
+
+
+def _record(statement: dict, concept: str, label: str) -> dict:
+    matches = [r for r in statement["records"] if r["concept"] == concept and r["label"] == label]
+    assert len(matches) == 1, f"expected exactly one {concept} / {label!r} row, got {len(matches)}"
+    return matches[0]
+
+
+def _values(record: dict) -> list:
+    return [v["value"] for v in record["values"]]
+
+
+@pytest.mark.vcr(allow_playback_repeats=True)
+def test_financials_annual_standardized(client: TestClient, golden) -> None:
+    response = client.get("/company/AAPL/financials")
+    assert response.status_code == 200
+    body = response.json()
+
+    assert body["cik"] == "0000320193"
+    assert body["company"] == "Apple Inc."
+    assert body["form"] == "10-K"
+    assert body["accession_number"] == "0000320193-25-000079"
+    assert body["filing_date"] == "2025-10-31"
+    assert body["period_of_report"] == "2025-09-27"
+    assert body["period"] == "annual"
+    assert body["view"] == "standardized"
+    assert body["dimensions"] is False
+
+    income = body["income_statement"]
+    assert income["periods"] == [
+        {
+            "key": "duration_2024-09-29_2025-09-27",
+            "label": "Annual: September 29, 2024 to September 27, 2025",
+            "period_type": "duration",
+            "period_start": "2024-09-29",
+            "period_end": "2025-09-27",
+        },
+        {
+            "key": "duration_2023-10-01_2024-09-28",
+            "label": "Annual: October 01, 2023 to September 28, 2024",
+            "period_type": "duration",
+            "period_start": "2023-10-01",
+            "period_end": "2024-09-28",
+        },
+        {
+            "key": "duration_2022-09-25_2023-09-30",
+            "label": "Annual: September 25, 2022 to September 30, 2023",
+            "period_type": "duration",
+            "period_start": "2022-09-25",
+            "period_end": "2023-09-30",
+        },
+    ]
+    assert len(income["records"]) == 18
+
+    net_sales = _record(income, "us-gaap_RevenueFromContractWithCustomerExcludingAssessedTax", "Net sales")
+    assert _values(net_sales) == [416161000000.0, 391035000000.0, 383285000000.0]
+    assert net_sales["balance"] == "credit"
+    assert net_sales["preferred_sign"] == 1.0
+    assert net_sales["unit"] == "usd"
+    assert net_sales["is_abstract"] is False
+    assert _values(_record(income, "us-gaap_GrossProfit", "Gross margin")) == [
+        195201000000.0,
+        180683000000.0,
+        169148000000.0,
+    ]
+    assert _values(_record(income, "us-gaap_ResearchAndDevelopmentExpense", "Research and development")) == [
+        34550000000.0,
+        31370000000.0,
+        29915000000.0,
+    ]
+
+    # abstract section headers carry structure, never values
+    opex_header = _record(income, "us-gaap_OperatingExpensesAbstract", "Operating expenses:")
+    assert opex_header["is_abstract"] is True
+    assert _values(opex_header) == [None, None, None]
+
+    balance = body["balance_sheet"]
+    assert balance["periods"] == [
+        {
+            "key": "instant_2025-09-27",
+            "label": "September 27, 2025",
+            "period_type": "instant",
+            "period_start": None,
+            "period_end": "2025-09-27",
+        },
+        {
+            "key": "instant_2024-09-28",
+            "label": "September 28, 2024",
+            "period_type": "instant",
+            "period_start": None,
+            "period_end": "2024-09-28",
+        },
+    ]
+    assert len(balance["records"]) == 37
+    assert _values(_record(balance, "us-gaap_CashAndCashEquivalentsAtCarryingValue", "Cash and cash equivalents")) == [
+        35934000000.0,
+        29943000000.0,
+    ]
+
+    cashflow = body["cashflow_statement"]
+    assert len(cashflow["records"]) == 35
+    ocf = _record(cashflow, "us-gaap_NetCashProvidedByUsedInOperatingActivities", "Cash generated by operating activities")
+    assert ocf["standard_concept"] == "NetCashFromOperatingActivities"
+    assert _values(ocf) == [111482000000.0, 118254000000.0, 110543000000.0]
+
+    equity = body["statement_of_equity"]
+    assert len(equity["records"]) == 11
+    assert _values(_record(equity, "us-gaap_StockholdersEquity", "Beginning balances")) == [
+        56950000000.0,
+        62146000000.0,
+        50672000000.0,
+    ]
+
+    comprehensive = body["comprehensive_income"]
+    assert len(comprehensive["records"]) == 13
+    assert _values(_record(comprehensive, "us-gaap_NetIncomeLoss", "Net income")) == [
+        112010000000.0,
+        93736000000.0,
+        96995000000.0,
+    ]
+
+    cover = body["cover"]
+    assert len(cover["records"]) == 36
+    assert [p["key"] for p in cover["periods"]] == ["duration_2024-09-29_2025-09-27"]
+    # cover facts are text - the wire value union carries them as strings
+    assert _values(_record(cover, "dei_DocumentType", "Document Type")) == ["10-K"]
+    assert _values(_record(cover, "dei_CurrentFiscalYearEndDate", "Current Fiscal Year End Date")) == ["--09-27"]
+    assert _values(_record(cover, "dei_DocumentPeriodEndDate", "Document Period End Date")) == ["2025-09-27"]
+
+    golden("company_financials", "aapl_annual_standardized", body)
+
+
+@pytest.mark.vcr(allow_playback_repeats=True)
+def test_financials_raw_view_with_dimensions(client: TestClient, golden) -> None:
+    response = client.get("/company/AAPL/financials", params={"view": "raw", "dimensions": "true"})
+    assert response.status_code == 200
+    body = response.json()
+    assert body["view"] == "raw"
+    assert body["dimensions"] is True
+
+    income = body["income_statement"]
+    assert len(income["records"]) == 47
+    assert len([r for r in income["records"] if r["is_dimension"]]) == 29
+
+    iphone = _record(income, "us-gaap_RevenueFromContractWithCustomerExcludingAssessedTax", "iPhone")
+    assert iphone["is_dimension"] is True
+    assert iphone["dimension_axis"] == "srt:ProductOrServiceAxis"
+    assert iphone["dimension_member_label"] == "iPhone"
+    assert _values(iphone) == [209586000000.0, 201183000000.0, 200583000000.0]
+
+    golden("company_financials", "aapl_annual_raw_dimensions", body)
+
+
+@pytest.mark.vcr(allow_playback_repeats=True)
+def test_financials_quarterly(client: TestClient, golden) -> None:
+    response = client.get("/company/AAPL/financials", params={"period": "quarterly"})
+    assert response.status_code == 200
+    body = response.json()
+    assert body["form"] == "10-Q"
+    assert body["accession_number"] == "0000320193-26-000013"
+    assert body["period"] == "quarterly"
+
+    # a 10-Q carries quarter + fiscal-YTD durations; both label kinds must survive the wire
+    income = body["income_statement"]
+    assert [p["label"] for p in income["periods"]] == [
+        "Quarterly: December 28, 2025 to March 28, 2026",
+        "Quarterly: December 29, 2024 to March 29, 2025",
+        "Semi-Annual: September 28, 2025 to March 28, 2026",
+        "Semi-Annual: September 29, 2024 to March 29, 2025",
+    ]
+    assert [p["key"] for p in income["periods"]] == [
+        "duration_2025-12-28_2026-03-28",
+        "duration_2024-12-29_2025-03-29",
+        "duration_2025-09-28_2026-03-28",
+        "duration_2024-09-29_2025-03-29",
+    ]
+    net_sales = _record(income, "us-gaap_RevenueFromContractWithCustomerExcludingAssessedTax", "Net sales")
+    assert _values(net_sales) == [111184000000.0, 95359000000.0, 254940000000.0, 219659000000.0]
+
+    golden("company_financials", "aapl_quarterly", body)
+
+
+@pytest.mark.vcr(allow_playback_repeats=True)
+def test_financials_reit_revenue_composition(client: TestClient, golden) -> None:
+    # diversify beyond AAPL: REIT income statements lead with lease income, not product sales
+    response = client.get("/company/O/financials")
+    assert response.status_code == 200
+    body = response.json()
+    assert body["cik"] == "0000726728"
+    assert body["form"] == "10-K"
+    assert body["accession_number"] == "0000726728-26-000011"
+
+    income = body["income_statement"]
+    assert [p["key"] for p in income["periods"]] == [
+        "duration_2025-01-01_2025-12-31",
+        "duration_2024-01-01_2024-12-31",
+        "duration_2023-01-01_2023-12-31",
+    ]
+    assert _values(_record(income, "us-gaap_LeaseIncome", "Rental (including reimbursements)")) == [
+        5437332000.0,
+        5043748000.0,
+        3958150000.0,
+    ]
+    assert _values(_record(income, "us-gaap_Revenues", "Total revenue")) == [
+        5749377000.0,
+        5271142000.0,
+        4078993000.0,
+    ]
+    assert _values(_record(income, "us-gaap_DepreciationDepletionAndAmortization", "Depreciation and amortization")) == [
+        2524200000.0,
+        2395644000.0,
+        1895177000.0,
+    ]
+
+    golden("company_financials", "realty_income_annual", body)
+
+
+@pytest.mark.vcr(allow_playback_repeats=True)
+def test_financials_ifrs_foreign_filer(client: TestClient, golden) -> None:
+    # 20-F filer: annual chain falls through 10-K to 20-F; concepts are ifrs-full_*
+    response = client.get("/company/INFY/financials")
+    assert response.status_code == 200
+    body = response.json()
+    assert body["cik"] == "0001067491"
+    assert body["company"] == "Infosys Ltd"
+    assert body["form"] == "20-F"
+    assert body["accession_number"] == "0000950170-25-091925"
+    assert body["filing_date"] == "2025-07-01"
+    assert body["period_of_report"] == "2025-03-31"
+
+    income = body["income_statement"]
+    # Indian fiscal year: April-March annual durations
+    assert income["periods"][0] == {
+        "key": "duration_2024-04-01_2025-03-31",
+        "label": "Annual: April 01, 2024 to March 31, 2025",
+        "period_type": "duration",
+        "period_start": "2024-04-01",
+        "period_end": "2025-03-31",
+    }
+    revenue = _record(income, "ifrs-full_RevenueFromContractsWithCustomers", "Revenues")
+    assert _values(revenue) == [19277000000.0, 18562000000.0, 18212000000.0]
+    assert revenue["unit"] == "u_usd"  # INFY declares its own unit id, unlike AAPL's 'usd'
+    assert _values(_record(income, "ifrs-full_GrossProfit", "Gross profit")) == [
+        5872000000.0,
+        5587000000.0,
+        5503000000.0,
+    ]
+    assert _values(_record(income, "ifrs-full_ProfitLossFromOperatingActivities", "Operating profit")) == [
+        4071000000.0,
+        3834000000.0,
+        3825000000.0,
+    ]
+    assert {k: len(body[k]["records"]) for k in _STATEMENT_KEYS} == {
+        "income_statement": 40,
+        "balance_sheet": 53,
+        "cashflow_statement": 66,
+        "statement_of_equity": 28,
+        "comprehensive_income": 40,
+        "cover": 41,
+    }
+    golden("company_financials", "infy_annual_standardized", body)
+
+    # inverse of the AAPL gap: OCF resolves but operating_income/capex/shares do not -
+    # the library getters' concept/label coverage is uneven across taxonomies (the
+    # 'Operating profit' row above is on the statement; no getter pattern matches it)
+    response = client.get("/company/INFY/financials/metrics")
+    assert response.status_code == 200
+    metrics = response.json()
+    assert metrics == {
+        "cik": "0001067491",
+        "company": "Infosys Ltd",
+        "form": "20-F",
+        "accession_number": "0000950170-25-091925",
+        "filing_date": "2025-07-01",
+        "period_of_report": "2025-03-31",
+        "period": "annual",
+        "revenue": 19277000000.0,
+        "operating_income": None,
+        "net_income": 3162000000.0,
+        "total_assets": 17419000000.0,
+        "total_liabilities": 6164000000.0,
+        "stockholders_equity": 11255000000.0,
+        "current_assets": 11359000000.0,
+        "current_liabilities": 5012000000.0,
+        "operating_cash_flow": 4351000000.0,
+        "capital_expenditures": None,
+        "free_cash_flow": None,
+        "shares_outstanding_basic": None,
+        "shares_outstanding_diluted": None,
+        "current_ratio": 2.2663607342378294,
+        "debt_to_assets": 0.35386646765026697,
+    }
+    golden("company_financials_metrics", "infy_annual", metrics)
+
+
+@pytest.mark.vcr(allow_playback_repeats=True)
+def test_financial_metrics(client: TestClient, golden) -> None:
+    response = client.get("/company/AAPL/financials/metrics")
+    assert response.status_code == 200
+    body = response.json()
+    # operating_cash_flow/free_cash_flow are None by library behavior, not missing data:
+    # Financials.get_operating_cash_flow only label-regex matches the rendered statement
+    # (no concept-based lookup like the other getters) and AAPL's rendered label
+    # 'Cash generated by operating activities' matches none of its patterns. The actual
+    # OCF (111482000000) ships in the statements endpoint. Library finding, U31 Log.
+    assert body == {
+        "cik": "0000320193",
+        "company": "Apple Inc.",
+        "form": "10-K",
+        "accession_number": "0000320193-25-000079",
+        "filing_date": "2025-10-31",
+        "period_of_report": "2025-09-27",
+        "period": "annual",
+        "revenue": 416161000000.0,
+        "operating_income": 133050000000.0,
+        "net_income": 112010000000.0,
+        "total_assets": 359241000000.0,
+        "total_liabilities": 285508000000.0,
+        "stockholders_equity": 73733000000.0,
+        "current_assets": 147957000000.0,
+        "current_liabilities": 165631000000.0,
+        "operating_cash_flow": None,
+        "capital_expenditures": 12715000000.0,
+        "free_cash_flow": None,
+        "shares_outstanding_basic": 14948500000.0,
+        "shares_outstanding_diluted": 15004697000.0,
+        "current_ratio": 0.8932929222186667,
+        "debt_to_assets": 0.7947533828265705,
+    }
+
+    golden("company_financials_metrics", "aapl_annual", body)
+
+
+@pytest.mark.vcr(allow_playback_repeats=True)
+def test_financials_silence_no_annual_filing(client: TestClient) -> None:
+    # individual filer (Form 4s only) - the error names the form chain that was tried
+    response = client.get("/company/0001347842/financials")
+    assert response.status_code == 404
+    assert response.json() == {"detail": "no annual filing (10-K/20-F/40-F) at SEC for CIK 0001347842"}
+
+
+@pytest.mark.vcr(allow_playback_repeats=True)
+def test_financials_param_validation(client: TestClient) -> None:
+    # FastAPI rejects bad query params before the handler runs - no SEC traffic
+    assert client.get("/company/AAPL/financials", params={"period": "bogus"}).status_code == 422
+    assert client.get("/company/AAPL/financials", params={"view": "bogus"}).status_code == 422
+    assert client.get("/company/AAPL/financials", params={"dimensions": "maybe"}).status_code == 422
+    assert client.get("/company/AAPL/financials/metrics", params={"period": "bogus"}).status_code == 422
