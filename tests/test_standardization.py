@@ -560,3 +560,49 @@ def test_dividend_cluster_mappings():
     # Industry overrides carry the same correction (AAPL resolves via Comps)
     assert idx.get_standard_concept("us-gaap_PaymentsOfDividends", industry="Comps") == "CommonDividendsPaid"
     assert idx.get_standard_concept("us-gaap_PaymentsOfDividendsCommonStock", industry="Banks") == "CommonDividendsPaid"
+
+
+def test_detail_tags_never_resolve_to_statement_totals():
+    """Subtotal sweep: detail lines must not be relabeled as statement totals.
+
+    The learned tier shipped ~250 detail/noncash/equity-statement tags mapped to
+    aggregate concepts (NetCashFrom*, Liabilities, Revenue, PretaxIncomeLoss...),
+    so e.g. a "Repayments of bonds" line rendered as "Net Cash from Financing
+    Activities". Detail tags with an exact categorical concept were retargeted;
+    the rest were dropped so the filing label passes through unchanged.
+    """
+    from edgar.xbrl.standardization.reverse_index import get_reverse_index
+    idx = get_reverse_index()
+
+    # Retargets: exact categorical concepts, precedent-consistent
+    assert idx.get_standard_concept("us-gaap_RepaymentsOfBondsNotesAndDebentures") == "DebtRepayments"
+    assert idx.get_standard_concept("us-gaap_ProceedsFromLinesOfCredit") == "DebtProceeds"
+    assert idx.get_standard_concept("us-gaap_ProceedsFromIssuanceInitialPublicOffering") == "StockIssuanceProceeds"
+    assert idx.get_standard_concept("us-gaap_PaymentsToAcquireMachineryAndEquipment") == "CapitalExpenses"
+    assert idx.get_standard_concept(
+        "us-gaap_ProceedsFromSaleMaturityAndCollectionsOfInvestments") == "InvestmentProceeds"
+    assert idx.get_standard_concept("us-gaap_IncreaseDecreaseInInterestAndDividendsReceivable") == "ChangeInReceivables"
+    assert idx.get_standard_concept("us-gaap_IncreaseDecreaseInDeferredIncomeTaxes") == "DeferredIncomeTaxCF"
+    assert idx.get_standard_concept("ifrs-full_CurrentTradeReceivables") == "TradeReceivables"
+    assert idx.get_standard_concept(
+        "us-gaap_PaymentsOfLeaseLiabilitiesClassifiedAsFinancingActivities", industry="Banks") == "FinanceLeasePayments"
+
+    # FX effect on cash is its own concept, not the net change in cash
+    assert idx.get_standard_concept(
+        "us-gaap_EffectOfExchangeRateChangesOnCashAndCashEquivalents") == "ForeignExchangeEffectOnCash"
+    assert idx.get_standard_concept(
+        "ifrs-full_EffectOfExchangeRateChangesOnCashAndCashEquivalents") == "ForeignExchangeEffectOnCash"
+
+    # The total-noncurrent-liabilities tag lost its bogus second target
+    assert idx.lookup("us-gaap_LiabilitiesNoncurrent").standard_concepts == ["NonCurrentLiabilitiesTotal"]
+
+    # Drops: no scheme concept exists, so the filing label must pass through
+    for tag in (
+        "us-gaap_CommitmentsAndContingencies",  # placeholder line, was "Total Liabilities and Equity"
+        "us-gaap_EquityMethodInvestmentDividendsOrDistributions",
+        "us-gaap_ProceedsFromRepaymentsOfShortTermDebt",  # net flow, maps to neither proceeds nor repayments
+        "us-gaap_SalesReturnsAndAllowancesGoods",  # contra-revenue, was "Revenue"
+        "us-gaap_IncomeLossFromContinuingOperationsBeforeIncomeTaxesDomestic",  # component, was pretax total
+        "us-gaap_CashProvidedByUsedInOperatingActivitiesDiscontinuedOperations",
+    ):
+        assert idx.get_standard_concept(tag) is None, f"{tag} must stay unmapped"
