@@ -7,20 +7,11 @@ from typing import Literal
 
 from pydantic import Field
 
-from app.models.common import ACCESSION_PATTERN, CIK_PATTERN, WireModel
+from app.models.common import ACCESSION_PATTERN, CIK_PATTERN, Address, WireModel
 
 ContentFormat = Literal["markdown", "text", "html"]
 SectionFormat = Literal["text", "markdown"]
 AttachmentFormat = Literal["raw", "text", "markdown"]
-
-
-class HeaderAddress(WireModel):
-    # state_or_country_description excluded: the SGML header parse never populates it
-    street1: str | None
-    street2: str | None
-    city: str | None
-    state_or_country: str | None
-    zipcode: str | None
 
 
 class CompanyInfo(WireModel):
@@ -47,8 +38,8 @@ class FormerName(WireModel):
 class HeaderFiler(WireModel):
     company: CompanyInfo | None
     filing_values: FilingValues | None
-    business_address: HeaderAddress | None
-    mailing_address: HeaderAddress | None
+    business_address: Address | None
+    mailing_address: Address | None
     former_names: list[FormerName]
 
 
@@ -58,21 +49,21 @@ class HeaderReportingOwner(WireModel):
     cik: str | None = Field(pattern=CIK_PATTERN)
     company: CompanyInfo | None
     filing_values: FilingValues | None
-    business_address: HeaderAddress | None
-    mailing_address: HeaderAddress | None
+    business_address: Address | None
+    mailing_address: Address | None
 
 
 class HeaderIssuer(WireModel):
     company: CompanyInfo | None
-    business_address: HeaderAddress | None
-    mailing_address: HeaderAddress | None
+    business_address: Address | None
+    mailing_address: Address | None
 
 
 class HeaderSubjectCompany(WireModel):
     company: CompanyInfo | None
     filing_values: FilingValues | None
-    business_address: HeaderAddress | None
-    mailing_address: HeaderAddress | None
+    business_address: Address | None
+    mailing_address: Address | None
     former_names: list[FormerName]
 
 
@@ -109,7 +100,8 @@ class DocumentRef(WireModel):
 
 
 class FilingEnvelope(WireModel):
-    # `data` becomes the typed-form discriminated union when the first P4 unit (U40) lands
+    # TODO(DEFERRED): U40 typed P4 forms - `data: None` becomes the discriminated union of
+    # typed form models with obj_type as its discriminator; both populate together then
     accession_number: str = Field(pattern=ACCESSION_PATTERN)
     form: str
     cik: str = Field(pattern=CIK_PATTERN)

@@ -1,14 +1,19 @@
 """Unit tests for the exception -> HTTP status mapping (pure function only)."""
 
+import asyncio
+
 import httpx
+import pytest
 from edgar import DataObjectException, Filing
 from edgar.core import TooManyRequestsException
 from edgar.dates import InvalidDateException
 from edgar.entity.core import CompanyNotFoundError
 from edgar.enums import ValidationError as EdgarValidationError
 from edgar.httprequests import IdentityNotSetException, TooManyRequestsError
+from fastapi.exceptions import RequestValidationError
+from starlette.requests import Request
 
-from app.errors import retry_after_header, status_for_exception
+from app.errors import _handle, format_validation_errors, retry_after_header, status_for_exception
 
 
 def _must_map(exc: Exception) -> tuple[int, str]:
@@ -113,3 +118,27 @@ def test_retry_after_absent_on_httpx_429_without_header():
 
 def test_retry_after_none_for_unrelated_exception():
     assert retry_after_header(KeyError("boom")) is None
+
+
+def test_handler_reraises_unmapped_exception_types():
+    # drift guard for _handle's re-raise branch: a type without a status mapping must
+    # surface as the original exception (FastAPI 500), never a swallowed JSON response
+    request = Request({"type": "http", "method": "GET", "path": "/", "headers": []})
+    with pytest.raises(KeyError):
+        asyncio.run(_handle(request, KeyError("boom")))
+
+
+def test_validation_errors_flatten_to_canonical_detail():
+    exc = RequestValidationError(
+        [
+            {"loc": ("query", "page_size"), "msg": "Input should be greater than or equal to 1"},
+            {"loc": ("query", "year"), "msg": "Input should be a valid integer"},
+        ]
+    )
+    assert format_validation_errors(exc) == (
+        "query.page_size: Input should be greater than or equal to 1; query.year: Input should be a valid integer"
+    )
+
+
+def test_validation_errors_flatten_handles_empty_list():
+    assert format_validation_errors(RequestValidationError([])) == "request validation failed"

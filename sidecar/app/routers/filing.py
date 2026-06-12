@@ -15,7 +15,7 @@ from app.converters.filing import (
     filing_envelope,
     sections_response,
 )
-from app.models.common import ACCESSION_PATTERN
+from app.models.common import ACCESSION_PATTERN, error_responses
 from app.models.filing import (
     AttachmentContentResponse,
     AttachmentFormat,
@@ -27,7 +27,7 @@ from app.models.filing import (
     SectionsResponse,
 )
 
-router = APIRouter()
+router = APIRouter(responses=error_responses(404, 422, 429, 502))
 
 AccessionParam = Annotated[str, Path(pattern=ACCESSION_PATTERN)]
 SequenceParam = Annotated[str, Path(pattern=r"^\d{1,4}$")]

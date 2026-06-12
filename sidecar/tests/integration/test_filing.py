@@ -55,7 +55,7 @@ def test_filing_envelope_entities_header_and_missing(client: TestClient, golden)
     assert header["issuer"] is None
     assert header["subject_companies"] == []
     assert wba["primary_documents"][0]["document"] == "d880765d8k.htm"
-    assert wba["obj_type"] == "EightK"
+    assert wba["obj_type"] is None  # null together with data until typed P4 forms land (U40)
     assert wba["data"] is None
     assert wba["homepage_url"].endswith("/0001193125-25-004072-index.html")
     assert wba["text_url"].endswith("/0001193125-25-004072.txt")
@@ -96,6 +96,8 @@ def test_filing_envelope_entities_header_and_missing(client: TestClient, golden)
         "street2": "PO BOX 1347",
         "city": "MIAMI",
         "state_or_country": "FL",
+        # canonical Address shape: the SGML header parse never carries the description
+        "state_or_country_description": None,
         "zipcode": "33178-2428",
     }
     assert corp["former_names"] == [{"name": "CARNIVAL CRUISE LINES INC", "date_of_change": "1992-07-03"}]
@@ -138,6 +140,7 @@ def test_filing_envelope_entities_header_and_missing(client: TestClient, golden)
         "street2": None,
         "city": "SANTA CLARA",
         "state_or_country": "CA",
+        "state_or_country_description": None,
         "zipcode": "95051",
     }
     issuer = header["issuer"]
@@ -148,7 +151,7 @@ def test_filing_envelope_entities_header_and_missing(client: TestClient, golden)
     doc = nvda["primary_documents"][0]
     assert doc["document"] == "wk-form4_1736377440.xml"
     assert doc["document_type"] == "4"
-    assert nvda["obj_type"] == "Form4"
+    assert nvda["obj_type"] is None  # null together with data until typed P4 forms land (U40)
     golden("filing", "nvidia_form4", nvda)
 
     # nonexistent accession -> 404 with the accession named (silence check)

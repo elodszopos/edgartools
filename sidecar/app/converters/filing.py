@@ -22,6 +22,7 @@ from edgar.sgml.sgml_header import (
 )
 
 from app.cik import pad_cik
+from app.models.common import Address as WireAddress
 from app.models.filing import (
     AttachmentContentResponse,
     AttachmentFormat,
@@ -36,7 +37,6 @@ from app.models.filing import (
     FilingHeaderModel,
     FilingValues,
     FormerName,
-    HeaderAddress,
     HeaderFiler,
     HeaderIssuer,
     HeaderReportingOwner,
@@ -51,14 +51,16 @@ from app.serialize import eastern_naive_to_utc, to_date, to_int, to_str
 _ITEM_LINE = re.compile(r"^ITEM INFORMATION:\s*(.+?)\s*$", re.MULTILINE)
 
 
-def _address(address: Address | None) -> HeaderAddress | None:
+def _address(address: Address | None) -> WireAddress | None:
     if address is None:
         return None
-    return HeaderAddress(
+    return WireAddress(
         street1=to_str(address.street1),
         street2=to_str(address.street2),
         city=to_str(address.city),
         state_or_country=to_str(address.state_or_country),
+        # the SGML header parse never populates the description; null per the canonical shape
+        state_or_country_description=None,
         zipcode=to_str(address.zipcode),
     )
 
@@ -244,11 +246,13 @@ def _attachment_info(attachment: Attachment, *, is_primary: bool, group: str) ->
 
 def attachments_response(filing: Filing) -> AttachmentsResponse:
     # sgml-sourced attachments: documents first, then data files (the SGML build latches
-    # everything after the first XML data file into data_files); primary = sequence-1 docs
+    # everything after the first XML data file into data_files); primary = sequence-1 docs.
+    # membership by sequence_number, not object identity - the library may rebuild
+    # Attachment objects between the documents and primary_documents accessors
     attachments = filing.attachments
-    primary = attachments.primary_documents
-    rows = [_attachment_info(a, is_primary=any(a is p for p in primary), group="document") for a in attachments.documents]
-    rows += [_attachment_info(a, is_primary=any(a is p for p in primary), group="data_file") for a in attachments.data_files or []]
+    primary_sequences = {p.sequence_number for p in attachments.primary_documents}
+    rows = [_attachment_info(a, is_primary=a.sequence_number in primary_sequences, group="document") for a in attachments.documents]
+    rows += [_attachment_info(a, is_primary=a.sequence_number in primary_sequences, group="data_file") for a in attachments.data_files or []]
     return AttachmentsResponse(accession_number=filing.accession_no, total=len(rows), attachments=rows)
 
 
@@ -298,6 +302,9 @@ def filing_envelope(filing: Filing) -> FilingEnvelope:
         primary_documents=[_document_ref(a) for a in sgml.attachments.primary_documents],
         homepage_url=filing.homepage_url,
         text_url=filing.text_url,
-        obj_type=filing.obj_type,
+        # TODO(DEFERRED): U40 typed P4 forms - populate obj_type AND data together here from
+        # filing.obj() (filing.obj_type is live and ready as the discriminator source);
+        # until then both stay null - obj_type alone is a promise data never delivers (#44)
+        obj_type=None,
         data=None,
     )

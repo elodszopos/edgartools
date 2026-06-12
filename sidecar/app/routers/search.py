@@ -7,16 +7,16 @@ from typing import Annotated
 
 import orjson
 from edgar.httprequests import get_with_retry
-from edgar.reference.tickers import find_cik
 from edgar.search.efts import EFTS_BASE_URL, build_efts_params, parse_aggregations, parse_hit
 from fastapi import APIRouter, HTTPException, Query
 
-from app.cik import pad_cik, parse_entity_id
+from app.cik import pad_cik
 from app.converters.search import EFTS_RESULT_WINDOW, search_page
-from app.deps import StartParam
+from app.deps import StartParam, resolve_cik
+from app.models.common import error_responses
 from app.models.search import SearchPage
 
-router = APIRouter()
+router = APIRouter(responses=error_responses(404, 422, 429, 502))
 
 
 def _build_efts_params(
@@ -67,16 +67,7 @@ def search(
             detail=f"start + page_size exceeds the EFTS result window of {EFTS_RESULT_WINDOW}; narrow the query instead",
         )
 
-    cik: str | None = None
-    if id is not None:
-        entity = parse_entity_id(id)
-        if isinstance(entity, int):
-            cik = pad_cik(entity)
-        else:
-            resolved = find_cik(entity)
-            if resolved is None:
-                raise HTTPException(status_code=404, detail=f"ticker {entity!r} not found in the SEC ticker reference")
-            cik = pad_cik(resolved)
+    cik = pad_cik(resolve_cik(id)) if id is not None else None
 
     params = _build_efts_params(query, forms, items, cik, date_from, date_to, start)
     response = get_with_retry(EFTS_BASE_URL, params=params)

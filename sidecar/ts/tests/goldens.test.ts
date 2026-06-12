@@ -8,6 +8,7 @@ import { join } from 'node:path';
 import { describe, expect, test } from 'bun:test';
 import type { z } from 'zod';
 import {
+  ErrorResponse,
   GetAttachmentContentFilingAccessionAttachmentsSequenceGetResponse,
   GetCompanyCompanyIdGetResponse,
   GetCompanyFinancialMetricsCompanyIdFinancialsMetricsGetResponse,
@@ -30,6 +31,8 @@ const FIXTURES = join(import.meta.dir, '..', 'fixtures', 'responses');
 
 // endpoint dir name -> generated response schema; extend with every new endpoint
 const RESPONSE_SCHEMAS: Record<string, z.ZodType> = {
+  // not an endpoint dir: canonical error bodies, one golden per error mechanism
+  errors: ErrorResponse,
   health: HealthHealthGetResponse,
   company: GetCompanyCompanyIdGetResponse,
   company_financials: GetCompanyFinancialsCompanyIdFinancialsGetResponse,

@@ -6,17 +6,7 @@ from datetime import date, datetime
 
 from pydantic import Field
 
-from app.models.common import ACCESSION_PATTERN, CIK_PATTERN, WireModel
-
-
-class EntityAddress(WireModel):
-    # submissions-store addresses carry the country description (SGML header ones do not)
-    street1: str | None
-    street2: str | None
-    city: str | None
-    state_or_country: str | None
-    state_or_country_description: str | None
-    zipcode: str | None
+from app.models.common import ACCESSION_PATTERN, CIK_PATTERN, Address, WireModel
 
 
 class EntityFormerName(WireModel):
@@ -54,8 +44,8 @@ class CompanyProfile(WireModel):
     # null when no incorporation code is on file (resolving it would need cross-filing analysis)
     is_foreign: bool | None
     flags: str | None
-    business_address: EntityAddress | None
-    mailing_address: EntityAddress | None
+    business_address: Address | None
+    mailing_address: Address | None
     former_names: list[EntityFormerName]
     insider_transaction_for_owner_exists: bool
     insider_transaction_for_issuer_exists: bool

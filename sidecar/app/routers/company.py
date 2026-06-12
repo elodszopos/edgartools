@@ -6,9 +6,10 @@ from fastapi import APIRouter
 
 from app.converters.company import company_profile, submissions_page
 from app.deps import PageSizeParam, StartParam, lookup_company
+from app.models.common import error_responses
 from app.models.company import CompanyProfile, SubmissionsPage
 
-router = APIRouter()
+router = APIRouter(responses=error_responses(404, 422, 429, 502))
 
 
 @router.get("/company/{id}")

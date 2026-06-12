@@ -23,6 +23,7 @@ from app.converters.financials import (
     ttm_metric_model,
 )
 from app.deps import lookup_company
+from app.models.common import error_responses
 from app.models.financials import (
     FinancialMetrics,
     FinancialsPeriod,
@@ -37,7 +38,7 @@ from app.serialize import to_date, to_str
 if TYPE_CHECKING:
     from edgar.ttm.calculator import TTMMetric
 
-router = APIRouter()
+router = APIRouter(responses=error_responses(404, 422, 429, 502))
 
 _TTM_QUARTER_KEY = re.compile(r"^\d{4}-[Qq][1-4]$")
 

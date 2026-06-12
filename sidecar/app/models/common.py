@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import date
+from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -14,6 +15,34 @@ class WireModel(BaseModel):
     """Base for every response model: unknown constructor fields are converter bugs - fail loud."""
 
     model_config = ConfigDict(extra="forbid")
+
+
+class ErrorResponse(WireModel):
+    """Canonical body for every non-2xx the sidecar emits (HTTPException, mapped
+    edgartools/httpx exceptions, and flattened request-validation errors alike)."""
+
+    detail: str
+
+
+def error_responses(*statuses: int) -> dict[int | str, dict[str, Any]]:
+    """OpenAPI ``responses`` declaration: the given statuses carry an ErrorResponse body.
+
+    Declaring 422 here also suppresses FastAPI's auto-added HTTPValidationError schema,
+    which lies about the wire shape (the validation handler flattens detail to a string).
+    """
+    return {status: {"model": ErrorResponse} for status in statuses}
+
+
+class Address(WireModel):
+    """One address shape for every source. The submissions store carries the country
+    description; the SGML header parse does not and serves it as null."""
+
+    street1: str | None
+    street2: str | None
+    city: str | None
+    state_or_country: str | None
+    state_or_country_description: str | None
+    zipcode: str | None
 
 
 class EntityRef(WireModel):

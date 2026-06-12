@@ -73,6 +73,22 @@ def test_filings_index_paging_and_filters(client: TestClient, golden) -> None:
     assert response.status_code == 200
     assert {ref["accession_number"] for ref in response.json()["filings"]} == {ref["accession_number"] for ref in apple["filings"]}
 
+    # unknown ticker -> 404, matching /company and /search (not a silent empty page)
+    response = client.get("/filings", params={**WINDOW, "id": "ZZZZZZZZ"})
+    assert response.status_code == 404
+    assert "ZZZZZZZZ" in response.json()["detail"]
+
+    # amendments=false binds WITHOUT form/date filters too (same 2025 Q1 index fixture);
+    # get_filings used to silently ignore it on this path
+    response = client.get("/filings", params={"year": 2025, "quarter": 1, "page_size": 100})
+    assert response.status_code == 200
+    all_forms_total = response.json()["total"]
+    response = client.get("/filings", params={"year": 2025, "quarter": 1, "amendments": False, "page_size": 100})
+    assert response.status_code == 200
+    unamended = response.json()
+    assert 0 < unamended["total"] < all_forms_total  # the quarter's /A filings dropped
+    assert not any(ref["form"].endswith("/A") for ref in unamended["filings"])
+
     golden("filings", "tenk_window_page", page1)
 
 
@@ -101,6 +117,16 @@ def test_current_filings_page_and_form_filter(client: TestClient, golden) -> Non
     assert len(form4["filings"]) > 0
     assert all(ref["form"] in ("4", "4/A") for ref in form4["filings"])
 
+    # amendments=false holds WITHOUT a form filter: the recorded page carries two
+    # SCHEDULE 13D/A entries that must drop (short page per the raw-count contract)
+    assert sum(ref["form"].endswith("/A") for ref in page["filings"]) == 2
+    response = client.get("/filings/current", params={"page_size": 10, "amendments": False})
+    assert response.status_code == 200
+    unamended = response.json()
+    assert len(unamended["filings"]) == 8
+    assert not any(ref["form"].endswith("/A") for ref in unamended["filings"])
+    assert unamended["has_more"] is True  # paging still follows the raw (pre-filter) page
+
     golden("filings_current", "first_page", page)
 
 
@@ -125,3 +151,8 @@ def test_filings_param_validation(client: TestClient) -> None:
     # current: owner enum enforced
     response = client.get("/filings/current", params={"owner": "everyone"})
     assert response.status_code == 422
+
+    # malformed id -> 422 via the shared resolver (not a 500)
+    response = client.get("/filings", params={**WINDOW, "id": "0"})
+    assert response.status_code == 422
+    assert "CIK out of range" in response.json()["detail"]

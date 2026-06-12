@@ -4,6 +4,18 @@
  */
 import * as zod from 'zod';
 
+export const Address = zod.strictObject({
+  "street1": zod.union([zod.string(),zod.null()]),
+  "street2": zod.union([zod.string(),zod.null()]),
+  "city": zod.union([zod.string(),zod.null()]),
+  "state_or_country": zod.union([zod.string(),zod.null()]),
+  "state_or_country_description": zod.union([zod.string(),zod.null()]),
+  "zipcode": zod.union([zod.string(),zod.null()])
+}).describe('One address shape for every source. The submissions store carries the country\ndescription; the SGML header parse does not and serves it as null.');
+
+export type Address = zod.input<typeof Address>;
+export type AddressOutput = zod.output<typeof Address>;
+
 export const attachmentContentResponseAccessionNumberRegExp = new RegExp('^\\d{10}-\\d{2}-\\d{6}$');
 
 
@@ -65,18 +77,6 @@ export const CompanyInfo = zod.strictObject({
 export type CompanyInfo = zod.input<typeof CompanyInfo>;
 export type CompanyInfoOutput = zod.output<typeof CompanyInfo>;
 
-export const EntityAddress = zod.strictObject({
-  "street1": zod.union([zod.string(),zod.null()]),
-  "street2": zod.union([zod.string(),zod.null()]),
-  "city": zod.union([zod.string(),zod.null()]),
-  "state_or_country": zod.union([zod.string(),zod.null()]),
-  "state_or_country_description": zod.union([zod.string(),zod.null()]),
-  "zipcode": zod.union([zod.string(),zod.null()])
-});
-
-export type EntityAddress = zod.input<typeof EntityAddress>;
-export type EntityAddressOutput = zod.output<typeof EntityAddress>;
-
 export const EntityFormerName = zod.strictObject({
   "name": zod.union([zod.string(),zod.null()]),
   "from_date": zod.union([zod.iso.date(),zod.null()]),
@@ -112,8 +112,8 @@ export const CompanyProfile = zod.strictObject({
   "state_of_incorporation_description": zod.union([zod.string(),zod.null()]),
   "is_foreign": zod.union([zod.boolean(),zod.null()]),
   "flags": zod.union([zod.string(),zod.null()]),
-  "business_address": zod.union([EntityAddress,zod.null()]),
-  "mailing_address": zod.union([EntityAddress,zod.null()]),
+  "business_address": zod.union([Address,zod.null()]),
+  "mailing_address": zod.union([Address,zod.null()]),
   "former_names": zod.array(EntityFormerName),
   "insider_transaction_for_owner_exists": zod.boolean(),
   "insider_transaction_for_issuer_exists": zod.boolean(),
@@ -164,6 +164,11 @@ export const CurrentFilingsPage = zod.strictObject({
 export type CurrentFilingsPage = zod.input<typeof CurrentFilingsPage>;
 export type CurrentFilingsPageOutput = zod.output<typeof CurrentFilingsPage>;
 
+export const CurrentPageSize = zod.union([zod.literal(10),zod.literal(20),zod.literal(40),zod.literal(80),zod.literal(100)]).describe('The getcurrent feed only serves these page sizes; anything else would be silently clamped.');
+
+export type CurrentPageSize = zod.input<typeof CurrentPageSize>;
+export type CurrentPageSizeOutput = zod.output<typeof CurrentPageSize>;
+
 export const DocumentRef = zod.strictObject({
   "sequence": zod.string(),
   "document": zod.union([zod.string(),zod.null()]),
@@ -176,6 +181,13 @@ export const DocumentRef = zod.strictObject({
 
 export type DocumentRef = zod.input<typeof DocumentRef>;
 export type DocumentRefOutput = zod.output<typeof DocumentRef>;
+
+export const ErrorResponse = zod.strictObject({
+  "detail": zod.string()
+}).describe('Canonical body for every non-2xx the sidecar emits (HTTPException, mapped\nedgartools\/httpx exceptions, and flattened request-validation errors alike).');
+
+export type ErrorResponse = zod.input<typeof ErrorResponse>;
+export type ErrorResponseOutput = zod.output<typeof ErrorResponse>;
 
 export const FacetBucket = zod.strictObject({
   "key": zod.string(),
@@ -208,17 +220,6 @@ export const FilingValues = zod.strictObject({
 export type FilingValues = zod.input<typeof FilingValues>;
 export type FilingValuesOutput = zod.output<typeof FilingValues>;
 
-export const HeaderAddress = zod.strictObject({
-  "street1": zod.union([zod.string(),zod.null()]),
-  "street2": zod.union([zod.string(),zod.null()]),
-  "city": zod.union([zod.string(),zod.null()]),
-  "state_or_country": zod.union([zod.string(),zod.null()]),
-  "zipcode": zod.union([zod.string(),zod.null()])
-});
-
-export type HeaderAddress = zod.input<typeof HeaderAddress>;
-export type HeaderAddressOutput = zod.output<typeof HeaderAddress>;
-
 export const FormerName = zod.strictObject({
   "name": zod.union([zod.string(),zod.null()]),
   "date_of_change": zod.union([zod.iso.date(),zod.null()])
@@ -230,8 +231,8 @@ export type FormerNameOutput = zod.output<typeof FormerName>;
 export const HeaderFiler = zod.strictObject({
   "company": zod.union([CompanyInfo,zod.null()]),
   "filing_values": zod.union([FilingValues,zod.null()]),
-  "business_address": zod.union([HeaderAddress,zod.null()]),
-  "mailing_address": zod.union([HeaderAddress,zod.null()]),
+  "business_address": zod.union([Address,zod.null()]),
+  "mailing_address": zod.union([Address,zod.null()]),
   "former_names": zod.array(FormerName)
 });
 
@@ -246,8 +247,8 @@ export const HeaderReportingOwner = zod.strictObject({
   "cik": zod.union([zod.string().regex(headerReportingOwnerCikOneRegExp),zod.null()]),
   "company": zod.union([CompanyInfo,zod.null()]),
   "filing_values": zod.union([FilingValues,zod.null()]),
-  "business_address": zod.union([HeaderAddress,zod.null()]),
-  "mailing_address": zod.union([HeaderAddress,zod.null()])
+  "business_address": zod.union([Address,zod.null()]),
+  "mailing_address": zod.union([Address,zod.null()])
 });
 
 export type HeaderReportingOwner = zod.input<typeof HeaderReportingOwner>;
@@ -255,8 +256,8 @@ export type HeaderReportingOwnerOutput = zod.output<typeof HeaderReportingOwner>
 
 export const HeaderIssuer = zod.strictObject({
   "company": zod.union([CompanyInfo,zod.null()]),
-  "business_address": zod.union([HeaderAddress,zod.null()]),
-  "mailing_address": zod.union([HeaderAddress,zod.null()])
+  "business_address": zod.union([Address,zod.null()]),
+  "mailing_address": zod.union([Address,zod.null()])
 });
 
 export type HeaderIssuer = zod.input<typeof HeaderIssuer>;
@@ -265,8 +266,8 @@ export type HeaderIssuerOutput = zod.output<typeof HeaderIssuer>;
 export const HeaderSubjectCompany = zod.strictObject({
   "company": zod.union([CompanyInfo,zod.null()]),
   "filing_values": zod.union([FilingValues,zod.null()]),
-  "business_address": zod.union([HeaderAddress,zod.null()]),
-  "mailing_address": zod.union([HeaderAddress,zod.null()]),
+  "business_address": zod.union([Address,zod.null()]),
+  "mailing_address": zod.union([Address,zod.null()]),
   "former_names": zod.array(FormerName)
 });
 
@@ -319,7 +320,8 @@ export const FilingProvenance = zod.strictObject({
   "form": zod.string(),
   "accession_number": zod.string().regex(filingProvenanceAccessionNumberRegExp),
   "filing_date": zod.iso.date(),
-  "period_of_report": zod.union([zod.iso.date(),zod.null()])
+  "period_of_report": zod.union([zod.iso.date(),zod.null()]),
+  "superseded_by": zod.union([zod.string(),zod.null()]).describe('Accession of the latest later-filed amendment covering the same report period; null when this filing stands as-is.')
 });
 
 export type FilingProvenance = zod.input<typeof FilingProvenance>;
@@ -363,7 +365,9 @@ export const FinancialMetrics = zod.strictObject({
   "accession_number": zod.string().regex(financialMetricsAccessionNumberRegExp),
   "filing_date": zod.iso.date(),
   "period_of_report": zod.union([zod.iso.date(),zod.null()]),
+  "superseded_by": zod.union([zod.string(),zod.null()]).describe('Accession of the latest later-filed amendment covering the same report period; null when this filing stands as-is.'),
   "period": zod.enum(['annual', 'quarterly']),
+  "amendments": zod.boolean(),
   "revenue": zod.union([zod.number(),zod.null()]),
   "operating_income": zod.union([zod.number(),zod.null()]),
   "net_income": zod.union([zod.number(),zod.null()]),
@@ -389,7 +393,8 @@ export const StatementPeriod = zod.strictObject({
   "label": zod.string(),
   "period_type": zod.enum(['duration', 'instant']),
   "period_start": zod.union([zod.iso.date(),zod.null()]),
-  "period_end": zod.iso.date()
+  "period_end": zod.iso.date(),
+  "period_months": zod.union([zod.number(),zod.null()]).describe('Approximate duration in whole months (3=quarter, 12=annual); null for instant periods.')
 });
 
 export type StatementPeriod = zod.input<typeof StatementPeriod>;
@@ -397,7 +402,8 @@ export type StatementPeriodOutput = zod.output<typeof StatementPeriod>;
 
 export const StatementValue = zod.strictObject({
   "period_key": zod.string(),
-  "value": zod.union([zod.number(),zod.string(),zod.null()])
+  "value": zod.union([zod.number(),zod.string(),zod.null()]).describe('RAW XBRL instance value, never sign-adjusted for display: numeric fact, text fact (cover page, flags), or null when absent.'),
+  "value_type": zod.union([zod.enum(['number', 'text']),zod.null()]).describe('Discriminator for value: \'number\', \'text\', or null when value is null.')
 });
 
 export type StatementValue = zod.input<typeof StatementValue>;
@@ -407,7 +413,7 @@ export const StatementRecord = zod.strictObject({
   "concept": zod.string(),
   "label": zod.string(),
   "standard_concept": zod.union([zod.string(),zod.null()]),
-  "level": zod.number(),
+  "level": zod.number().describe('Presentation indent depth within the statement hierarchy.'),
   "is_abstract": zod.boolean(),
   "is_dimension": zod.boolean(),
   "is_breakdown": zod.boolean(),
@@ -415,12 +421,13 @@ export const StatementRecord = zod.strictObject({
   "dimension_member": zod.union([zod.string(),zod.null()]),
   "dimension_member_label": zod.union([zod.string(),zod.null()]),
   "dimension_label": zod.union([zod.string(),zod.null()]),
-  "balance": zod.union([zod.enum(['debit', 'credit']),zod.null()]),
-  "weight": zod.union([zod.number(),zod.null()]),
-  "preferred_sign": zod.union([zod.number(),zod.null()]),
+  "balance": zod.union([zod.enum(['debit', 'credit']),zod.null()]).describe('XBRL balance attribute of the concept; with weight, determines how the value aggregates.'),
+  "weight": zod.union([zod.number(),zod.null()]).describe('Calculation-arc weight toward the parent total (e.g. -1.0 subtracts); null when the concept is not in a calculation tree.'),
+  "preferred_sign": zod.union([zod.number(),zod.null()]).describe('Display sign multiplier from the presentation linkbase: apply to values to reproduce SEC HTML display (e.g. -1.0 shows outflows as negative). Values ship raw.'),
   "parent_concept": zod.union([zod.string(),zod.null()]),
   "parent_abstract_concept": zod.union([zod.string(),zod.null()]),
-  "unit": zod.union([zod.string(),zod.null()]),
+  "unit": zod.union([zod.string(),zod.null()]).describe('Normalized unit: usd, shares, usdPerShare, number, ...'),
+  "currency": zod.union([zod.string(),zod.null()]).describe('ISO 4217 code when the unit is monetary (incl. per-share); null for shares\/pure numbers.'),
   "point_in_time": zod.union([zod.boolean(),zod.null()]),
   "values": zod.array(StatementValue)
 });
@@ -447,9 +454,11 @@ export const FinancialsResponse = zod.strictObject({
   "accession_number": zod.string().regex(financialsResponseAccessionNumberRegExp),
   "filing_date": zod.iso.date(),
   "period_of_report": zod.union([zod.iso.date(),zod.null()]),
+  "superseded_by": zod.union([zod.string(),zod.null()]).describe('Accession of the latest later-filed amendment covering the same report period; null when this filing stands as-is.'),
   "period": zod.enum(['annual', 'quarterly']),
   "view": zod.enum(['raw', 'standardized']),
   "dimensions": zod.boolean(),
+  "amendments": zod.boolean(),
   "income_statement": zod.union([FinancialStatement,zod.null()]),
   "balance_sheet": zod.union([FinancialStatement,zod.null()]),
   "cashflow_statement": zod.union([FinancialStatement,zod.null()]),
@@ -460,26 +469,6 @@ export const FinancialsResponse = zod.strictObject({
 
 export type FinancialsResponse = zod.input<typeof FinancialsResponse>;
 export type FinancialsResponseOutput = zod.output<typeof FinancialsResponse>;
-
-export const ValidationError = zod.strictObject({
-  "loc": zod.array(zod.union([zod.string(),zod.number()])),
-  "msg": zod.string(),
-  "type": zod.string(),
-  "input": zod.unknown().optional(),
-  "ctx": zod.looseObject({
-
-}).optional()
-});
-
-export type ValidationError = zod.input<typeof ValidationError>;
-export type ValidationErrorOutput = zod.output<typeof ValidationError>;
-
-export const HTTPValidationError = zod.strictObject({
-  "detail": zod.array(ValidationError).optional()
-});
-
-export type HTTPValidationError = zod.input<typeof HTTPValidationError>;
-export type HTTPValidationErrorOutput = zod.output<typeof HTTPValidationError>;
 
 export const Health = zod.strictObject({
   "status": zod.literal("ok"),
@@ -494,10 +483,14 @@ export const StitchedStatementRecord = zod.strictObject({
   "concept": zod.string(),
   "label": zod.string(),
   "standard_concept": zod.union([zod.string(),zod.null()]),
-  "level": zod.number(),
+  "level": zod.number().describe('Presentation indent depth within the statement hierarchy.'),
   "is_abstract": zod.boolean(),
   "is_total": zod.boolean(),
-  "preferred_sign": zod.union([zod.number(),zod.null()]),
+  "balance": zod.union([zod.enum(['debit', 'credit']),zod.null()]).describe('XBRL balance attribute of the concept; with weight, determines how the value aggregates.'),
+  "weight": zod.union([zod.number(),zod.null()]).describe('Calculation-arc weight toward the parent total (e.g. -1.0 subtracts); null when the concept is not in a calculation tree.'),
+  "preferred_sign": zod.union([zod.number(),zod.null()]).describe('Display sign multiplier from the presentation linkbase: apply to values to reproduce SEC HTML display. Values ship raw.'),
+  "unit": zod.union([zod.string(),zod.null()]).describe('Normalized unit: usd, shares, usdPerShare, number, ...'),
+  "currency": zod.union([zod.string(),zod.null()]).describe('ISO 4217 code when the unit is monetary (incl. per-share); null for shares\/pure numbers.'),
   "values": zod.array(StatementValue)
 });
 
@@ -521,10 +514,13 @@ export const MultiFinancialsResponse = zod.strictObject({
   "period": zod.enum(['annual', 'quarterly']),
   "view": zod.enum(['raw', 'standardized']),
   "dimensions": zod.boolean(),
+  "amendments": zod.boolean(),
   "filings": zod.array(FilingProvenance),
   "income_statement": zod.union([StitchedFinancialStatement,zod.null()]),
   "balance_sheet": zod.union([StitchedFinancialStatement,zod.null()]),
-  "cashflow_statement": zod.union([StitchedFinancialStatement,zod.null()])
+  "cashflow_statement": zod.union([StitchedFinancialStatement,zod.null()]),
+  "statement_of_equity": zod.union([StitchedFinancialStatement,zod.null()]),
+  "comprehensive_income": zod.union([StitchedFinancialStatement,zod.null()])
 });
 
 export type MultiFinancialsResponse = zod.input<typeof MultiFinancialsResponse>;
@@ -647,7 +643,10 @@ export type SubmissionsPageOutput = zod.output<typeof SubmissionsPage>;
 
 export const TTMPeriod = zod.strictObject({
   "fiscal_year": zod.number(),
-  "fiscal_period": zod.string()
+  "fiscal_period": zod.string(),
+  "filing_date": zod.union([zod.iso.date(),zod.null()]),
+  "accession_number": zod.union([zod.string(),zod.null()]),
+  "form_type": zod.union([zod.string(),zod.null()])
 });
 
 export type TTMPeriod = zod.input<typeof TTMPeriod>;
@@ -659,6 +658,7 @@ export const TTMMetricModel = zod.strictObject({
   "value": zod.number(),
   "unit": zod.string(),
   "as_of_date": zod.iso.date(),
+  "public_date": zod.union([zod.iso.date(),zod.null()]).describe('Latest filing_date across the facts used in the calculation: when this data vintage was fully on file. The library may back a historical window with comparative facts re-reported in later filings, so this is the vintage\'s publication date, not necessarily the earliest date a TTM for the window was knowable. Null when fact provenance is missing.'),
   "periods": zod.array(TTMPeriod),
   "has_gaps": zod.boolean(),
   "has_calculated_q4": zod.boolean(),
@@ -755,14 +755,14 @@ export const listCurrentFilingsFilingsCurrentGetQueryAmendmentsDefault = true;
 export const listCurrentFilingsFilingsCurrentGetQueryStartDefault = 0;
 export const listCurrentFilingsFilingsCurrentGetQueryStartMin = 0;
 
-export const listCurrentFilingsFilingsCurrentGetQueryPageSizeDefault = 40;
+
 
 export const ListCurrentFilingsFilingsCurrentGetQueryParams = zod.strictObject({
   "form": zod.string().default(listCurrentFilingsFilingsCurrentGetQueryFormDefault),
   "owner": zod.enum(['include', 'exclude', 'only']).default(listCurrentFilingsFilingsCurrentGetQueryOwnerDefault),
   "amendments": zod.boolean().default(listCurrentFilingsFilingsCurrentGetQueryAmendmentsDefault),
   "start": zod.number().min(listCurrentFilingsFilingsCurrentGetQueryStartMin).default(listCurrentFilingsFilingsCurrentGetQueryStartDefault),
-  "page_size": zod.number().default(listCurrentFilingsFilingsCurrentGetQueryPageSizeDefault)
+  "page_size": zod.union([zod.literal(10),zod.literal(20),zod.literal(40),zod.literal(80),zod.literal(100)]).optional().describe('The getcurrent feed only serves these page sizes; anything else would be silently clamped.')
 })
 
 export const ListCurrentFilingsFilingsCurrentGetResponse = CurrentFilingsPage
@@ -899,11 +899,13 @@ export const GetCompanyFinancialsCompanyIdFinancialsGetParams = zod.strictObject
 export const getCompanyFinancialsCompanyIdFinancialsGetQueryPeriodDefault = `annual`;
 export const getCompanyFinancialsCompanyIdFinancialsGetQueryViewDefault = `standardized`;
 export const getCompanyFinancialsCompanyIdFinancialsGetQueryDimensionsDefault = false;
+export const getCompanyFinancialsCompanyIdFinancialsGetQueryAmendmentsDefault = false;
 
 export const GetCompanyFinancialsCompanyIdFinancialsGetQueryParams = zod.strictObject({
   "period": zod.enum(['annual', 'quarterly']).default(getCompanyFinancialsCompanyIdFinancialsGetQueryPeriodDefault),
   "view": zod.enum(['raw', 'standardized']).default(getCompanyFinancialsCompanyIdFinancialsGetQueryViewDefault),
-  "dimensions": zod.boolean().default(getCompanyFinancialsCompanyIdFinancialsGetQueryDimensionsDefault)
+  "dimensions": zod.boolean().default(getCompanyFinancialsCompanyIdFinancialsGetQueryDimensionsDefault),
+  "amendments": zod.boolean().default(getCompanyFinancialsCompanyIdFinancialsGetQueryAmendmentsDefault)
 })
 
 export const GetCompanyFinancialsCompanyIdFinancialsGetResponse = FinancialsResponse
@@ -917,9 +919,11 @@ export const GetCompanyFinancialMetricsCompanyIdFinancialsMetricsGetParams = zod
 })
 
 export const getCompanyFinancialMetricsCompanyIdFinancialsMetricsGetQueryPeriodDefault = `annual`;
+export const getCompanyFinancialMetricsCompanyIdFinancialsMetricsGetQueryAmendmentsDefault = false;
 
 export const GetCompanyFinancialMetricsCompanyIdFinancialsMetricsGetQueryParams = zod.strictObject({
-  "period": zod.enum(['annual', 'quarterly']).default(getCompanyFinancialMetricsCompanyIdFinancialsMetricsGetQueryPeriodDefault)
+  "period": zod.enum(['annual', 'quarterly']).default(getCompanyFinancialMetricsCompanyIdFinancialsMetricsGetQueryPeriodDefault),
+  "amendments": zod.boolean().default(getCompanyFinancialMetricsCompanyIdFinancialsMetricsGetQueryAmendmentsDefault)
 })
 
 export const GetCompanyFinancialMetricsCompanyIdFinancialsMetricsGetResponse = FinancialMetrics
@@ -939,12 +943,14 @@ export const getCompanyFinancialsMultiCompanyIdFinancialsMultiGetQueryNMax = 8;
 
 export const getCompanyFinancialsMultiCompanyIdFinancialsMultiGetQueryViewDefault = `standardized`;
 export const getCompanyFinancialsMultiCompanyIdFinancialsMultiGetQueryDimensionsDefault = false;
+export const getCompanyFinancialsMultiCompanyIdFinancialsMultiGetQueryAmendmentsDefault = false;
 
 export const GetCompanyFinancialsMultiCompanyIdFinancialsMultiGetQueryParams = zod.strictObject({
   "period": zod.enum(['annual', 'quarterly']).default(getCompanyFinancialsMultiCompanyIdFinancialsMultiGetQueryPeriodDefault),
   "n": zod.number().min(getCompanyFinancialsMultiCompanyIdFinancialsMultiGetQueryNMin).max(getCompanyFinancialsMultiCompanyIdFinancialsMultiGetQueryNMax).default(getCompanyFinancialsMultiCompanyIdFinancialsMultiGetQueryNDefault),
   "view": zod.enum(['raw', 'standardized']).default(getCompanyFinancialsMultiCompanyIdFinancialsMultiGetQueryViewDefault),
-  "dimensions": zod.boolean().default(getCompanyFinancialsMultiCompanyIdFinancialsMultiGetQueryDimensionsDefault)
+  "dimensions": zod.boolean().default(getCompanyFinancialsMultiCompanyIdFinancialsMultiGetQueryDimensionsDefault),
+  "amendments": zod.boolean().default(getCompanyFinancialsMultiCompanyIdFinancialsMultiGetQueryAmendmentsDefault)
 })
 
 export const GetCompanyFinancialsMultiCompanyIdFinancialsMultiGetResponse = MultiFinancialsResponse

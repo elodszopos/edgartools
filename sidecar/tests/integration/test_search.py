@@ -101,6 +101,11 @@ def test_search_param_validation(client: TestClient) -> None:
     assert response.status_code == 422
     assert "result window" in response.json()["detail"].lower()
 
+    # malformed id -> 422 via the shared resolver (not a 500)
+    response = client.get("/search", params={"q": "x", "id": "0"})
+    assert response.status_code == 422
+    assert "CIK out of range" in response.json()["detail"]
+
 
 def _hit(accession: str) -> EFTSResult:
     return EFTSResult(accession_number=accession, form="8-K", filed="2024-01-01")

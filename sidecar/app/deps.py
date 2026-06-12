@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import Annotated
 
 from edgar.entity.core import Company
+from edgar.reference.tickers import find_cik
 from fastapi import HTTPException, Query
 
 from app.cik import parse_entity_id
@@ -17,13 +18,29 @@ StartParam = Annotated[int, Query(ge=0)]
 PageSizeParam = Annotated[int, Query(ge=1, le=1000)]
 
 
-def lookup_company(id: str) -> Company:
+def resolve_entity_id(id: str) -> int | str:
+    """Wire `id` param: digits -> CIK int, anything else -> ticker string; malformed -> 422."""
     try:
-        entity = parse_entity_id(id)
+        return parse_entity_id(id)
     except ValueError as error:
         raise HTTPException(status_code=422, detail=str(error)) from error
+
+
+def resolve_cik(id: str) -> int:
+    """Like resolve_entity_id, but tickers resolve through the SEC ticker reference -> 404
+    when unknown. For endpoints that filter by CIK without loading the entity."""
+    entity = resolve_entity_id(id)
+    if isinstance(entity, int):
+        return entity
+    cik = find_cik(entity)
+    if cik is None:
+        raise HTTPException(status_code=404, detail=f"ticker {entity!r} not found in the SEC ticker reference")
+    return int(cik)
+
+
+def lookup_company(id: str) -> Company:
     # unknown ticker raises CompanyNotFoundError (mapped to 404 in errors.py, with suggestions)
-    company = Company(entity)
+    company = Company(resolve_entity_id(id))
     if company.not_found:
         raise HTTPException(status_code=404, detail=f"no entity at SEC with CIK {company.cik}")
     return company

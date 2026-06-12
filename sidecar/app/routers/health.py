@@ -21,7 +21,9 @@ class Health(WireModel):
 
 @router.get("/health")
 def health() -> Health:
-    # read the env directly: edgar.core.get_identity() prompts interactively when unset
+    # read the env directly: edgar.core.get_identity() prompts interactively when unset.
+    # identity_set is false only if boot semantics change (load_settings aborts without
+    # an identity today) - kept as belt-and-suspenders for monitoring
     return Health(
         status="ok",
         edgartools_version=edgartools_version,

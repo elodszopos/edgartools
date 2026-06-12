@@ -9,9 +9,10 @@ from fastapi import APIRouter, Query
 
 from app.converters.tickers import tickers_page
 from app.deps import StartParam
+from app.models.common import error_responses
 from app.models.tickers import TickersPage
 
-router = APIRouter()
+router = APIRouter(responses=error_responses(422, 429, 502))
 
 
 @router.get("/tickers")

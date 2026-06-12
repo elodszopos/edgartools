@@ -12,16 +12,15 @@ from edgar.core import IntString
 from edgar.current_filings import get_current_entries_on_page
 from fastapi import APIRouter, HTTPException, Query
 
-from app.cik import parse_entity_id
 from app.converters.filings import current_filings_page, filings_page
-from app.deps import PageSizeParam, StartParam
-from app.models.common import FilingsPage
+from app.deps import PageSizeParam, StartParam, resolve_cik
+from app.models.common import FilingsPage, error_responses
 from app.models.filings import CurrentFilingsPage, CurrentPageSize
 
-router = APIRouter()
+router = APIRouter(responses=error_responses(422, 429, 502))
 
 
-@router.get("/filings")
+@router.get("/filings", responses=error_responses(404))
 def list_filings(
     year: Annotated[int | None, Query(ge=1994, le=2100)] = None,
     quarter: Annotated[int | None, Query(ge=1, le=4)] = None,
@@ -41,6 +40,10 @@ def list_filings(
     if date_from and date_to and date_from > date_to:
         raise HTTPException(status_code=422, detail="date_from must be <= date_to")
 
+    # tickers resolve up front (unknown -> 404, like /company and /search) and BEFORE the
+    # index download; filter(ticker=...) would silently yield an empty page instead
+    cik = resolve_cik(id) if id is not None else None
+
     filing_date = f"{date_from.isoformat()}:{date_to.isoformat()}" if date_from and date_to else None
     # cast: List[IntString] is invariant, list[str] is a safe member
     forms = cast("list[IntString] | None", form)
@@ -48,9 +51,8 @@ def list_filings(
     if filings is None:
         raise HTTPException(status_code=422, detail="no SEC index for the requested period")
 
-    if id is not None:
-        entity = parse_entity_id(id)
-        filings = filings.filter(cik=entity) if isinstance(entity, int) else filings.filter(ticker=entity)
+    if cik is not None:
+        filings = filings.filter(cik=cik)
 
     return filings_page(filings, start=start, page_size=page_size)
 
@@ -70,4 +72,8 @@ def list_current_filings(
     if form:
         # SEC's getcurrent ignores its type param (edgartools issue #501) - filter client-side
         filings = filings.filter(form=form, amendments=amendments)
+    elif not amendments:
+        # the amendments param must hold without a form filter too; short pages follow the
+        # same documented raw-count paging contract as the form filter above
+        filings = filings.filter(amendments=False)
     return current_filings_page(filings, raw_count=len(entries), start=start, page_size=page_size)

@@ -13,9 +13,9 @@ from edgar.entity.data import Address
 from edgar.reference import is_foreign_company
 
 from app.cik import pad_cik
+from app.models.common import Address as WireAddress
 from app.models.company import (
     CompanyProfile,
-    EntityAddress,
     EntityFormerName,
     SubmissionFiling,
     SubmissionsPage,
@@ -23,10 +23,10 @@ from app.models.company import (
 from app.serialize import to_bool, to_date, to_int, to_str, utc_naive_to_utc
 
 
-def _entity_address(address: Address | None) -> EntityAddress | None:
+def _entity_address(address: Address | None) -> WireAddress | None:
     if address is None or address.empty:
         return None
-    return EntityAddress(
+    return WireAddress(
         street1=to_str(address.street1),
         street2=to_str(address.street2),
         city=to_str(address.city),
