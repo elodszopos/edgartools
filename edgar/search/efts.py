@@ -414,7 +414,7 @@ class EFTSSearch:
 
 
 # ---------------------------------------------------------------------------
-# Internal helpers
+# Response parsing + page fetch
 # ---------------------------------------------------------------------------
 
 def _fetch_page(params: dict, offset: int = 0, limit: int = 100):
@@ -434,17 +434,17 @@ def _fetch_page(params: dict, offset: int = 0, limit: int = 100):
     results = []
 
     for hit in hits.get("hits", []):
-        result = _parse_hit(hit)
+        result = parse_hit(hit)
         results.append(result)
         if len(results) >= limit:
             break
 
-    aggregations = _parse_aggregations(data.get("aggregations", {}))
+    aggregations = parse_aggregations(data.get("aggregations", {}))
 
     return results, total, aggregations
 
 
-def _parse_hit(hit: dict) -> EFTSResult:
+def parse_hit(hit: dict) -> EFTSResult:
     """Parse a single EFTS hit into an EFTSResult."""
     source = hit.get("_source", {})
 
@@ -478,7 +478,7 @@ def _parse_hit(hit: dict) -> EFTSResult:
     )
 
 
-def _parse_aggregations(aggs_data: dict) -> EFTSAggregations:
+def parse_aggregations(aggs_data: dict) -> EFTSAggregations:
     """Parse EFTS aggregation buckets into EFTSAggregations."""
     def _parse_buckets(filter_key: str) -> List[Aggregation]:
         filter_data = aggs_data.get(filter_key, {})
@@ -498,6 +498,41 @@ def _parse_aggregations(aggs_data: dict) -> EFTSAggregations:
 # ---------------------------------------------------------------------------
 # Public API
 # ---------------------------------------------------------------------------
+
+def build_efts_params(
+    query: str = "",
+    *,
+    forms: Optional[Union[str, List[str]]] = None,
+    items: Optional[Union[str, List[str]]] = None,
+    cik: Optional[str] = None,
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None,
+) -> dict:
+    """Encode EFTS query parameters — the single source of truth for the wire format.
+
+    Shared by search_filings and any other caller issuing EFTS requests, so the
+    encoding lives in exactly one place. Pagination (``from``) is applied by the
+    caller, not here. ``cik`` must already be a zero-padded CIK string.
+    """
+    params: dict = {"q": query}
+    if forms:
+        if isinstance(forms, str):
+            forms = [forms]
+        params["forms"] = ",".join(forms)
+    if items:
+        if isinstance(items, str):
+            items = [items]
+        params["items"] = ",".join(items)
+    if start_date or end_date:
+        params["dateRange"] = "custom"
+        if start_date:
+            params["startdt"] = start_date
+        if end_date:
+            params["enddt"] = end_date
+    if cik:
+        params["ciks"] = cik
+    return params
+
 
 def search_filings(
     query: str = "",
@@ -573,29 +608,6 @@ def search_filings(
 
     limit = min(max(limit, 1), 100)
 
-    # Build request parameters. EFTS accepts q="" when other filters are set.
-    params: dict = {"q": query}
-
-    # Form type filter
-    if forms:
-        if isinstance(forms, str):
-            forms = [forms]
-        params["forms"] = ",".join(forms)
-
-    # 8-K item filter (server-side)
-    if items:
-        if isinstance(items, str):
-            items = [items]
-        params["items"] = ",".join(items)
-
-    # Date range
-    if start_date or end_date:
-        params["dateRange"] = "custom"
-        if start_date:
-            params["startdt"] = start_date
-        if end_date:
-            params["enddt"] = end_date
-
     # Resolve CIK from ticker if given
     resolved_cik = None
     if ticker:
@@ -603,8 +615,15 @@ def search_filings(
     elif cik is not None:
         resolved_cik = str(cik).strip().zfill(10)
 
-    if resolved_cik:
-        params["ciks"] = resolved_cik
+    # Build request parameters. EFTS accepts q="" when other filters are set.
+    params = build_efts_params(
+        query,
+        forms=forms,
+        items=items,
+        cik=resolved_cik,
+        start_date=start_date,
+        end_date=end_date,
+    )
 
     # Fetch results via internal helper
     results, total, aggregations = _fetch_page(params, offset=0, limit=limit)

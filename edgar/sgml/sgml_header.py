@@ -216,6 +216,15 @@ class Owner:
         self._needs_reversal = needs_reversal
 
     @property
+    def raw_name(self) -> Optional[str]:
+        """The conformed name exactly as the header artifact carries it.
+
+        No reversal, no Entity lookup — use this when the raw "LAST FIRST"
+        order is wanted and a cross-entity SEC fetch must be avoided.
+        """
+        return self._raw_name
+
+    @property
     def name(self) -> str:
         if self._resolved_name is not None:
             return self._resolved_name

@@ -11,6 +11,7 @@ import pyarrow as pa
 
 from edgar.core import get_edgar_data_directory, listify, log
 from edgar.httprequests import download_file, download_json
+from edgar.storage import is_using_local_storage
 from edgar.reference.data.common import read_csv_from_package, read_parquet_from_package
 
 __all__ = ['cusip_ticker_mapping', 'get_ticker_from_cusip', 'get_company_tickers', 'get_icon_from_ticker', 'find_cik',
@@ -174,7 +175,7 @@ def _get_company_tickers_raw() -> pd.DataFrame:
 
     # Priority 2: Try local downloaded data (if EDGAR_USE_LOCAL_DATA)
     tickers_json = None
-    if os.getenv("EDGAR_USE_LOCAL_DATA"):
+    if is_using_local_storage():  # strtobool-aware: "0"/"false" mean disabled
         tickers_json = load_tickers_from_local()
 
     # Priority 3: Fetch from SEC API
@@ -226,7 +227,7 @@ def get_cik_tickers_from_ticker_txt():
     Use get_company_tickers() instead, which uses the bundled parquet data.
     """
     try:
-        if os.getenv("EDGAR_USE_LOCAL_DATA"):
+        if is_using_local_storage():  # strtobool-aware: "0"/"false" mean disabled
             ticker_txt = load_cik_tickers_from_local()
             if not ticker_txt:
                 # Don't try to fetch from SEC - endpoint is deprecated

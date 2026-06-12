@@ -64,7 +64,16 @@ __all__ = [
     'NoCompanyFactsFound',
     'has_company_filings',
     'COMPANY_FORMS',
+    'ANNUAL_FINANCIAL_FORMS',
+    'QUARTERLY_FINANCIAL_FORMS',
 ]
+
+# Form preference chains for financial statements: the primary form first, then the
+# foreign/Canadian fallbacks. Consumed by Company.get_financials /
+# get_quarterly_financials; exposed so callers that select the filing themselves
+# (e.g. to carry provenance) share one source of truth instead of re-declaring them.
+ANNUAL_FINANCIAL_FORMS: Tuple[str, ...] = ('10-K', '20-F', '40-F')
+QUARTERLY_FINANCIAL_FORMS: Tuple[str, ...] = ('10-Q', '6-K')
 
 
 class CompanyNotFoundError(Exception):
@@ -628,8 +637,9 @@ class Company(Entity):
         tenk_filing = self.latest_tenk
         if tenk_filing is not None:
             return tenk_filing.financials
-        # Fall back to 20-F (foreign private issuers) and 40-F (Canadian filers)
-        for form in ('20-F', '40-F'):
+        # Fall back to 20-F (foreign private issuers) and 40-F (Canadian filers);
+        # ANNUAL_FINANCIAL_FORMS[0] ('10-K') is handled above via latest_tenk.
+        for form in ANNUAL_FINANCIAL_FORMS[1:]:
             filing = self.get_filings(form=form, amendments=False, trigger_full_load=False).latest()
             if filing is not None:
                 return Financials.extract(filing)
@@ -655,10 +665,12 @@ class Company(Entity):
         tenq_filing = self.latest_tenq
         if tenq_filing is not None:
             return tenq_filing.financials
-        # Fall back to 6-K (foreign private issuers)
-        filing = self.get_filings(form='6-K', amendments=False, trigger_full_load=False).latest()
-        if filing is not None:
-            return Financials.extract(filing)
+        # Fall back to 6-K (foreign private issuers);
+        # QUARTERLY_FINANCIAL_FORMS[0] ('10-Q') is handled above via latest_tenq.
+        for form in QUARTERLY_FINANCIAL_FORMS[1:]:
+            filing = self.get_filings(form=form, amendments=False, trigger_full_load=False).latest()
+            if filing is not None:
+                return Financials.extract(filing)
         return None
 
     @property
@@ -702,7 +714,7 @@ class Company(Entity):
             False
         """
         if hasattr(self.data, 'state_of_incorporation') and self.data.state_of_incorporation:
-            from edgar.reference._codes import is_foreign_company
+            from edgar.reference import is_foreign_company
             return is_foreign_company(self.data.state_of_incorporation)
         # Fallback: use filer_type which checks filed forms
         return self.filer_type in ('Foreign', 'Canadian')

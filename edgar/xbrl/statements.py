@@ -3231,6 +3231,29 @@ class Statements:
         return statement.render(period_view=period_view, standard=standard, include_dimensions=include_dimensions).to_dataframe()
 
 
+@dataclass(frozen=True)
+class StitchedPeriod:
+    """A period column in a stitched statement: full XBRL period id + display label."""
+    period_id: str
+    label: str
+
+
+@dataclass(frozen=True)
+class StitchedLineItem:
+    """A row in a stitched statement; ``period_values`` is keyed by XBRL period id.
+
+    ``preferred_sign`` is the concept-level sign the stitcher fans out across periods.
+    """
+    concept: str
+    label: str
+    standard_concept: Optional[str]
+    level: int
+    is_abstract: bool
+    is_total: bool
+    preferred_sign: Optional[float]
+    period_values: Dict[str, Any]
+
+
 class StitchedStatement:
     """
     A stitched financial statement across multiple time periods.
@@ -3309,6 +3332,34 @@ class StitchedStatement:
                 self.include_quarterly,
             )
         return self._statement_data
+
+    @property
+    def stitched_periods(self) -> List[StitchedPeriod]:
+        """Period columns as (period_id, label) pairs.
+
+        Unlike :attr:`periods` (which returns only the trailing end date), period_id
+        keeps the full XBRL prefix and dates, so callers can key values by period id.
+        """
+        return [StitchedPeriod(period_id=pid, label=label)
+                for pid, label in self.statement_data['periods']]
+
+    def line_items(self) -> List[StitchedLineItem]:
+        """The statement rows, values keyed by XBRL period id (no presentation
+        column naming). Required keys raise loudly if the underlying shape drifts.
+        """
+        return [
+            StitchedLineItem(
+                concept=item['concept'],
+                label=item['label'],
+                standard_concept=item.get('standard_concept'),
+                level=item['level'],
+                is_abstract=item['is_abstract'],
+                is_total=item['is_total'],
+                preferred_sign=next(iter(item['preferred_signs'].values()), None),
+                period_values=item['values'],
+            )
+            for item in self.statement_data['statement_data']
+        ]
 
     def render(self, show_date_range: bool = False) -> Table:
         """

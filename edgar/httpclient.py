@@ -377,6 +377,23 @@ def get_http_config() -> dict:
 HTTP_MGR = get_http_mgr(request_per_sec_limit=get_edgar_rate_limit_per_sec())
 
 
+def set_rate_limit(requests_per_second: int) -> None:
+    """Reconfigure the live SEC request throttle at runtime.
+
+    HTTP_MGR builds its rate limiter once at import from EDGAR_RATE_LIMIT_PER_SEC, so
+    changing that env var afterwards does nothing. This installs a freshly built limiter
+    (preserving edgartools' blocking/version-compat semantics) on the live manager and
+    drops the cached client, so the next request rebuilds its transport chain at the new
+    limit. Takes effect after import — unlike mutating the env var alone.
+    """
+    if requests_per_second < 1:
+        raise ValueError(f"requests_per_second must be >= 1, got {requests_per_second}")
+    os.environ["EDGAR_RATE_LIMIT_PER_SEC"] = str(requests_per_second)
+    HTTP_MGR.request_per_sec_limit = requests_per_second
+    HTTP_MGR.rate_limiter = _create_rate_limiter(requests_per_second)
+    HTTP_MGR.close()  # drop the cached client; next request rebuilds with the new limiter
+
+
 def clear_empty_cached_responses():
     """
     One-time cache clearing function to remove potentially stale empty responses (Issue #672).

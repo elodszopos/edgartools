@@ -64,7 +64,7 @@ from edgar.ats import (
 from edgar.bdc import BDCEntities, BDCEntity, get_bdc_list, get_active_bdc_ciks, is_bdc_cik
 
 # HTTP configuration functions for runtime SSL/proxy configuration
-from edgar.httpclient import configure_http, get_http_config
+from edgar.httpclient import configure_http, get_http_config, set_rate_limit
 from edgar.npx import NPX
 from edgar.paths import (
     get_anchor_cache_directory,
@@ -99,7 +99,7 @@ from edgar.storage import (
     use_local_storage,
 )
 from edgar.correspondence import CORRESPONDENCE_FORMS, Correspondence, CorrespondenceThread, CorrespondenceType
-from edgar.search.efts import EFTSResult, EFTSSearch, search_filings
+from edgar.search.efts import EFTSResult, EFTSSearch, build_efts_params, search_filings
 from edgar.thirteenf import THIRTEENF_FORMS, ThirteenF
 from edgar.xbrl import XBRL
 
