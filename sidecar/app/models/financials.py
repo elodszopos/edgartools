@@ -77,6 +77,73 @@ class FinancialsResponse(WireModel):
     cover: FinancialStatement | None
 
 
+class FilingProvenance(WireModel):
+    form: str
+    accession_number: str = Field(pattern=ACCESSION_PATTERN)
+    filing_date: date
+    period_of_report: date | None
+
+
+class StitchedStatementRecord(WireModel):
+    # stitched rows carry less metadata than single-filing rows (no unit/balance/dims)
+    concept: str
+    label: str
+    standard_concept: str | None
+    level: int
+    is_abstract: bool
+    is_total: bool
+    preferred_sign: float | None
+    values: list[StatementValue]
+
+
+class StitchedFinancialStatement(WireModel):
+    periods: list[StatementPeriod]
+    records: list[StitchedStatementRecord]
+
+
+class MultiFinancialsResponse(WireModel):
+    cik: str = Field(pattern=CIK_PATTERN)
+    company: str | None
+    period: FinancialsPeriod
+    view: FinancialsView
+    dimensions: bool
+    # filings handed to the stitcher, newest first; periods reveal actual coverage
+    # (the stitcher silently drops a filing whose XBRL fails to parse)
+    filings: list[FilingProvenance]
+    income_statement: StitchedFinancialStatement | None
+    balance_sheet: StitchedFinancialStatement | None
+    cashflow_statement: StitchedFinancialStatement | None
+
+
+class TTMPeriod(WireModel):
+    fiscal_year: int
+    fiscal_period: str  # Q1-Q4; Q2-Q4 may be derived from YTD/annual facts
+
+
+class TTMMetricModel(WireModel):
+    concept: str
+    label: str
+    value: float
+    unit: str
+    as_of_date: date
+    periods: list[TTMPeriod]
+    has_gaps: bool
+    has_calculated_q4: bool
+    warning: str | None
+
+
+class TTMResponse(WireModel):
+    cik: str = Field(pattern=CIK_PATTERN)
+    company: str | None
+    as_of: str | None  # request echo: ISO date or YYYY-QN
+    concept: str | None  # request echo
+    # convenience metrics: null when the company facts lack a matching concept
+    # or fewer than 4 consecutive quarters exist (TTM not computable)
+    revenue: TTMMetricModel | None
+    net_income: TTMMetricModel | None
+    metric: TTMMetricModel | None  # TTM for the requested concept
+
+
 class FinancialMetrics(WireModel):
     cik: str = Field(pattern=CIK_PATTERN)
     company: str | None

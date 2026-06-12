@@ -789,6 +789,166 @@
         }
       }
     },
+    "/company/{id}/financials/multi": {
+      "get": {
+        "summary": "Get Company Financials Multi",
+        "operationId": "get_company_financials_multi_company__id__financials_multi_get",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Id"
+            }
+          },
+          {
+            "name": "period",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "annual",
+                "quarterly"
+              ],
+              "type": "string",
+              "default": "annual",
+              "title": "Period"
+            }
+          },
+          {
+            "name": "n",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 8,
+              "minimum": 2,
+              "default": 4,
+              "title": "N"
+            }
+          },
+          {
+            "name": "view",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "raw",
+                "standardized"
+              ],
+              "type": "string",
+              "default": "standardized",
+              "title": "View"
+            }
+          },
+          {
+            "name": "dimensions",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Dimensions"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MultiFinancialsResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/company/{id}/financials/ttm": {
+      "get": {
+        "summary": "Get Company Financials Ttm",
+        "operationId": "get_company_financials_ttm_company__id__financials_ttm_get",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Id"
+            }
+          },
+          {
+            "name": "concept",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Concept"
+            }
+          },
+          {
+            "name": "as_of",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "As Of"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TTMResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/search": {
       "get": {
         "summary": "Search",
@@ -2223,6 +2383,45 @@
         ],
         "title": "FilingHeaderModel"
       },
+      "FilingProvenance": {
+        "properties": {
+          "form": {
+            "type": "string",
+            "title": "Form"
+          },
+          "accession_number": {
+            "type": "string",
+            "pattern": "^\\d{10}-\\d{2}-\\d{6}$",
+            "title": "Accession Number"
+          },
+          "filing_date": {
+            "type": "string",
+            "format": "date",
+            "title": "Filing Date"
+          },
+          "period_of_report": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Period Of Report"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "form",
+          "accession_number",
+          "filing_date",
+          "period_of_report"
+        ],
+        "title": "FilingProvenance"
+      },
       "FilingRef": {
         "properties": {
           "accession_number": {
@@ -3179,6 +3378,97 @@
         ],
         "title": "Health"
       },
+      "MultiFinancialsResponse": {
+        "properties": {
+          "cik": {
+            "type": "string",
+            "pattern": "^\\d{10}$",
+            "title": "Cik"
+          },
+          "company": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Company"
+          },
+          "period": {
+            "type": "string",
+            "enum": [
+              "annual",
+              "quarterly"
+            ],
+            "title": "Period"
+          },
+          "view": {
+            "type": "string",
+            "enum": [
+              "raw",
+              "standardized"
+            ],
+            "title": "View"
+          },
+          "dimensions": {
+            "type": "boolean",
+            "title": "Dimensions"
+          },
+          "filings": {
+            "items": {
+              "$ref": "#/components/schemas/FilingProvenance"
+            },
+            "type": "array",
+            "title": "Filings"
+          },
+          "income_statement": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/StitchedFinancialStatement"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "balance_sheet": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/StitchedFinancialStatement"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "cashflow_statement": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/StitchedFinancialStatement"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "cik",
+          "company",
+          "period",
+          "view",
+          "dimensions",
+          "filings",
+          "income_statement",
+          "balance_sheet",
+          "cashflow_statement"
+        ],
+        "title": "MultiFinancialsResponse"
+      },
       "SearchAggregations": {
         "properties": {
           "entities": {
@@ -3814,6 +4104,97 @@
         ],
         "title": "StatementValue"
       },
+      "StitchedFinancialStatement": {
+        "properties": {
+          "periods": {
+            "items": {
+              "$ref": "#/components/schemas/StatementPeriod"
+            },
+            "type": "array",
+            "title": "Periods"
+          },
+          "records": {
+            "items": {
+              "$ref": "#/components/schemas/StitchedStatementRecord"
+            },
+            "type": "array",
+            "title": "Records"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "periods",
+          "records"
+        ],
+        "title": "StitchedFinancialStatement"
+      },
+      "StitchedStatementRecord": {
+        "properties": {
+          "concept": {
+            "type": "string",
+            "title": "Concept"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "standard_concept": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Standard Concept"
+          },
+          "level": {
+            "type": "integer",
+            "title": "Level"
+          },
+          "is_abstract": {
+            "type": "boolean",
+            "title": "Is Abstract"
+          },
+          "is_total": {
+            "type": "boolean",
+            "title": "Is Total"
+          },
+          "preferred_sign": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Preferred Sign"
+          },
+          "values": {
+            "items": {
+              "$ref": "#/components/schemas/StatementValue"
+            },
+            "type": "array",
+            "title": "Values"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "concept",
+          "label",
+          "standard_concept",
+          "level",
+          "is_abstract",
+          "is_total",
+          "preferred_sign",
+          "values"
+        ],
+        "title": "StitchedStatementRecord"
+      },
       "SubmissionFiling": {
         "properties": {
           "accession_number": {
@@ -4025,6 +4406,174 @@
           "filings"
         ],
         "title": "SubmissionsPage"
+      },
+      "TTMMetricModel": {
+        "properties": {
+          "concept": {
+            "type": "string",
+            "title": "Concept"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "value": {
+            "type": "number",
+            "title": "Value"
+          },
+          "unit": {
+            "type": "string",
+            "title": "Unit"
+          },
+          "as_of_date": {
+            "type": "string",
+            "format": "date",
+            "title": "As Of Date"
+          },
+          "periods": {
+            "items": {
+              "$ref": "#/components/schemas/TTMPeriod"
+            },
+            "type": "array",
+            "title": "Periods"
+          },
+          "has_gaps": {
+            "type": "boolean",
+            "title": "Has Gaps"
+          },
+          "has_calculated_q4": {
+            "type": "boolean",
+            "title": "Has Calculated Q4"
+          },
+          "warning": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Warning"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "concept",
+          "label",
+          "value",
+          "unit",
+          "as_of_date",
+          "periods",
+          "has_gaps",
+          "has_calculated_q4",
+          "warning"
+        ],
+        "title": "TTMMetricModel"
+      },
+      "TTMPeriod": {
+        "properties": {
+          "fiscal_year": {
+            "type": "integer",
+            "title": "Fiscal Year"
+          },
+          "fiscal_period": {
+            "type": "string",
+            "title": "Fiscal Period"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "fiscal_year",
+          "fiscal_period"
+        ],
+        "title": "TTMPeriod"
+      },
+      "TTMResponse": {
+        "properties": {
+          "cik": {
+            "type": "string",
+            "pattern": "^\\d{10}$",
+            "title": "Cik"
+          },
+          "company": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Company"
+          },
+          "as_of": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "As Of"
+          },
+          "concept": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Concept"
+          },
+          "revenue": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TTMMetricModel"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "net_income": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TTMMetricModel"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "metric": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TTMMetricModel"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "cik",
+          "company",
+          "as_of",
+          "concept",
+          "revenue",
+          "net_income",
+          "metric"
+        ],
+        "title": "TTMResponse"
       },
       "TickerRef": {
         "properties": {

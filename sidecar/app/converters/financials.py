@@ -22,20 +22,28 @@ from edgar.xbrl.statements import Statement, StatementValidationError
 
 from app.cik import pad_cik
 from app.models.financials import (
+    FilingProvenance,
     FinancialMetrics,
     FinancialsPeriod,
     FinancialsResponse,
     FinancialStatement,
     FinancialsView,
+    MultiFinancialsResponse,
     StatementPeriod,
     StatementRecord,
     StatementValue,
+    StitchedFinancialStatement,
+    StitchedStatementRecord,
+    TTMMetricModel,
+    TTMPeriod,
 )
 from app.serialize import to_date, to_float, to_int, to_str
 
 if TYPE_CHECKING:
     from edgar._filings import Filing
     from edgar.entity.core import Company
+    from edgar.ttm.calculator import TTMMetric
+    from edgar.xbrl.statements import StitchedStatement
 
 # every non-period column to_dataframe(include_unit, include_point_in_time) can emit;
 # the remaining columns are period values in determine_periods_to_display order
@@ -242,6 +250,83 @@ def financials_response(
         statement_of_equity=_statement(financials.statement_of_equity(), standard=standard, dimensions=dimensions),
         comprehensive_income=_statement(financials.comprehensive_income(), standard=standard, dimensions=dimensions),
         cover=_statement(financials.cover(), standard=standard, dimensions=dimensions),
+    )
+
+
+def _stitched_statement(stmt: StitchedStatement | None) -> StitchedFinancialStatement | None:
+    """Build the wire statement straight from the stitcher's data dict.
+
+    Unlike single-filing statements (which force the to_dataframe column-name
+    mirroring), stitched data keys every value by its XBRL period id directly -
+    no name mapping, no drift risk.
+    """
+    if stmt is None:
+        return None
+    data = stmt.statement_data
+    period_ids = [period_id for period_id, _ in data["periods"]]
+    periods = [_statement_period(period_id, period_label) for period_id, period_label in data["periods"]]
+    records = []
+    for item in data["statement_data"]:
+        # concept-level sign; the stitcher stores one sign fanned out per period
+        preferred_sign = next(iter(item["preferred_signs"].values()), None)
+        records.append(
+            StitchedStatementRecord(
+                concept=str(item["concept"]),
+                label=str(item["label"]),
+                standard_concept=_opt_str(item.get("standard_concept")),
+                level=_require_int(item["level"]),
+                is_abstract=bool(item["is_abstract"]),
+                is_total=bool(item["is_total"]),
+                preferred_sign=to_float(preferred_sign),
+                values=[StatementValue(period_key=period_id, value=_value(item["values"].get(period_id))) for period_id in period_ids],
+            )
+        )
+    return StitchedFinancialStatement(periods=periods, records=records)
+
+
+def multi_financials_response(
+    company: Company,
+    filings: list[Filing],
+    *,
+    period: FinancialsPeriod,
+    view: FinancialsView,
+    dimensions: bool,
+    income_statement: StitchedStatement | None,
+    balance_sheet: StitchedStatement | None,
+    cashflow_statement: StitchedStatement | None,
+) -> MultiFinancialsResponse:
+    return MultiFinancialsResponse(
+        cik=pad_cik(company.cik),
+        company=to_str(company.display_name),
+        period=period,
+        view=view,
+        dimensions=dimensions,
+        filings=[
+            FilingProvenance(
+                form=filing.form,
+                accession_number=filing.accession_no,
+                filing_date=to_date(filing.filing_date),  # pyright: ignore[reportArgumentType] - filings always carry a date
+                period_of_report=to_date(filing.period_of_report),
+            )
+            for filing in filings
+        ],
+        income_statement=_stitched_statement(income_statement),
+        balance_sheet=_stitched_statement(balance_sheet),
+        cashflow_statement=_stitched_statement(cashflow_statement),
+    )
+
+
+def ttm_metric_model(metric: TTMMetric) -> TTMMetricModel:
+    return TTMMetricModel(
+        concept=metric.concept,
+        label=metric.label,
+        value=float(metric.value),
+        unit=metric.unit,
+        as_of_date=to_date(metric.as_of_date),  # pyright: ignore[reportArgumentType] - TTM windows always end on a date
+        periods=[TTMPeriod(fiscal_year=fiscal_year, fiscal_period=fiscal_period) for fiscal_year, fiscal_period in metric.periods],
+        has_gaps=bool(metric.has_gaps),
+        has_calculated_q4=bool(metric.has_calculated_q4),
+        warning=_opt_str(metric.warning),
     )
 
 

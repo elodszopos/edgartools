@@ -312,6 +312,19 @@ export const FilingEnvelope = zod.strictObject({
 export type FilingEnvelope = zod.input<typeof FilingEnvelope>;
 export type FilingEnvelopeOutput = zod.output<typeof FilingEnvelope>;
 
+export const filingProvenanceAccessionNumberRegExp = new RegExp('^\\d{10}-\\d{2}-\\d{6}$');
+
+
+export const FilingProvenance = zod.strictObject({
+  "form": zod.string(),
+  "accession_number": zod.string().regex(filingProvenanceAccessionNumberRegExp),
+  "filing_date": zod.iso.date(),
+  "period_of_report": zod.union([zod.iso.date(),zod.null()])
+});
+
+export type FilingProvenance = zod.input<typeof FilingProvenance>;
+export type FilingProvenanceOutput = zod.output<typeof FilingProvenance>;
+
 export const filingRefAccessionNumberRegExp = new RegExp('^\\d{10}-\\d{2}-\\d{6}$');
 export const filingRefCikRegExp = new RegExp('^\\d{10}$');
 
@@ -477,6 +490,46 @@ export const Health = zod.strictObject({
 export type Health = zod.input<typeof Health>;
 export type HealthOutput = zod.output<typeof Health>;
 
+export const StitchedStatementRecord = zod.strictObject({
+  "concept": zod.string(),
+  "label": zod.string(),
+  "standard_concept": zod.union([zod.string(),zod.null()]),
+  "level": zod.number(),
+  "is_abstract": zod.boolean(),
+  "is_total": zod.boolean(),
+  "preferred_sign": zod.union([zod.number(),zod.null()]),
+  "values": zod.array(StatementValue)
+});
+
+export type StitchedStatementRecord = zod.input<typeof StitchedStatementRecord>;
+export type StitchedStatementRecordOutput = zod.output<typeof StitchedStatementRecord>;
+
+export const StitchedFinancialStatement = zod.strictObject({
+  "periods": zod.array(StatementPeriod),
+  "records": zod.array(StitchedStatementRecord)
+});
+
+export type StitchedFinancialStatement = zod.input<typeof StitchedFinancialStatement>;
+export type StitchedFinancialStatementOutput = zod.output<typeof StitchedFinancialStatement>;
+
+export const multiFinancialsResponseCikRegExp = new RegExp('^\\d{10}$');
+
+
+export const MultiFinancialsResponse = zod.strictObject({
+  "cik": zod.string().regex(multiFinancialsResponseCikRegExp),
+  "company": zod.union([zod.string(),zod.null()]),
+  "period": zod.enum(['annual', 'quarterly']),
+  "view": zod.enum(['raw', 'standardized']),
+  "dimensions": zod.boolean(),
+  "filings": zod.array(FilingProvenance),
+  "income_statement": zod.union([StitchedFinancialStatement,zod.null()]),
+  "balance_sheet": zod.union([StitchedFinancialStatement,zod.null()]),
+  "cashflow_statement": zod.union([StitchedFinancialStatement,zod.null()])
+});
+
+export type MultiFinancialsResponse = zod.input<typeof MultiFinancialsResponse>;
+export type MultiFinancialsResponseOutput = zod.output<typeof MultiFinancialsResponse>;
+
 export const SearchAggregations = zod.strictObject({
   "entities": zod.array(FacetBucket),
   "sics": zod.array(FacetBucket),
@@ -591,6 +644,45 @@ export const SubmissionsPage = zod.strictObject({
 
 export type SubmissionsPage = zod.input<typeof SubmissionsPage>;
 export type SubmissionsPageOutput = zod.output<typeof SubmissionsPage>;
+
+export const TTMPeriod = zod.strictObject({
+  "fiscal_year": zod.number(),
+  "fiscal_period": zod.string()
+});
+
+export type TTMPeriod = zod.input<typeof TTMPeriod>;
+export type TTMPeriodOutput = zod.output<typeof TTMPeriod>;
+
+export const TTMMetricModel = zod.strictObject({
+  "concept": zod.string(),
+  "label": zod.string(),
+  "value": zod.number(),
+  "unit": zod.string(),
+  "as_of_date": zod.iso.date(),
+  "periods": zod.array(TTMPeriod),
+  "has_gaps": zod.boolean(),
+  "has_calculated_q4": zod.boolean(),
+  "warning": zod.union([zod.string(),zod.null()])
+});
+
+export type TTMMetricModel = zod.input<typeof TTMMetricModel>;
+export type TTMMetricModelOutput = zod.output<typeof TTMMetricModel>;
+
+export const tTMResponseCikRegExp = new RegExp('^\\d{10}$');
+
+
+export const TTMResponse = zod.strictObject({
+  "cik": zod.string().regex(tTMResponseCikRegExp),
+  "company": zod.union([zod.string(),zod.null()]),
+  "as_of": zod.union([zod.string(),zod.null()]),
+  "concept": zod.union([zod.string(),zod.null()]),
+  "revenue": zod.union([TTMMetricModel,zod.null()]),
+  "net_income": zod.union([TTMMetricModel,zod.null()]),
+  "metric": zod.union([TTMMetricModel,zod.null()])
+});
+
+export type TTMResponse = zod.input<typeof TTMResponse>;
+export type TTMResponseOutput = zod.output<typeof TTMResponse>;
 
 export const tickerRefCikRegExp = new RegExp('^\\d{10}$');
 
@@ -831,6 +923,46 @@ export const GetCompanyFinancialMetricsCompanyIdFinancialsMetricsGetQueryParams 
 })
 
 export const GetCompanyFinancialMetricsCompanyIdFinancialsMetricsGetResponse = FinancialMetrics
+
+
+/**
+ * @summary Get Company Financials Multi
+ */
+export const GetCompanyFinancialsMultiCompanyIdFinancialsMultiGetParams = zod.strictObject({
+  "id": zod.string()
+})
+
+export const getCompanyFinancialsMultiCompanyIdFinancialsMultiGetQueryPeriodDefault = `annual`;
+export const getCompanyFinancialsMultiCompanyIdFinancialsMultiGetQueryNDefault = 4;
+export const getCompanyFinancialsMultiCompanyIdFinancialsMultiGetQueryNMin = 2;
+export const getCompanyFinancialsMultiCompanyIdFinancialsMultiGetQueryNMax = 8;
+
+export const getCompanyFinancialsMultiCompanyIdFinancialsMultiGetQueryViewDefault = `standardized`;
+export const getCompanyFinancialsMultiCompanyIdFinancialsMultiGetQueryDimensionsDefault = false;
+
+export const GetCompanyFinancialsMultiCompanyIdFinancialsMultiGetQueryParams = zod.strictObject({
+  "period": zod.enum(['annual', 'quarterly']).default(getCompanyFinancialsMultiCompanyIdFinancialsMultiGetQueryPeriodDefault),
+  "n": zod.number().min(getCompanyFinancialsMultiCompanyIdFinancialsMultiGetQueryNMin).max(getCompanyFinancialsMultiCompanyIdFinancialsMultiGetQueryNMax).default(getCompanyFinancialsMultiCompanyIdFinancialsMultiGetQueryNDefault),
+  "view": zod.enum(['raw', 'standardized']).default(getCompanyFinancialsMultiCompanyIdFinancialsMultiGetQueryViewDefault),
+  "dimensions": zod.boolean().default(getCompanyFinancialsMultiCompanyIdFinancialsMultiGetQueryDimensionsDefault)
+})
+
+export const GetCompanyFinancialsMultiCompanyIdFinancialsMultiGetResponse = MultiFinancialsResponse
+
+
+/**
+ * @summary Get Company Financials Ttm
+ */
+export const GetCompanyFinancialsTtmCompanyIdFinancialsTtmGetParams = zod.strictObject({
+  "id": zod.string()
+})
+
+export const GetCompanyFinancialsTtmCompanyIdFinancialsTtmGetQueryParams = zod.strictObject({
+  "concept": zod.union([zod.string(),zod.null()]).optional(),
+  "as_of": zod.union([zod.string(),zod.null()]).optional()
+})
+
+export const GetCompanyFinancialsTtmCompanyIdFinancialsTtmGetResponse = TTMResponse
 
 
 /**
