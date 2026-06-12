@@ -14,7 +14,6 @@ def client():
         yield test_client
 
 
-@pytest.mark.vcr
 def test_tickers_full_map_and_paging(client: TestClient, golden) -> None:
     # default request serves the entire map in one page
     response = client.get("/tickers")

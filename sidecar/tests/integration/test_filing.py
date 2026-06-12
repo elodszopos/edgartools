@@ -1,12 +1,8 @@
 """Integration: /filing/{accession} envelope + /content + /sections.
 
-All VCR tests in this module share ONE cassette (filing_p2_fixtures.yaml) via the
-vcr_cassette_name override: the 2025 Q1 index download is the expensive interaction
-and the in-session HTTP cache serves repeat reads, so each test stays runnable
-standalone without re-recording the index. Appending new fixtures to the shared
-cassette requires `--vcr-record=new_episodes` for that one recording run.
-The 404 case uses a 1995 accession so the not-found scan stays in the small
-early-EDGAR indexes.
+Every request resolves to a URL-keyed fixture; the 2025 Q1 index download is the
+expensive one. The 404 case uses a 1995 accession so the not-found scan stays in the
+small early-EDGAR indexes.
 """
 
 from __future__ import annotations
@@ -17,18 +13,12 @@ from fastapi.testclient import TestClient
 from app.main import app
 
 
-@pytest.fixture
-def vcr_cassette_name():
-    return "filing_p2_fixtures"
-
-
 @pytest.fixture(scope="module")
 def client():
     with TestClient(app) as test_client:
         yield test_client
 
 
-@pytest.mark.vcr
 def test_filing_envelope_entities_header_and_missing(client: TestClient, golden) -> None:
     # single-entity 8-K with three items (Walgreens Q1 earnings day)
     response = client.get("/filing/0001193125-25-004072")
@@ -167,7 +157,6 @@ def test_filing_envelope_entities_header_and_missing(client: TestClient, golden)
     assert "0000000000-95-654321" in response.json()["detail"]
 
 
-@pytest.mark.vcr
 def test_filing_content_formats(client: TestClient, golden) -> None:
     # markdown (default): whole-document render of the primary HTML
     response = client.get("/filing/0001193125-25-004072/content")
@@ -209,7 +198,6 @@ def test_filing_content_formats(client: TestClient, golden) -> None:
     assert response.status_code == 422
 
 
-@pytest.mark.vcr
 def test_filing_sections_detection(client: TestClient, golden) -> None:
     # 10-K with TOC-detected sections across Parts I-IV (Anixa Biosciences FY2024)
     response = client.get("/filing/0001493152-25-001787/sections")

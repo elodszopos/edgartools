@@ -1,9 +1,9 @@
 """Integration: /company/{id} profile + /company/{id}/submissions history.
 
-All VCR tests share company_p3_fixtures.yaml. The profile is built from the SEC
-submissions store JSON only (data.sec.gov/submissions/CIK##########.json); the
-submissions endpoint additionally loads pagination files for long filers. Ground
-truth verified by hand against the recorded SEC responses (2026-06-12).
+The profile is built from the SEC submissions store JSON only
+(data.sec.gov/submissions/CIK##########.json); the submissions endpoint additionally
+loads pagination files for long filers. Ground truth verified by hand against the
+recorded SEC responses (2026-06-12).
 """
 
 from __future__ import annotations
@@ -14,18 +14,12 @@ from fastapi.testclient import TestClient
 from app.main import app
 
 
-@pytest.fixture
-def vcr_cassette_name():
-    return "company_p3_fixtures"
-
-
 @pytest.fixture(scope="module")
 def client():
     with TestClient(app) as test_client:
         yield test_client
 
 
-@pytest.mark.vcr
 def test_company_profile_operating_company(client: TestClient, golden) -> None:
     # ticker resolution path: AAPL -> CIK 320193 via the SEC company tickers map
     response = client.get("/company/AAPL")
@@ -84,7 +78,6 @@ def test_company_profile_operating_company(client: TestClient, golden) -> None:
     golden("company", "aapl", aapl)
 
 
-@pytest.mark.vcr
 def test_company_profile_foreign_incorporated(client: TestClient, golden) -> None:
     # Carnival: US-listed but Bermuda-incorporated; submissions store reflects the
     # CURRENT registration (D0/Bermuda) - older filing headers say R1/Panama
@@ -109,7 +102,6 @@ def test_company_profile_foreign_incorporated(client: TestClient, golden) -> Non
     golden("company", "carnival", ccl)
 
 
-@pytest.mark.vcr
 def test_company_profile_individual(client: TestClient, golden) -> None:
     # individual insider (NVDA EVP Ajay Puri): no ticker/SIC/category, mailing-only
     # address, and display_name reverses the store's "Last First" ordering
@@ -143,9 +135,8 @@ def test_company_profile_individual(client: TestClient, golden) -> None:
     golden("company", "puri_individual", puri)
 
 
-@pytest.mark.vcr(allow_playback_repeats=True)
 def test_submissions_first_page(client: TestClient, golden) -> None:
-    # AAPL full history spans pagination files back to 1994 (2234 filings in cassette)
+    # AAPL full history spans pagination files back to 1994 (2234 filings recorded)
     response = client.get("/company/AAPL/submissions", params={"page_size": 3})
     assert response.status_code == 200
     page = response.json()
@@ -187,7 +178,6 @@ def test_submissions_first_page(client: TestClient, golden) -> None:
     golden("company_submissions", "aapl_first_page", page)
 
 
-@pytest.mark.vcr(allow_playback_repeats=True)
 def test_submissions_form_filter(client: TestClient, golden) -> None:
     response = client.get("/company/AAPL/submissions", params={"form": "10-K", "page_size": 2})
     assert response.status_code == 200
@@ -222,7 +212,6 @@ def test_submissions_form_filter(client: TestClient, golden) -> None:
     assert latest["is_inline_xbrl"] is True
 
 
-@pytest.mark.vcr(allow_playback_repeats=True)
 def test_submissions_deep_page(client: TestClient, golden) -> None:
     # last page of AAPL history: partial page, paging terminates cleanly
     response = client.get("/company/AAPL/submissions", params={"start": 2230, "page_size": 100})
@@ -240,7 +229,6 @@ def test_submissions_deep_page(client: TestClient, golden) -> None:
     golden("company_submissions", "aapl_deep_page", deep)
 
 
-@pytest.mark.vcr
 def test_company_not_found_silence_checks(client: TestClient) -> None:
     # valid-format CIK that exists nowhere at SEC: the submissions fetch 404s
     response = client.get("/company/9999999999")

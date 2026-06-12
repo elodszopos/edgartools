@@ -1,4 +1,4 @@
-"""Integration: /search (EFTS full-text). One cassette; every call is a small JSON page."""
+"""Integration: /search (EFTS full-text). Every call is a small JSON page served from the store."""
 
 from __future__ import annotations
 
@@ -14,9 +14,8 @@ def client():
         yield test_client
 
 
-@pytest.mark.vcr
 def test_search_paging_filters_and_facets(client: TestClient, golden) -> None:
-    # phrase search scoped to 8-K within a fixed window (deterministic cassette)
+    # phrase search scoped to 8-K within a fixed window (deterministic fixtures)
     params = {
         "q": '"cybersecurity incident"',
         "forms": "8-K",
@@ -78,7 +77,7 @@ def test_search_paging_filters_and_facets(client: TestClient, golden) -> None:
     assert apple["total"] > 0
     assert all(result["cik"] == "0000320193" for result in apple["results"])
 
-    # unknown ticker -> 404 (resolves via the ticker reference fetch, hence inside the cassette)
+    # unknown ticker -> 404 (resolves via the ticker reference fetch, a fixtured request)
     response = client.get("/search", params={"q": "x", "id": "ZZZZZZZZ"})
     assert response.status_code == 404
 

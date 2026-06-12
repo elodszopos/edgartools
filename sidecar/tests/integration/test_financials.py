@@ -1,12 +1,9 @@
 """Integration: /company/{id}/financials statements + /financials/metrics scalars.
 
-All VCR tests share financials_p3_fixtures.yaml. Each company costs ~2 interactions
-(submissions JSON + the filing's SGML .txt); XBRL parses from the in-memory SGML.
-Ground truth verified by hand against the recorded SEC filings (2026-06-12):
-AAPL 10-K 0000320193-25-000079 / 10-Q 0000320193-26-000013, Realty Income 10-K
-0000726728-26-000011, Infosys 20-F 0000950170-25-091925 (IFRS path).
-The cassette's recorded Date header ages past the cache TTLs, so every test
-needs allow_playback_repeats (see the NOTE in conftest.py).
+Each company costs ~2 requests (submissions JSON + the filing's SGML .txt); XBRL parses
+from the in-memory SGML. Ground truth verified by hand against the recorded SEC filings
+(2026-06-12): AAPL 10-K 0000320193-25-000079 / 10-Q 0000320193-26-000013, Realty Income
+10-K 0000726728-26-000011, Infosys 20-F 0000950170-25-091925 (IFRS path).
 """
 
 from __future__ import annotations
@@ -26,11 +23,6 @@ _STATEMENT_KEYS = (
 )
 
 
-@pytest.fixture
-def vcr_cassette_name():
-    return "financials_p3_fixtures"
-
-
 @pytest.fixture(scope="module")
 def client():
     with TestClient(app) as test_client:
@@ -47,7 +39,6 @@ def _values(record: dict) -> list:
     return [v["value"] for v in record["values"]]
 
 
-@pytest.mark.vcr(allow_playback_repeats=True)
 def test_financials_annual_standardized(client: TestClient, golden) -> None:
     response = client.get("/company/AAPL/financials")
     assert response.status_code == 200
@@ -167,7 +158,6 @@ def test_financials_annual_standardized(client: TestClient, golden) -> None:
     golden("company_financials", "aapl_annual_standardized", body)
 
 
-@pytest.mark.vcr(allow_playback_repeats=True)
 def test_financials_raw_view_with_dimensions(client: TestClient, golden) -> None:
     response = client.get("/company/AAPL/financials", params={"view": "raw", "dimensions": "true"})
     assert response.status_code == 200
@@ -188,7 +178,6 @@ def test_financials_raw_view_with_dimensions(client: TestClient, golden) -> None
     golden("company_financials", "aapl_annual_raw_dimensions", body)
 
 
-@pytest.mark.vcr(allow_playback_repeats=True)
 def test_financials_quarterly(client: TestClient, golden) -> None:
     response = client.get("/company/AAPL/financials", params={"period": "quarterly"})
     assert response.status_code == 200
@@ -217,7 +206,6 @@ def test_financials_quarterly(client: TestClient, golden) -> None:
     golden("company_financials", "aapl_quarterly", body)
 
 
-@pytest.mark.vcr(allow_playback_repeats=True)
 def test_financials_reit_revenue_composition(client: TestClient, golden) -> None:
     # diversify beyond AAPL: REIT income statements lead with lease income, not product sales
     response = client.get("/company/O/financials")
@@ -252,7 +240,6 @@ def test_financials_reit_revenue_composition(client: TestClient, golden) -> None
     golden("company_financials", "realty_income_annual", body)
 
 
-@pytest.mark.vcr(allow_playback_repeats=True)
 def test_financials_ifrs_foreign_filer(client: TestClient, golden) -> None:
     # 20-F filer: annual chain falls through 10-K to 20-F; concepts are ifrs-full_*
     response = client.get("/company/INFY/financials")
@@ -330,7 +317,6 @@ def test_financials_ifrs_foreign_filer(client: TestClient, golden) -> None:
     golden("company_financials_metrics", "infy_annual", metrics)
 
 
-@pytest.mark.vcr(allow_playback_repeats=True)
 def test_financial_metrics(client: TestClient, golden) -> None:
     response = client.get("/company/AAPL/financials/metrics")
     assert response.status_code == 200
@@ -367,7 +353,6 @@ def test_financial_metrics(client: TestClient, golden) -> None:
     golden("company_financials_metrics", "aapl_annual", body)
 
 
-@pytest.mark.vcr(allow_playback_repeats=True)
 def test_financials_silence_no_annual_filing(client: TestClient) -> None:
     # individual filer (Form 4s only) - the error names the form chain that was tried
     response = client.get("/company/0001347842/financials")
@@ -375,7 +360,6 @@ def test_financials_silence_no_annual_filing(client: TestClient) -> None:
     assert response.json() == {"detail": "no annual filing (10-K/20-F/40-F) at SEC for CIK 0001347842"}
 
 
-@pytest.mark.vcr(allow_playback_repeats=True)
 def test_financials_multi_annual(client: TestClient, golden) -> None:
     # one fiscal year stitched in from each of the 3 most recent 10-Ks
     response = client.get("/company/AAPL/financials/multi", params={"n": "3"})
@@ -450,7 +434,6 @@ def test_financials_multi_annual(client: TestClient, golden) -> None:
     golden("company_financials_multi", "aapl_annual_n3", body)
 
 
-@pytest.mark.vcr(allow_playback_repeats=True)
 def test_financials_multi_quarterly(client: TestClient, golden) -> None:
     # default stitching takes ONE column per filing (GH #780): the newest 10-Q
     # contributes its YTD column, so quarter and YTD durations mix across periods -
@@ -478,7 +461,6 @@ def test_financials_multi_quarterly(client: TestClient, golden) -> None:
     golden("company_financials_multi", "aapl_quarterly_n3", body)
 
 
-@pytest.mark.vcr(allow_playback_repeats=True)
 def test_financials_multi_reit_and_errors(client: TestClient, golden) -> None:
     response = client.get("/company/O/financials/multi", params={"n": "2"})
     assert response.status_code == 200
@@ -502,7 +484,6 @@ def test_financials_multi_reit_and_errors(client: TestClient, golden) -> None:
 _TTM_DERIVED_WARNING = "Some quarters were derived from YTD or annual facts. These are calculated values, not directly reported quarterly data."
 
 
-@pytest.mark.vcr(allow_playback_repeats=True)
 def test_financials_ttm(client: TestClient, golden) -> None:
     response = client.get("/company/AAPL/financials/ttm")
     assert response.status_code == 200
@@ -545,7 +526,6 @@ def test_financials_ttm(client: TestClient, golden) -> None:
     golden("company_financials_ttm", "aapl_default", body)
 
 
-@pytest.mark.vcr(allow_playback_repeats=True)
 def test_financials_ttm_concept_and_as_of(client: TestClient, golden) -> None:
     response = client.get("/company/AAPL/financials/ttm", params={"concept": "GrossProfit"})
     assert response.status_code == 200
@@ -578,7 +558,6 @@ def test_financials_ttm_concept_and_as_of(client: TestClient, golden) -> None:
     golden("company_financials_ttm", "aapl_grossprofit_2025q1", body)
 
 
-@pytest.mark.vcr(allow_playback_repeats=True)
 def test_financials_ttm_silence(client: TestClient) -> None:
     response = client.get("/company/AAPL/financials/ttm", params={"concept": "NoSuchConceptXyz"})
     assert response.status_code == 404
@@ -593,7 +572,6 @@ def test_financials_ttm_silence(client: TestClient) -> None:
     assert response.json() == {"detail": "no XBRL facts at SEC for CIK 0001347842"}
 
 
-@pytest.mark.vcr(allow_playback_repeats=True)
 def test_financials_param_validation(client: TestClient) -> None:
     # FastAPI rejects bad query params before the handler runs - no SEC traffic
     assert client.get("/company/AAPL/financials", params={"period": "bogus"}).status_code == 422

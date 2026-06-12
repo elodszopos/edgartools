@@ -1,8 +1,7 @@
 """Integration: /filing/{accession}/attachments list + /attachments/{sequence} content.
 
-Shares the P2 cassette (filing_p2_fixtures.yaml) via the vcr_cassette_name override.
 Attachment listings and content are served from the already-recorded SGML submission
-text files - no new SEC interactions in this module.
+text fixtures - no new SEC requests in this module.
 """
 
 from __future__ import annotations
@@ -13,18 +12,12 @@ from fastapi.testclient import TestClient
 from app.main import app
 
 
-@pytest.fixture
-def vcr_cassette_name():
-    return "filing_p2_fixtures"
-
-
 @pytest.fixture(scope="module")
 def client():
     with TestClient(app) as test_client:
         yield test_client
 
 
-@pytest.mark.vcr
 def test_attachments_listing(client: TestClient, golden) -> None:
     # 8-K with exhibits, XBRL data files, graphics, and SEC-generated viewer files
     response = client.get("/filing/0001193125-25-004072/attachments")
@@ -103,7 +96,6 @@ def test_attachments_listing(client: TestClient, golden) -> None:
     golden("filing_attachments", "anixa_10k", anixa)
 
 
-@pytest.mark.vcr
 def test_attachment_content_extraction(client: TestClient, golden) -> None:
     # exhibit text (default fmt): the WBA earnings press release
     response = client.get("/filing/0001193125-25-004072/attachments/2")
@@ -146,7 +138,6 @@ def test_attachment_content_extraction(client: TestClient, golden) -> None:
     golden("filing_attachment_content", "anixa_r2_balance_sheet_text", r2)
 
 
-@pytest.mark.vcr
 def test_attachment_content_silence_checks(client: TestClient) -> None:
     # binary attachment: raw is a 422 pointing at the download url, text is null content
     response = client.get("/filing/0001193125-25-004072/attachments/7", params={"fmt": "raw"})

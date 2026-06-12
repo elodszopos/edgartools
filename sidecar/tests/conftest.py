@@ -1,9 +1,9 @@
-"""Shared pytest harness: VCR wiring (fork conventions), SEC recording budget guard,
-identity defaults for replay, and the golden-dump helper (plan: edgar-sidecar.md)."""
+"""Shared pytest harness: URL-keyed SEC fixture store + httpx replay transport,
+isolated edgartools data dir, identity defaults, and the golden-dump helper
+(plan: edgar-sidecar.md; store: tests/sec_replay.py)."""
 
 from __future__ import annotations
 
-import inspect
 import json
 import os
 from collections.abc import Callable
@@ -11,72 +11,43 @@ from pathlib import Path
 from typing import Any
 
 import pytest
+import sec_replay
 
-CASSETTES_DIR = Path(__file__).parent / "cassettes"
 GOLDENS_DIR = Path(__file__).parent.parent / "ts" / "fixtures" / "responses"
-
-# plan "SEC recording budget": hard cap on NEW interactions recorded per pytest run
-SEC_RECORDING_BUDGET = 60
-_new_recordings = {"count": 0}
-
-
-def _budget_guard(response: dict) -> dict:
-    # vcrpy runs before_record_response on BOTH record-appends and cassette loads
-    # (Cassette._load replays every stored interaction through append) - count only
-    # true recordings, or shared multi-test cassettes blow the budget on replay alone
-    frame = inspect.currentframe()
-    while frame is not None:
-        code = frame.f_code
-        if code.co_name == "_load" and code.co_filename.endswith("cassette.py"):
-            return response
-        frame = frame.f_back
-    _new_recordings["count"] += 1
-    if _new_recordings["count"] > SEC_RECORDING_BUDGET:
-        raise RuntimeError(
-            f"SEC recording budget exceeded: more than {SEC_RECORDING_BUDGET} new HTTP "
-            "interactions recorded in one run (plan: edgar-sidecar.md, recording budget)"
-        )
-    return response
-
-
-@pytest.fixture(scope="module")
-def vcr_cassette_dir(request):
-    # pin one shared cassette dir; pytest-vcr's default is per-test-file
-    return str(CASSETTES_DIR)
-
-
-@pytest.fixture(scope="module")
-def vcr_config():
-    # mirrors fork tests/conftest.py vcr_config
-    return {
-        "cassette_library_dir": str(CASSETTES_DIR),
-        "record_mode": "once",
-        "match_on": ["method", "scheme", "host", "port", "path", "query"],
-        "filter_headers": ["User-Agent", "Authorization"],
-        "decode_compressed_response": True,
-        "before_record_response": _budget_guard,
-        # NOTE: the disk cache judges freshness from the RECORDED Date header, so any
-        # cassette older than the URL's TTL (submissions/tickers: 30s per issue #471,
-        # indexes: 30min) stops deduping repeat in-test requests - mark such tests
-        # @pytest.mark.vcr(allow_playback_repeats=True); that kwarg is use_cassette-only
-        # and must flow via the marker, not this config
-    }
 
 
 @pytest.fixture(scope="session", autouse=True)
 def _isolated_edgar_data_dir(tmp_path_factory: pytest.TempPathFactory) -> None:
-    # edgartools keeps a 30-min disk HTTP cache (~/.edgar/_tcache); a warm cache would
-    # swallow requests before VCR sees them -> cassettes silently missing interactions.
-    # A fresh tmp dir per session keeps record AND replay deterministic.
+    # Pin a clean per-session data dir so no stray local cache/state leaks into tests.
+    # The replay transport is the sole arbiter of SEC bytes (cache disabled), but edgartools
+    # also keeps other local data under this dir -- a fresh dir keeps every run deterministic.
     os.environ["EDGAR_LOCAL_DATA_DIR"] = str(tmp_path_factory.mktemp("edgar-data"))
 
 
 @pytest.fixture(scope="session", autouse=True)
 def _default_identity() -> None:
-    # cassette replay needs no real identity; recording uses the caller's exported env.
+    # replay needs no real identity; recording uses the caller's exported env.
     # session scope: must be set before module-scoped TestClient fixtures boot the app.
     os.environ.setdefault("EDGAR_IDENTITY", "edgar-sidecar tests test@example.com")
     os.environ.setdefault("SEC_EDGAR_USER_AGENT", "edgar-sidecar tests test@example.com")
+
+
+@pytest.fixture(scope="session", autouse=True)
+def _sec_transport(_isolated_edgar_data_dir: None, _default_identity: None):
+    # Single chokepoint: patch httpx.HTTPTransport / AsyncHTTPTransport so EVERY SEC request
+    # (edgartools' HTTP_MGR clients AND its direct httpx.get/httpx.Client call sites) resolves
+    # to the fixture store. Default = replay (miss is a hard error, never a silent network call);
+    # EDGAR_FIXTURE_RECORD=1 = record. Session-scoped so the patch spans the whole run.
+    mp = pytest.MonkeyPatch()
+    if os.environ.get("EDGAR_FIXTURE_RECORD") == "1":
+        sec_replay.install_record(mp)
+    else:
+        sec_replay.install_replay(mp)
+    yield
+    mp.undo()
+    from edgar.httpclient import HTTP_MGR
+
+    HTTP_MGR.close()  # drop the replay-bound client so later imports rebuild normally
 
 
 @pytest.fixture
