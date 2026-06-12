@@ -9,7 +9,7 @@ to_dict() dumps. Coercers are strict: unexpected types raise instead of guessing
 from __future__ import annotations
 
 import math
-from datetime import date, datetime
+from datetime import UTC, date, datetime
 from decimal import Decimal
 
 import numpy as np
@@ -96,6 +96,20 @@ def to_bool(value: object) -> bool | None:
             return False
         raise TypeError(f"cannot coerce str to bool: {value!r}")
     raise TypeError(f"cannot coerce {type(value).__name__} to bool: {value!r}")
+
+
+def to_utc_datetime(value: object) -> datetime | None:
+    """Wire datetimes are UTC (pydantic renders trailing 'Z', which generated Zod accepts)."""
+    if _is_missing(value):
+        return None
+    if isinstance(value, pd.Timestamp):
+        value = value.to_pydatetime()
+    if isinstance(value, datetime):
+        if value.tzinfo is None:
+            # naive timestamps are ambiguous (SEC mixes Eastern and UTC sources) - never guess
+            raise ValueError(f"naive datetime is ambiguous on the wire: {value!r}")
+        return value.astimezone(UTC)
+    raise TypeError(f"cannot coerce {type(value).__name__} to UTC datetime: {value!r}")
 
 
 def to_date(value: object) -> date | None:

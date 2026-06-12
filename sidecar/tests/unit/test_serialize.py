@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from app.serialize import to_bool, to_date, to_float, to_int, to_str
+from app.serialize import to_bool, to_date, to_float, to_int, to_str, to_utc_datetime
 
 
 def test_to_int_numpy_int():
@@ -172,3 +172,32 @@ def test_to_date_non_iso_string_raises():
 def test_to_date_number_raises():
     with pytest.raises(TypeError):
         to_date(20240501)
+
+
+def test_to_utc_datetime_converts_offset_to_utc():
+    eastern = datetime.fromisoformat("2026-06-11T21:59:17-04:00")
+    converted = to_utc_datetime(eastern)
+    assert converted is not None
+    assert converted.isoformat() == "2026-06-12T01:59:17+00:00"
+
+
+def test_to_utc_datetime_pandas_timestamp():
+    ts = pd.Timestamp("2026-06-11T21:59:17-04:00")
+    converted = to_utc_datetime(ts)
+    assert converted is not None
+    assert converted.isoformat() == "2026-06-12T01:59:17+00:00"
+
+
+def test_to_utc_datetime_none_and_nat_are_null():
+    assert to_utc_datetime(None) is None
+    assert to_utc_datetime(pd.NaT) is None
+
+
+def test_to_utc_datetime_naive_raises():
+    with pytest.raises(ValueError, match="naive datetime"):
+        to_utc_datetime(datetime(2026, 6, 11, 21, 59, 17))
+
+
+def test_to_utc_datetime_date_raises():
+    with pytest.raises(TypeError):
+        to_utc_datetime(date(2026, 6, 11))

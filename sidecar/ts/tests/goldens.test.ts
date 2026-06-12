@@ -7,13 +7,19 @@ import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, test } from 'bun:test';
 import type { z } from 'zod';
-import { HealthHealthGetResponse } from '../src/generated/zod';
+import {
+  HealthHealthGetResponse,
+  ListCurrentFilingsFilingsCurrentGetResponse,
+  ListFilingsFilingsGetResponse,
+} from '../src/generated/zod';
 
 const FIXTURES = join(import.meta.dir, '..', 'fixtures', 'responses');
 
 // endpoint dir name -> generated response schema; extend with every new endpoint
 const RESPONSE_SCHEMAS: Record<string, z.ZodType> = {
   health: HealthHealthGetResponse,
+  filings: ListFilingsFilingsGetResponse,
+  filings_current: ListCurrentFilingsFilingsCurrentGetResponse,
 };
 
 const endpoints = readdirSync(FIXTURES).filter((entry) => statSync(join(FIXTURES, entry)).isDirectory());

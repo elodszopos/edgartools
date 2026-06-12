@@ -49,13 +49,20 @@ def vcr_config():
     }
 
 
-@pytest.fixture(autouse=True)
-def _default_identity(monkeypatch: pytest.MonkeyPatch) -> None:
-    # cassette replay needs no real identity; recording uses the caller's exported env
-    if not os.environ.get("EDGAR_IDENTITY"):
-        monkeypatch.setenv("EDGAR_IDENTITY", "edgar-sidecar tests test@example.com")
-    if not os.environ.get("SEC_EDGAR_USER_AGENT"):
-        monkeypatch.setenv("SEC_EDGAR_USER_AGENT", "edgar-sidecar tests test@example.com")
+@pytest.fixture(scope="session", autouse=True)
+def _isolated_edgar_data_dir(tmp_path_factory: pytest.TempPathFactory) -> None:
+    # edgartools keeps a 30-min disk HTTP cache (~/.edgar/_tcache); a warm cache would
+    # swallow requests before VCR sees them -> cassettes silently missing interactions.
+    # A fresh tmp dir per session keeps record AND replay deterministic.
+    os.environ["EDGAR_LOCAL_DATA_DIR"] = str(tmp_path_factory.mktemp("edgar-data"))
+
+
+@pytest.fixture(scope="session", autouse=True)
+def _default_identity() -> None:
+    # cassette replay needs no real identity; recording uses the caller's exported env.
+    # session scope: must be set before module-scoped TestClient fixtures boot the app.
+    os.environ.setdefault("EDGAR_IDENTITY", "edgar-sidecar tests test@example.com")
+    os.environ.setdefault("SEC_EDGAR_USER_AGENT", "edgar-sidecar tests test@example.com")
 
 
 @pytest.fixture
