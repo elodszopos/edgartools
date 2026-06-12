@@ -1808,7 +1808,7 @@
       {
         "concept": "us-gaap_PaymentsForProceedsFromOtherInvestingActivities",
         "label": "Other",
-        "standard_concept": "NetCashFromInvestingActivities",
+        "standard_concept": null,
         "level": 3,
         "is_abstract": false,
         "is_total": false,
@@ -2015,7 +2015,7 @@
       {
         "concept": "us-gaap_ProceedsFromPaymentsForOtherFinancingActivities",
         "label": "Other",
-        "standard_concept": "NetCashFromFinancingActivities",
+        "standard_concept": null,
         "level": 3,
         "is_abstract": false,
         "is_total": false,

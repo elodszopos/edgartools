@@ -240,7 +240,7 @@
       {
         "concept": "ifrs-full_SalesAndMarketingExpense",
         "label": "Selling and marketing expenses",
-        "standard_concept": "OperatingIncomeLoss",
+        "standard_concept": "MarketingExpenses",
         "level": 4,
         "is_abstract": false,
         "is_dimension": false,
@@ -1124,7 +1124,7 @@
       {
         "concept": "ifrs-full_ComprehensiveIncomeAttributableToNoncontrollingInterests",
         "label": "Non-controlling interests",
-        "standard_concept": "ComprehensiveIncomeNet",
+        "standard_concept": null,
         "level": 3,
         "is_abstract": false,
         "is_dimension": false,
@@ -1566,7 +1566,7 @@
       {
         "concept": "ifrs-full_CurrentTradeReceivables",
         "label": "Trade receivables",
-        "standard_concept": "CurrentAssetsTotal",
+        "standard_concept": "TradeReceivables",
         "level": 4,
         "is_abstract": false,
         "is_dimension": false,
@@ -1626,7 +1626,7 @@
       {
         "concept": "ifrs-full_CurrentPrepaymentsAndOtherCurrentAssets",
         "label": "Prepayments and other current assets",
-        "standard_concept": "CurrentAssetsTotal",
+        "standard_concept": "OtherNonOperatingCurrentAssets",
         "level": 4,
         "is_abstract": false,
         "is_dimension": false,
@@ -1656,7 +1656,7 @@
       {
         "concept": "ifrs-full_CurrentTaxAssetsCurrent",
         "label": "Income tax assets",
-        "standard_concept": "CurrentAssetsTotal",
+        "standard_concept": "IncomeTaxReceivable",
         "level": 4,
         "is_abstract": false,
         "is_dimension": false,
@@ -1686,7 +1686,7 @@
       {
         "concept": "ifrs-full_CurrentDerivativeFinancialAssets",
         "label": "Derivative financial instruments",
-        "standard_concept": "CurrentAssetsTotal",
+        "standard_concept": null,
         "level": 4,
         "is_abstract": false,
         "is_dimension": false,
@@ -2226,7 +2226,7 @@
       {
         "concept": "ifrs-full_CurrentDerivativeFinancialLiabilities",
         "label": "Derivative financial instruments",
-        "standard_concept": "CurrentLiabilitiesTotal",
+        "standard_concept": null,
         "level": 4,
         "is_abstract": false,
         "is_dimension": false,
@@ -2256,7 +2256,7 @@
       {
         "concept": "ifrs-full_CurrentTaxLiabilitiesCurrent",
         "label": "Current income tax liabilities",
-        "standard_concept": "CurrentLiabilitiesTotal",
+        "standard_concept": "AccruedIncomeTaxes",
         "level": 4,
         "is_abstract": false,
         "is_dimension": false,
@@ -2346,7 +2346,7 @@
       {
         "concept": "ifrs-full_CurrentProvisions",
         "label": "Provisions",
-        "standard_concept": "CurrentLiabilitiesTotal",
+        "standard_concept": null,
         "level": 4,
         "is_abstract": false,
         "is_dimension": false,
@@ -2526,7 +2526,7 @@
       {
         "concept": "ifrs-full_NoncurrentProvisionsForEmployeeBenefits",
         "label": "Employee benefit obligations",
-        "standard_concept": "NonCurrentLiabilitiesTotal",
+        "standard_concept": null,
         "level": 3,
         "is_abstract": false,
         "is_dimension": false,
@@ -3271,7 +3271,7 @@
       {
         "concept": "ifrs-full_AdjustmentsForIncomeTaxExpense",
         "label": "Income tax expense",
-        "standard_concept": "NetCashFromOperatingActivities",
+        "standard_concept": null,
         "level": 3,
         "is_abstract": false,
         "is_dimension": false,
@@ -3305,7 +3305,7 @@
       {
         "concept": "ifrs-full_AdjustmentsForUnrealisedForeignExchangeLossesGains",
         "label": "Exchange differences on translation of assets and liabilities, net",
-        "standard_concept": "NetCashFromOperatingActivities",
+        "standard_concept": null,
         "level": 3,
         "is_abstract": false,
         "is_dimension": false,
@@ -3475,7 +3475,7 @@
       {
         "concept": "ifrs-full_OtherAdjustmentsToReconcileProfitLoss",
         "label": "Other adjustments",
-        "standard_concept": "NetCashFromOperatingActivities",
+        "standard_concept": "OtherNonCashItemsCF",
         "level": 3,
         "is_abstract": false,
         "is_dimension": false,
@@ -3543,7 +3543,7 @@
       {
         "concept": "ifrs-full_AdjustmentsForDecreaseIncreaseInTradeAndOtherReceivables",
         "label": "Trade receivables and unbilled revenues",
-        "standard_concept": "NetCashFromOperatingActivities",
+        "standard_concept": "ChangeInReceivables",
         "level": 3,
         "is_abstract": false,
         "is_dimension": false,
@@ -3577,7 +3577,7 @@
       {
         "concept": "ifrs-full_AdjustmentsForDecreaseIncreaseInOtherAssets",
         "label": "Prepayments and other assets",
-        "standard_concept": "NetCashFromOperatingActivities",
+        "standard_concept": "ChangeInOtherWorkingCapital",
         "level": 3,
         "is_abstract": false,
         "is_dimension": false,
@@ -3713,7 +3713,7 @@
       {
         "concept": "ifrs-full_CashFlowsFromUsedInOperations",
         "label": "Cash generated from operations",
-        "standard_concept": "NetCashFromOperatingActivities",
+        "standard_concept": null,
         "level": 3,
         "is_abstract": false,
         "is_dimension": false,
@@ -3747,7 +3747,7 @@
       {
         "concept": "ifrs-full_IncomeTaxesPaidRefundClassifiedAsOperatingActivities",
         "label": "Income taxes paid (net)",
-        "standard_concept": "NetCashFromOperatingActivities",
+        "standard_concept": null,
         "level": 3,
         "is_abstract": false,
         "is_dimension": false,
@@ -3985,7 +3985,7 @@
       {
         "concept": "ifrs-full_CashFlowsUsedInObtainingControlOfSubsidiariesOrOtherBusinessesClassifiedAsInvestingActivities",
         "label": "Payment for acquisition of business, net of cash acquired",
-        "standard_concept": "NetCashFromInvestingActivities",
+        "standard_concept": "AcquisitionsNet",
         "level": 3,
         "is_abstract": false,
         "is_dimension": false,
@@ -4733,7 +4733,7 @@
       {
         "concept": "ifrs-full_PaymentsOfLeaseLiabilitiesClassifiedAsFinancingActivities",
         "label": "Payment of lease liabilities",
-        "standard_concept": "NetCashFromFinancingActivities",
+        "standard_concept": "FinanceLeasePayments",
         "level": 3,
         "is_abstract": false,
         "is_dimension": false,
@@ -4835,7 +4835,7 @@
       {
         "concept": "ifrs-full_ProceedsFromExerciseOfOptions",
         "label": "Shares issued on exercise of employee stock options",
-        "standard_concept": "NetCashFromFinancingActivities",
+        "standard_concept": "StockIssuanceProceeds",
         "level": 3,
         "is_abstract": false,
         "is_dimension": false,
@@ -5073,7 +5073,7 @@
       {
         "concept": "ifrs-full_IncreaseDecreaseInCashAndCashEquivalentsBeforeEffectOfExchangeRateChanges",
         "label": "Net increase/(decrease) in cash and cash equivalents",
-        "standard_concept": "NetChangeInCash",
+        "standard_concept": null,
         "level": 1,
         "is_abstract": false,
         "is_dimension": false,
@@ -5107,7 +5107,7 @@
       {
         "concept": "ifrs-full_EffectOfExchangeRateChangesOnCashAndCashEquivalents",
         "label": "Effect of exchange rate changes on cash and cash equivalents",
-        "standard_concept": "NetChangeInCash",
+        "standard_concept": "ForeignExchangeEffectOnCash",
         "level": 1,
         "is_abstract": false,
         "is_dimension": false,
@@ -6487,7 +6487,7 @@
       {
         "concept": "ifrs-full_SalesAndMarketingExpense",
         "label": "Selling and marketing expenses",
-        "standard_concept": "OperatingIncomeLoss",
+        "standard_concept": "MarketingExpenses",
         "level": 4,
         "is_abstract": false,
         "is_dimension": false,
@@ -7371,7 +7371,7 @@
       {
         "concept": "ifrs-full_ComprehensiveIncomeAttributableToNoncontrollingInterests",
         "label": "Non-controlling interests",
-        "standard_concept": "ComprehensiveIncomeNet",
+        "standard_concept": null,
         "level": 3,
         "is_abstract": false,
         "is_dimension": false,

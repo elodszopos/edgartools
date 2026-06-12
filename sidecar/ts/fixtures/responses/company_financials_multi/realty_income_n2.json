@@ -1161,7 +1161,7 @@
       {
         "concept": "us-gaap_SecuredDebt",
         "label": "Mortgages payable, net",
-        "standard_concept": "Liabilities",
+        "standard_concept": null,
         "level": 3,
         "is_abstract": false,
         "is_total": false,
@@ -1656,7 +1656,7 @@
       {
         "concept": "us-gaap_EquityMethodInvestmentDividendsOrDistributions",
         "label": "Distributions on common equity from unconsolidated entities",
-        "standard_concept": "NetCashFromOperatingActivities",
+        "standard_concept": null,
         "level": 5,
         "is_abstract": false,
         "is_total": false,
@@ -1846,7 +1846,7 @@
       {
         "concept": "us-gaap_PaymentsForCapitalImprovements",
         "label": "Improvements to real estate, including leasing costs",
-        "standard_concept": "NetCashFromInvestingActivities",
+        "standard_concept": "CapitalExpenses",
         "level": 5,
         "is_abstract": false,
         "is_total": false,
@@ -1865,7 +1865,7 @@
       {
         "concept": "us-gaap_PaymentsToAcquireInterestInSubsidiariesAndAffiliates",
         "label": "Investment in unconsolidated entities",
-        "standard_concept": "NetCashFromInvestingActivities",
+        "standard_concept": null,
         "level": 5,
         "is_abstract": false,
         "is_total": false,
@@ -1884,7 +1884,7 @@
       {
         "concept": "us-gaap_PaymentsToAcquireLoansReceivable",
         "label": "Investment in loans and preferred equity",
-        "standard_concept": "NetCashFromInvestingActivities",
+        "standard_concept": null,
         "level": 5,
         "is_abstract": false,
         "is_total": false,
@@ -1922,7 +1922,7 @@
       {
         "concept": "us-gaap_ProceedsFromEquityMethodInvestmentDividendsOrDistributionsReturnOfCapital",
         "label": "Return of investment from unconsolidated entities",
-        "standard_concept": "NetCashFromInvestingActivities",
+        "standard_concept": null,
         "level": 5,
         "is_abstract": false,
         "is_total": false,
@@ -1941,7 +1941,7 @@
       {
         "concept": "us-gaap_ProceedsFromCollectionOfNotesReceivable",
         "label": "Proceeds from note receivable",
-        "standard_concept": "NetCashFromInvestingActivities",
+        "standard_concept": null,
         "level": 5,
         "is_abstract": false,
         "is_total": false,
@@ -1960,7 +1960,7 @@
       {
         "concept": "us-gaap_ProceedsFromInsuranceSettlementInvestingActivities",
         "label": "Insurance proceeds received",
-        "standard_concept": "NetCashFromInvestingActivities",
+        "standard_concept": null,
         "level": 5,
         "is_abstract": false,
         "is_total": false,
@@ -2378,7 +2378,7 @@
       {
         "concept": "us-gaap_ProceedsFromPaymentsForOtherFinancingActivities",
         "label": "Other financing activities, net",
-        "standard_concept": "NetCashFromFinancingActivities",
+        "standard_concept": null,
         "level": 5,
         "is_abstract": false,
         "is_total": false,
@@ -2473,7 +2473,7 @@
       {
         "concept": "us-gaap_ProceedsFromSaleOfEquityMethodInvestments",
         "label": "Net proceeds from sale of unconsolidated entities",
-        "standard_concept": "NetCashFromInvestingActivities",
+        "standard_concept": "InvestmentProceeds",
         "level": 5,
         "is_abstract": false,
         "is_total": false,
