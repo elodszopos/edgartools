@@ -22,9 +22,9 @@ import json
 import logging
 import os
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Set, Tuple
+from typing import Dict, List, Optional, Tuple
 
-from .exclusions import should_exclude, EXCLUDED_TAGS
+from .exclusions import EXCLUDED_TAGS, should_exclude
 
 logger = logging.getLogger(__name__)
 
@@ -113,7 +113,7 @@ class ReverseIndex:
         # Build embedded display names from entries (new format has display_name per entry)
         # Only use non-ambiguous entries or the primary (first) concept in ambiguous ones
         self._embedded_display_names: Dict[str, str] = {}
-        for tag, entry in self._gaap_mappings.items():
+        for entry in self._gaap_mappings.values():
             if isinstance(entry, dict) and entry.get("display_name"):
                 std_tags = entry.get("standard_tags", [])
                 if not entry.get("ambiguous") and len(std_tags) == 1:
@@ -396,7 +396,7 @@ class ReverseIndex:
         entry = self._index.get(normalized, {}) if normalized else {}
         entry_section = entry.get('section') if isinstance(entry, dict) else None
         entry_is_total = entry.get('is_total') if isinstance(entry, dict) else None
-        entry_confidence = entry.get('confidence', 0.0) if isinstance(entry, dict) else 0.0
+        # TODO(REVISIT): entry confidence is never consulted during disambiguation; define gating semantics or drop the field
 
         try:
             from .sections import get_section_for_concept
@@ -566,7 +566,7 @@ class ReverseIndex:
         if result is None:
             return []
 
-        return list(zip(result.standard_concepts, result.display_names))
+        return list(zip(result.standard_concepts, result.display_names, strict=True))
 
     def concept_to_display_name(self, standard_concept: str) -> str:
         """

@@ -682,7 +682,7 @@ class StatementStitcher:
             if canonical:
                 canonical_to_keys[canonical].append(concept_key)
 
-        for canonical, keys in canonical_to_keys.items():
+        for keys in canonical_to_keys.values():
             if len(keys) <= 1:
                 continue
             # Sort so the concept with the most data is primary
@@ -732,7 +732,7 @@ class StatementStitcher:
             by_start[p['start_date']].append(p)
 
         # 3. For each fiscal year start, sort by duration and derive discrete quarters
-        for start_date, group in by_start.items():
+        for group in by_start.values():
             # Sort shortest to longest (Q1 → Q2 YTD → Q3 YTD → FY)
             group.sort(key=lambda p: p['duration_days'])
 
@@ -827,8 +827,6 @@ class StatementStitcher:
         The longer period entry is updated in-place with the discrete value.
         The display label in self.period_dates is updated to reflect the discrete quarter.
         """
-        from edgar.core import log
-
         for concept_key in list(self.data.keys()):
             longer_entry = self.data[concept_key].get(longer_pid)
             shorter_entry = self.data[concept_key].get(shorter_pid)

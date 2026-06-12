@@ -12,10 +12,11 @@ from edgar.xbrl.stitching.core import StatementStitcher, stitch_statements
 from edgar.xbrl.stitching.periods import determine_optimal_periods
 from edgar.xbrl.stitching.query import StitchedFactQuery, StitchedFactsView
 from edgar.xbrl.stitching.utils import render_stitched_statement, to_pandas
-from edgar.xbrl.stitching.xbrls import XBRLS
+from edgar.xbrl.stitching.xbrls import XBRLS, XBRLParseOutcome
 
 __all__ = [
     'XBRLS',
+    'XBRLParseOutcome',
     'StatementStitcher',
     'stitch_statements',
     'determine_optimal_periods',

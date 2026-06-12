@@ -5,25 +5,22 @@ This module provides the main EntityFacts class with investment-focused
 analytics and AI-ready interfaces.
 """
 
+import re
 import warnings
 from collections import OrderedDict, defaultdict
 from datetime import date
 from functools import cached_property
-from typing import TYPE_CHECKING, Any, Callable, Dict, Iterator, List, Optional, Union as TypingUnion
+from typing import TYPE_CHECKING, Any, Callable, Dict, Iterator, List, Optional, Union
 
 if TYPE_CHECKING:
     from edgar.entity.query import FactQuery
-    from edgar.ttm.statement import TTMStatement
-    from edgar.ttm.calculator import TTMMetric
-    from edgar.entity.unit_handling import UnitResult
     from edgar.enums import PeriodType
-
-from typing import Union
+    from edgar.ttm.calculator import TTMMetric
+    from edgar.ttm.statement import TTMStatement
 
 import httpx
 import orjson as json
 import pandas as pd
-from pandas.core.interchange.dataframe_protocol import DataFrame
 from rich.box import SIMPLE, SIMPLE_HEAVY
 from rich.columns import Columns
 from rich.console import Group
@@ -34,13 +31,14 @@ from rich.text import Text
 
 from edgar.core import log
 from edgar.entity.enhanced_statement import MultiPeriodStatement
-from edgar.entity.models import FinancialFact
+from edgar.entity.models import ConceptMatch, ConceptSearchResults, FinancialFact, PeriodEntry, PeriodSummary
+from edgar.entity.unit_handling import UnitNormalizer, UnitResult
 from edgar.entity.utils import normalize_period_to_entity_facts
 from edgar.httprequests import download_json
 from edgar.storage import get_edgar_data_directory, is_using_local_storage
 
 
-class NoCompanyFactsFound(Exception):
+class NoCompanyFactsFound(Exception):  # noqa: N818 - public API name
     """Exception raised when no company facts are found for a given CIK."""
 
     def __init__(self, cik: int):
@@ -743,7 +741,7 @@ class EntityFacts:
             df = df.assign(
                 duration_days=[
                     (e - s).days if (s is not None and e is not None) else None
-                    for s, e in zip(df['period_start'], df['period_end'])
+                    for s, e in zip(df['period_start'], df['period_end'], strict=False)
                 ]
             )
             df = df[['period_start', 'period_end', 'duration_days',
@@ -1217,7 +1215,7 @@ class EntityFacts:
 
         return found_tags
 
-    def search_concepts(self, pattern: str) -> 'ConceptSearchResults':
+    def search_concepts(self, pattern: str) -> ConceptSearchResults:
         """
         Search this company's facts for concepts matching a pattern.
 
@@ -1235,9 +1233,6 @@ class EntityFacts:
             >>> facts.search_concepts("revenue")
             # Shows table: Concept | Label | Facts | Years | Periods
         """
-        import re
-        from edgar.entity.models import ConceptMatch, ConceptSearchResults
-
         regex = re.compile(pattern, re.IGNORECASE)
 
         # Single pass: build per-concept aggregates
@@ -1279,7 +1274,7 @@ class EntityFacts:
 
         return ConceptSearchResults(matches, pattern)
 
-    def available_periods(self, concept: str = None) -> 'PeriodSummary':
+    def available_periods(self, concept: str = None) -> PeriodSummary:
         """
         List periods that have data, optionally filtered to a specific concept.
 
@@ -1295,9 +1290,6 @@ class EntityFacts:
             >>> facts.available_periods()           # all periods
             >>> facts.available_periods("Revenue")  # periods with Revenue data
         """
-        from collections import defaultdict
-        from edgar.entity.models import PeriodEntry, PeriodSummary
-
         # Determine which facts to scan
         if concept:
             facts_to_scan = self._fact_index['by_concept'].get(concept, [])
@@ -1463,11 +1455,11 @@ class EntityFacts:
 
     def _prepare_quarterly_facts(self, facts: List[FinancialFact]) -> List[FinancialFact]:
         """Enhance facts with derived quarter-level duration facts for TTM/quarterly views."""
-        from edgar.ttm.calculator import TTMCalculator
         from edgar.entity.enhanced_statement import (
             detect_fiscal_year_end,
             validate_fiscal_year_period_end,
         )
+        from edgar.ttm.calculator import TTMCalculator
 
         # Filter out forward-looking schedule data before TTM derivation (Issues #781, #779).
         # These are footnote disclosures (e.g., expected amortization) tagged with
@@ -1611,7 +1603,7 @@ class EntityFacts:
 
     def get_ttm(self, concept: str, as_of: Optional[Union[date, str]] = None) -> 'TTMMetric':
         """Calculate Trailing Twelve Months value for a concept."""
-        from edgar.ttm.calculator import TTMCalculator
+        from edgar.ttm.calculator import TTMCalculator, TTMConceptNotFoundError
 
         facts = self._get_split_adjusted_facts()
 
@@ -1623,7 +1615,9 @@ class EntityFacts:
         target_facts = [fact for fact in facts if fact.concept in concept_candidates]
 
         if not target_facts:
-            raise KeyError(f"Concept '{concept}' not found in facts")
+            # TTMConceptNotFoundError subclasses KeyError: callers' except KeyError and the
+            # quoted str() repr are unchanged; .reason carries the classification.
+            raise TTMConceptNotFoundError(f"Concept '{concept}' not found in facts")
 
         calc = TTMCalculator(target_facts)
         as_of_date = self._parse_ttm_date(as_of)
@@ -1631,6 +1625,8 @@ class EntityFacts:
 
     def get_ttm_revenue(self, as_of: Optional[Union[date, str]] = None) -> 'TTMMetric':
         """Get Trailing Twelve Months revenue using common revenue concepts."""
+        from edgar.ttm.calculator import TTMConceptNotFoundError
+
         revenue_concepts = [
             'RevenueFromContractWithCustomerExcludingAssessedTax',
             'Revenues',
@@ -1642,17 +1638,19 @@ class EntityFacts:
                 return self.get_ttm(concept, as_of)
             except KeyError:
                 continue
-        raise KeyError("Could not find revenue concept in company facts")
+        raise TTMConceptNotFoundError("Could not find revenue concept in company facts")
 
     def get_ttm_net_income(self, as_of: Optional[Union[date, str]] = None) -> 'TTMMetric':
         """Get Trailing Twelve Months net income using common net income concepts."""
+        from edgar.ttm.calculator import TTMConceptNotFoundError
+
         income_concepts = ['NetIncomeLoss', 'NetIncome', 'ProfitLoss']
         for concept in income_concepts:
             try:
                 return self.get_ttm(concept, as_of)
             except KeyError:
                 continue
-        raise KeyError("Could not find net income concept in company facts")
+        raise TTMConceptNotFoundError("Could not find net income concept in company facts")
 
     @cached_property
     def _ttm_ready_facts(self) -> 'EntityFacts':
@@ -1924,7 +1922,7 @@ class EntityFacts:
         )
 
     def cash_flow(self, periods: int = 4, period_length: Optional[int] = None, as_dataframe: bool = False,
-                  annual: bool = True, concise_format: bool = False) -> Union[DataFrame, MultiPeriodStatement]:
+                  annual: bool = True, concise_format: bool = False) -> Union[pd.DataFrame, MultiPeriodStatement]:
         """Deprecated: Use cashflow_statement() instead."""
         warnings.warn(
             "cash_flow() is deprecated and will be removed in v6.0. "
@@ -2251,7 +2249,6 @@ class EntityFacts:
         Returns:
             Numeric value or None if not found (or UnitResult if return_detailed=True)
         """
-        from edgar.entity.unit_handling import UnitNormalizer, UnitResult
 
         # Default to USD if no unit specified
         target_unit = unit or 'USD'

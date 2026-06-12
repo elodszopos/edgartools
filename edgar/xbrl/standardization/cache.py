@@ -8,8 +8,8 @@ eliminating redundant computation when accessing multiple statements from the sa
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
 
 if TYPE_CHECKING:
-    from edgar.xbrl.xbrl import XBRL
     from edgar.xbrl.standardization.core import ConceptMapper
+    from edgar.xbrl.xbrl import XBRL
 
 
 class StandardizationCache:

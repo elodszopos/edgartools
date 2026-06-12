@@ -7,7 +7,6 @@ users to query standardized, multi-period financial data.
 
 import re
 from collections import defaultdict
-
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 import pandas as pd
@@ -18,6 +17,7 @@ from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
 
+from edgar.core import log
 from edgar.richtools import repr_rich
 from edgar.xbrl.facts import FactQuery
 
@@ -95,8 +95,8 @@ class StitchedFactsView:
                 )
                 all_facts.extend(facts)
 
-            except Exception:
-                # Skip statements that can't be stitched
+            except Exception as e:
+                log.debug(f"Skipping unstitchable statement {statement_type}: {e}")
                 continue
 
         # Cache results

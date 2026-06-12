@@ -14,7 +14,8 @@ Example:
 """
 from dataclasses import dataclass
 from datetime import date
-from typing import Callable, List, Optional, Tuple
+from enum import Enum
+from typing import List, Optional, Tuple
 
 import pandas as pd
 
@@ -59,6 +60,33 @@ class DurationBucket:
     YTD_9M = "YTD_9M"       # 230-330 days
     ANNUAL = "ANNUAL"       # 330-420 days
     OTHER = "OTHER"         # Outside normal ranges
+
+
+class TTMUnavailableReason(str, Enum):
+    """Classifies why a TTM value could not be produced."""
+
+    CONCEPT_ABSENT = "concept_absent"                # concept not present in company facts
+    INSUFFICIENT_QUARTERS = "insufficient_quarters"  # fewer than 4 consecutive quarters
+
+
+class TTMConceptNotFoundError(KeyError):
+    """Requested concept is absent from the company's facts.
+
+    Subclasses KeyError so existing ``except KeyError`` handlers and the quoted
+    ``str()`` repr are preserved; ``.reason`` exposes the structured classification.
+    """
+
+    reason = TTMUnavailableReason.CONCEPT_ABSENT
+
+
+class TTMInsufficientDataError(ValueError):
+    """Fewer than 4 consecutive quarters exist to build a TTM window.
+
+    Subclasses ValueError so existing ``except ValueError`` handlers and message
+    text are preserved; ``.reason`` exposes the structured classification.
+    """
+
+    reason = TTMUnavailableReason.INSUFFICIENT_QUARTERS
 
 
 @dataclass
@@ -156,7 +184,7 @@ class TTMCalculator:
 
         # 3. Validate minimum 4 quarters
         if len(ttm_quarters) < 4:
-            raise ValueError(
+            raise TTMInsufficientDataError(
                 f"Insufficient quarterly data: found {len(ttm_quarters)} quarters, "
                 f"need at least 4 for TTM calculation. "
                 f"Quarterization requires Q1, YTD_6M, YTD_9M, and FY facts to derive all quarters."
@@ -177,6 +205,17 @@ class TTMCalculator:
         # 7. Generate warning if data quality issues exist
         warning = self._generate_warning(quarterly, ttm_quarters, has_calculated_q4)
 
+        # Derive each quarter's label fiscal_year from its period_end + the company's
+        # FYE month rather than trusting q.fiscal_year. The SEC tags comparative-period
+        # facts in next-year filings with the FILING's fiscal_year, so an as_of window
+        # over historical quarters would otherwise carry shifted year labels - the same
+        # root cause fixed in calculate_ttm_trend (GH #793).
+        from edgar.entity.enhanced_statement import (
+            calculate_fiscal_year_for_label,
+            detect_fiscal_year_end,
+        )
+        fiscal_year_end_month = detect_fiscal_year_end(self.facts)
+
         # 8. Build and return result
         return TTMMetric(
             concept=ttm_quarters[0].concept,
@@ -184,7 +223,10 @@ class TTMCalculator:
             value=ttm_value,
             unit=ttm_quarters[0].unit,
             as_of_date=ttm_quarters[-1].period_end,  # Most recent quarter
-            periods=[(q.fiscal_year, q.fiscal_period) for q in ttm_quarters],
+            periods=[
+                (calculate_fiscal_year_for_label(q.period_end, fiscal_year_end_month), q.fiscal_period)
+                for q in ttm_quarters
+            ],
             period_facts=ttm_quarters,
             has_gaps=has_gaps,
             has_calculated_q4=has_calculated_q4,

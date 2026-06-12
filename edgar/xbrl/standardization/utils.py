@@ -9,6 +9,7 @@ This module provides helper functions for:
 
 These utilities support the workflow described in the customizing-standardization.md guide.
 """
+# ruff: noqa: T201 - interactive CSV export/validate tooling; print is the UX
 
 import csv
 import json
@@ -214,7 +215,7 @@ def import_mappings_from_csv(
     with open(csv_path, 'r', encoding='utf-8') as f:
         reader = csv.DictReader(f)
 
-        for line_num, row in enumerate(reader, start=2):  # Start at 2 (header is line 1)
+        for row in reader:
             standard_concept = row['standard_concept'].strip()
             company_concept = row['company_concept'].strip()
             cik = row.get('cik', '').strip()
@@ -519,7 +520,7 @@ def _check_reverse_ambiguity(store: "MappingStore", report: ValidationReport):
             reverse_map[company_concept].add(standard_concept)
 
     # From company mappings
-    for entity_id, company_data in store.company_mappings.items():
+    for company_data in store.company_mappings.values():
         concept_mappings = company_data.get('concept_mappings', {})
         for standard_concept, company_concepts in concept_mappings.items():
             if isinstance(company_concepts, (list, set)):

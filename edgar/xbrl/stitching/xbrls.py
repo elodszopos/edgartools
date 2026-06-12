@@ -5,6 +5,8 @@ This module contains the XBRLS class which represents multiple XBRL filings
 stitched together for multi-period analysis.
 """
 
+from dataclasses import dataclass
+from datetime import date
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 import pandas as pd
@@ -17,6 +19,22 @@ if TYPE_CHECKING:
     from edgar.xbrl.statements import StitchedStatements
 
 
+@dataclass(frozen=True)
+class XBRLParseOutcome:
+    """Outcome of parsing one filing's XBRL while building an ``XBRLS``.
+
+    ``from_filings`` records one outcome per input filing (newest-first), so a
+    filing whose XBRL fails to parse is visible via ``XBRLS.parse_outcomes``
+    instead of being silently dropped from the stitched set.
+    """
+
+    accession_number: Optional[str]
+    form: Optional[str]
+    filing_date: Optional[date]
+    parsed: bool
+    error: Optional[str]
+
+
 class XBRLS:
     """
     A class representing multiple XBRL filings stitched together.
@@ -25,16 +43,22 @@ class XBRLS:
     automatically handling the complexities of statement stitching.
     """
 
-    def __init__(self, xbrl_list: List[Any]):
+    def __init__(self, xbrl_list: List[Any], parse_outcomes: Optional[List[XBRLParseOutcome]] = None):
         """
         Initialize an XBRLS instance with a list of XBRL objects.
 
         Args:
             xbrl_list: List of XBRL objects, should be from the same company
                        and ordered from newest to oldest
+            parse_outcomes: Per-filing parse results from ``from_filings`` (one per
+                       input filing, newest-first). Empty when built directly from
+                       XBRL objects, where no filing-level parse step occurred.
         """
         # Store the list of XBRL objects
         self.xbrl_list = xbrl_list
+
+        # Per-filing parse outcomes (see from_filings); empty for object-built instances
+        self.parse_outcomes: List[XBRLParseOutcome] = list(parse_outcomes) if parse_outcomes else []
 
         # Extract entity info from the most recent XBRL
         self.entity_info = xbrl_list[0].entity_info if xbrl_list else {}
@@ -74,16 +98,38 @@ class XBRLS:
         # Sort filings by date (newest first)
         sorted_filings = sorted(filtered_filings, key=lambda f: f.filing_date, reverse=True)
 
-        # Create XBRL objects from filings
+        # Create XBRL objects from filings, recording one outcome per input filing.
+        # A parse failure drops the filing from the stitched set but is surfaced via
+        # parse_outcomes rather than swallowed silently (the only failure mode here is
+        # a malformed/absent XBRL payload, which must not abort the whole stitch).
         xbrl_list = []
+        parse_outcomes: List[XBRLParseOutcome] = []
         for filing in sorted_filings:
             try:
                 xbrl = XBRL.from_filing(filing)
-                xbrl_list.append(xbrl)
-            except Exception:
-                pass
+            except Exception as exc:
+                parse_outcomes.append(
+                    XBRLParseOutcome(
+                        accession_number=getattr(filing, 'accession_no', None),
+                        form=getattr(filing, 'form', None),
+                        filing_date=getattr(filing, 'filing_date', None),
+                        parsed=False,
+                        error=f"{type(exc).__name__}: {exc}",
+                    )
+                )
+                continue
+            xbrl_list.append(xbrl)
+            parse_outcomes.append(
+                XBRLParseOutcome(
+                    accession_number=getattr(filing, 'accession_no', None),
+                    form=getattr(filing, 'form', None),
+                    filing_date=getattr(filing, 'filing_date', None),
+                    parsed=True,
+                    error=None,
+                )
+            )
 
-        return cls(xbrl_list)
+        return cls(xbrl_list, parse_outcomes=parse_outcomes)
 
     @classmethod
     def from_xbrl_objects(cls, xbrl_list: List[Any]) -> 'XBRLS':
@@ -300,10 +346,10 @@ class XBRLS:
         # Sort newest first and remove duplicates while preserving order
         seen = set()
         sorted_dates = []
-        for date in sorted(set(end_dates), reverse=True):
-            if date not in seen:
-                sorted_dates.append(date)
-                seen.add(date)
+        for end_date in sorted(set(end_dates), reverse=True):
+            if end_date not in seen:
+                sorted_dates.append(end_date)
+                seen.add(end_date)
 
         return sorted_dates
 

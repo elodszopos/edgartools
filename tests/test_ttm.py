@@ -4,15 +4,19 @@ from datetime import date
 import pandas as pd
 import pytest
 
+from edgar.entity.entity_facts import EntityFacts
 from edgar.entity.models import FinancialFact
 from edgar.ttm import (
     DurationBucket,
     TTMCalculator,
+    TTMConceptNotFoundError,
+    TTMInsufficientDataError,
     TTMMetric,
     TTMStatement,
     TTMStatementBuilder,
-    detect_splits,
+    TTMUnavailableReason,
     apply_split_adjustments,
+    detect_splits,
 )
 
 
@@ -98,6 +102,67 @@ class TestTTMCalculator:
         assert ttm.value == 460
         assert len(ttm.periods) == 4
         assert ttm.has_gaps is False
+
+    @pytest.mark.fast  # pure-logic guard; override test_ttm.py's network filename bucket
+    def test_calculate_ttm_labels_periods_from_period_end_not_tagged_fiscal_year(self):
+        """Period labels derive fiscal_year from period_end + FYE, not q.fiscal_year.
+
+        The SEC tags comparative-period facts in a later filing with that FILING's
+        fiscal_year. Here four calendar-2023 quarters are deliberately mis-tagged
+        fiscal_year=2024 (as a FY2024 filing's comparatives would be). The TTM
+        period labels must report 2023 (derived from period_end), not the tag.
+        """
+        facts = [
+            make_fact(
+                concept="us-gaap:Revenues",
+                value=100,
+                unit="USD",
+                period_start=date(2023, 1, 1),
+                period_end=date(2023, 3, 31),
+                fiscal_year=2024,  # mis-tagged with the later filing's FY
+                fiscal_period="Q1",
+            ),
+            make_fact(
+                concept="us-gaap:Revenues",
+                value=110,
+                unit="USD",
+                period_start=date(2023, 4, 1),
+                period_end=date(2023, 6, 30),
+                fiscal_year=2024,
+                fiscal_period="Q2",
+            ),
+            make_fact(
+                concept="us-gaap:Revenues",
+                value=120,
+                unit="USD",
+                period_start=date(2023, 7, 1),
+                period_end=date(2023, 9, 30),
+                fiscal_year=2024,
+                fiscal_period="Q3",
+            ),
+            make_fact(
+                concept="us-gaap:Revenues",
+                value=130,
+                unit="USD",
+                period_start=date(2023, 10, 1),
+                period_end=date(2023, 12, 31),
+                fiscal_year=2024,
+                fiscal_period="Q4",
+            ),
+        ]
+
+        ttm = TTMCalculator(facts).calculate_ttm()
+
+        # No FY facts -> Dec FYE default; every quarter ends in calendar 2023,
+        # so labels are 2023 despite the fiscal_year=2024 tag.
+        assert ttm.periods == [
+            (2023, "Q1"),
+            (2023, "Q2"),
+            (2023, "Q3"),
+            (2023, "Q4"),
+        ]
+        assert ttm.value == 460
+        assert ttm.as_of_date == date(2023, 12, 31)
 
     def test_quarterize_derives_q2_q3_q4(self):
         """Test Q4 derivation from YTD and annual facts."""
@@ -279,8 +344,10 @@ class TestListConcepts:
     def test_list_concepts_with_mock_facts(self):
         """Test list_concepts logic with mock data."""
         from unittest.mock import MagicMock
+
         from edgar import Company
-        from edgar.entity.core import Company as RealCompany, ConceptList
+        from edgar.entity.core import Company as RealCompany
+        from edgar.entity.core import ConceptList
 
         # Create mock facts
         mock_facts = [
@@ -323,8 +390,10 @@ class TestListConcepts:
     def test_list_concepts_filters_by_statement(self):
         """Test filtering by statement type."""
         from unittest.mock import MagicMock
+
         from edgar import Company
-        from edgar.entity.core import Company as RealCompany, ConceptList
+        from edgar.entity.core import Company as RealCompany
+        from edgar.entity.core import ConceptList
 
         mock_facts = [
             MagicMock(concept="us-gaap:Revenues", label="Revenues", statement_type="IncomeStatement"),
@@ -345,8 +414,10 @@ class TestListConcepts:
 
     def test_list_concepts_to_dataframe(self):
         """Test to_dataframe() method."""
-        import pandas as pd
         from unittest.mock import MagicMock
+
+        import pandas as pd
+
         from edgar import Company
         from edgar.entity.core import Company as RealCompany
 
@@ -370,6 +441,7 @@ class TestListConcepts:
     def test_list_concepts_iteration(self):
         """Test that ConceptList is iterable."""
         from unittest.mock import MagicMock
+
         from edgar import Company
         from edgar.entity.core import Company as RealCompany
 
@@ -393,6 +465,7 @@ class TestListConcepts:
     def test_list_concepts_to_list(self):
         """Test to_list() method."""
         from unittest.mock import MagicMock
+
         from edgar import Company
         from edgar.entity.core import Company as RealCompany
 
@@ -1222,6 +1295,72 @@ class TestCalculateTTMErrors:
         with pytest.raises(ValueError, match="Insufficient quarterly data"):
             calc.calculate_ttm()
 
+    @pytest.mark.fast  # pure-logic guard; override test_ttm.py's network filename bucket
+    def test_calculate_ttm_insufficient_raises_classified_error(self):
+        """<4 quarters raises TTMInsufficientDataError (a ValueError) carrying a reason."""
+        facts = [
+            make_fact(
+                concept="us-gaap:Revenues",
+                value=100,
+                unit="USD",
+                period_start=date(2024, 1, 1),
+                period_end=date(2024, 3, 31),
+                fiscal_year=2024,
+                fiscal_period="Q1",
+            ),
+            make_fact(
+                concept="us-gaap:Revenues",
+                value=110,
+                unit="USD",
+                period_start=date(2024, 4, 1),
+                period_end=date(2024, 6, 30),
+                fiscal_year=2024,
+                fiscal_period="Q2",
+            ),
+        ]
+        calc = TTMCalculator(facts)
+
+        with pytest.raises(TTMInsufficientDataError) as exc_info:
+            calc.calculate_ttm()
+
+        # Subclasses ValueError (existing handlers/message preserved) and exposes
+        # the structured classification.
+        assert isinstance(exc_info.value, ValueError)
+        assert exc_info.value.reason is TTMUnavailableReason.INSUFFICIENT_QUARTERS
+        assert "Insufficient quarterly data" in str(exc_info.value)
+
+
+class TestTTMUnavailableClassification:
+    """EntityFacts.get_ttm distinguishes concept-absent from too-few-quarters."""
+
+    @pytest.mark.fast  # pure in-memory EntityFacts; no network in the concept-absent path
+    def test_get_ttm_absent_concept_raises_classified_keyerror(self):
+        """An absent concept raises TTMConceptNotFoundError (a KeyError) with a reason."""
+        facts = [
+            make_fact(
+                concept="us-gaap:Revenues",
+                value=100,
+                unit="USD",
+                period_start=date(2024, 1, 1),
+                period_end=date(2024, 3, 31),
+                fiscal_year=2024,
+                fiscal_period="Q1",
+            ),
+        ]
+        entity_facts = EntityFacts(cik=1, name="Test Co", facts=facts)
+
+        with pytest.raises(TTMConceptNotFoundError) as exc_info:
+            entity_facts.get_ttm("NoSuchConceptXyz")
+
+        # Subclasses KeyError; existing `except KeyError` handlers and the quoted
+        # str() repr the wire 404 path strips are both preserved.
+        assert isinstance(exc_info.value, KeyError)
+        assert exc_info.value.reason is TTMUnavailableReason.CONCEPT_ABSENT
+        assert (
+            str(exc_info.value).strip("'\"")
+            == "Concept 'NoSuchConceptXyz' not found in facts"
+        )
+
 
 class TestCalculateTTMTrend:
     """Tests for TTMCalculator.calculate_ttm_trend()."""
@@ -1747,9 +1886,9 @@ class TestCompanyTTMIntegration:
         """Test that company.income_statement(period='ttm', periods=2) correctly limits periods."""
         from edgar import Company
         company = Company("AAPL")
-        
+
         stmt = company.income_statement(period='ttm', periods=2)
-        
+
         assert stmt is not None
         assert stmt.statement_type == 'IncomeStatement'
         assert len(stmt.periods) == 2

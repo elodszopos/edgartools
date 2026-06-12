@@ -1,13 +1,102 @@
+from collections import Counter
 from typing import Any, Dict, List, Optional, Union
 
 import pandas as pd
 
 from edgar.core import log
 from edgar.richtools import repr_rich
-from edgar.xbrl import XBRL, XBRLS, Statement
+from edgar.xbrl import XBRL, XBRLS
+from edgar.xbrl.core import get_currency_symbol
 from edgar.xbrl.presentation import ViewType
 from edgar.xbrl.statements import StitchedStatement
 from edgar.xbrl.xbrl import XBRLFilingWithNoXbrlData
+
+# Canonical XBRL concept local-names per metric, in resolution priority order.
+# Getters match these against the rendered statement's concept column by bare
+# local-name (taxonomy/company namespace stripped), so a single list resolves
+# US GAAP, IFRS (ifrs-full), and company-extension tags (e.g. infy_PurchaseOf...).
+# Match is exact local-name, never substring: that avoids picking near-named rows
+# like NetIncomeLossAttributableToNoncontrollingInterest when NetIncomeLoss is the
+# target (GH #814).
+_METRIC_CONCEPTS: Dict[str, List[str]] = {
+    "revenue": [
+        "RevenueFromContractWithCustomerExcludingAssessedTax",
+        "RevenueFromContractsWithCustomers",
+        "Revenues",
+        "RevenueFromContractWithCustomerIncludingAssessedTax",
+        "SalesRevenueNet",
+        "Revenue",
+    ],
+    "operating_income": [
+        "OperatingIncomeLoss",
+        "ProfitLossFromOperatingActivities",
+    ],
+    "net_income": [
+        "NetIncomeLoss",
+        "ProfitLoss",
+    ],
+    "total_assets": [
+        "Assets",
+    ],
+    "total_liabilities": [
+        "Liabilities",
+    ],
+    "stockholders_equity": [
+        "StockholdersEquity",
+        "Equity",
+        "EquityAttributableToOwnersOfParent",
+    ],
+    "current_assets": [
+        "AssetsCurrent",
+        "CurrentAssets",
+    ],
+    "current_liabilities": [
+        "LiabilitiesCurrent",
+        "CurrentLiabilities",
+    ],
+    "operating_cash_flow": [
+        "NetCashProvidedByUsedInOperatingActivities",
+        "NetCashProvidedByUsedInOperatingActivitiesContinuingOperations",
+        "CashFlowsFromUsedInOperatingActivities",
+    ],
+    "capital_expenditures": [
+        "PaymentsToAcquirePropertyPlantAndEquipment",
+        "PaymentsToAcquireProductiveAssets",
+        "PurchaseOfPropertyPlantAndEquipmentClassifiedAsInvestingActivities",
+        "PurchaseOfPropertyPlantAndEquipmentAndIntangiblesClassifiedAsInvestingActivities",
+    ],
+    "shares_outstanding_basic": [
+        "WeightedAverageNumberOfSharesOutstandingBasic",
+        "WeightedAverageShares",
+        "CommonStockSharesOutstanding",
+    ],
+    "shares_outstanding_diluted": [
+        "WeightedAverageNumberOfDilutedSharesOutstanding",
+        "WeightedAverageNumberOfSharesOutstandingDiluted",
+        "AdjustedWeightedAverageShares",
+    ],
+}
+
+# Non-period columns in render(standard=True).to_dataframe(); every other column is a
+# period value column, ordered newest first (so period_offset 0 == most recent period).
+_STATEMENT_META_COLUMNS = frozenset(
+    {"concept", "label", "level", "abstract", "dimension", "is_breakdown", "standard_concept"}
+)
+
+
+def _bare_local_name(concept: str) -> str:
+    """Reduce an XBRL concept to its bare, lowercased local-name.
+
+    Cuts at the first ``_`` or ``:`` separator, stripping the taxonomy or company
+    prefix: ``us-gaap_NetIncomeLoss``, ``ifrs-full:ProfitLoss`` and
+    ``infy_PurchaseOfPropertyPlantAndEquipment...`` all reduce to their local name.
+    """
+    text = str(concept)
+    for separator in ("_", ":"):
+        index = text.find(separator)
+        if index != -1:
+            return text[index + 1:].lower()
+    return text.lower()
 
 
 class Financials:
@@ -135,23 +224,24 @@ class Financials:
         return self.xb.statements.cover_page()
 
     # Standardized Financial Data Accessor Methods
-    # These methods provide easy access to common financial metrics
-    # using standardized labels across different companies
+    # These resolve common metrics by XBRL concept (us-gaap, ifrs-full, and
+    # company-extension tags) from the rendered statement, independent of the
+    # presentation label, so they work across filers and taxonomies.
 
-    def _get_standardized_concept_by_xbrl(self, statement_type: str,
-                                          standard_concept_names: List[str],
-                                          period_offset: int = 0) -> Optional[Union[int, float]]:
+    def _resolve_metric_value(self, statement_type: str,
+                              concept_local_names: List[str],
+                              period_offset: int = 0) -> Optional[Union[int, float]]:
         """
-        Robust helper method to extract concept values by XBRL concept names.
+        Resolve a metric by exact XBRL concept local-name from a rendered statement.
 
-        This method uses the standardization system's concept mappings to search
-        by XBRL concept names (e.g., 'us-gaap_RevenueFromContractWithCustomer...')
-        rather than display labels, making it more reliable across companies.
+        Tries each name in ``concept_local_names`` in order and returns the first
+        period value found. Matching is on the bare local-name (namespace stripped,
+        case-insensitive, exact - never substring), so US GAAP, IFRS, and
+        company-extension tags all resolve through one curated list.
 
         Args:
             statement_type: Type of statement ('income', 'balance', 'cashflow')
-            standard_concept_names: List of standardized concept names to try in order
-                                   (e.g., ['Contract Revenue', 'Revenue'])
+            concept_local_names: Candidate concept local-names, highest priority first
             period_offset: Which period to get (0=most recent, 1=previous, etc.)
 
         Returns:
@@ -160,175 +250,62 @@ class Financials:
         if self.xb is None:
             return None
 
-        try:
-            # Load the standardization mappings
-            from edgar.xbrl.standardization import get_default_store
-            standardizer = get_default_store()
-
-            # Get the appropriate statement
-            if statement_type == 'income':
-                statement = self.income_statement()
-            elif statement_type == 'balance':
-                statement = self.balance_sheet()
-            elif statement_type == 'cashflow':
-                statement = self.cashflow_statement()
-            else:
-                return None
-
-            if statement is None:
-                return None
-
-            # Render the statement
-            rendered = statement.render(standard=True)
-            df = rendered.to_dataframe()
-
-            if df.empty or 'concept' not in df.columns:
-                return None
-
-            # Filter out abstract rows - they never have values
-            if 'abstract' in df.columns:
-                df = df[~df['abstract']].copy()
-
-            # Get period columns
-            period_columns = [col for col in df.columns
-                            if col not in ['concept', 'label', 'level', 'abstract', 'dimension', 'is_breakdown']]
-
-            if len(period_columns) <= period_offset:
-                return None
-
-            period_col = period_columns[period_offset]
-
-            def _strip_ns(name: str) -> str:
-                # Normalize a concept name to its bare local-name for exact comparison.
-                # Strips the standard taxonomy namespaces edgartools maps against
-                # (us-gaap, dei, ifrs-full). Company-specific prefixes are left
-                # intact on both sides of the comparison and still match exactly.
-                return (str(name)
-                        .replace('us-gaap_', '')
-                        .replace('us-gaap:', '')
-                        .replace('dei_', '')
-                        .replace('dei:', '')
-                        .replace('ifrs-full_', '')
-                        .replace('ifrs-full:', ''))
-
-            concept_local = df['concept'].astype(str).map(_strip_ns).str.lower()
-
-            # Try each standard concept name in order
-            for std_concept_name in standard_concept_names:
-                # Get all XBRL concepts that map to this standard concept.
-                # The standardizer stores these as a set, so we sort to make
-                # iteration order deterministic across runs (otherwise a filer
-                # whose statement contains multiple mapped concepts can return
-                # different values depending on Python hash randomization).
-                xbrl_concepts = sorted(standardizer.mappings.get(std_concept_name, []))
-
-                # Search for any of these concepts in the dataframe
-                for xbrl_concept in xbrl_concepts:
-                    # Exact local-name match (case-insensitive). Substring matching
-                    # is unsafe here: e.g. 'NetIncome' substring-matches the
-                    # NetIncomeLossAttributableToNoncontrollingInterest row and
-                    # produces wrong values (Issue #814).
-                    target = _strip_ns(xbrl_concept).lower()
-                    matches = df[concept_local == target]
-
-                    if not matches.empty:
-                        # Try each match until we find one with a valid value
-                        for idx in range(len(matches)):
-                            value = matches.iloc[idx][period_col]
-
-                            # Skip empty/NA values
-                            if pd.isna(value) or value == '':
-                                continue
-
-                            # Convert to numeric
-                            try:
-                                return float(value) if '.' in str(value) else int(value)
-                            except (ValueError, TypeError):
-                                continue
-
+        if statement_type == 'income':
+            statement = self.income_statement()
+        elif statement_type == 'balance':
+            statement = self.balance_sheet()
+        elif statement_type == 'cashflow':
+            statement = self.cashflow_statement()
+        else:
             return None
 
-        except Exception as e:
-            log.debug(f"Error getting standardized concept by XBRL: {e}")
-            return None
-
-    def _get_standardized_concept_value(self, statement_type: str, concept_patterns: list,
-                                      period_offset: int = 0) -> Optional[Union[int, float]]:
-        """
-        Helper method to extract standardized concept values from financial statements.
-
-        Args:
-            statement_type: Type of statement ('income', 'balance', 'cashflow')
-            concept_patterns: List of label patterns to search for (case-insensitive)
-            period_offset: Which period to get (0=most recent, 1=previous, etc.)
-
-        Returns:
-            The concept value if found, None otherwise
-        """
-        if self.xb is None:
+        if statement is None:
             return None
 
         try:
-            # Get the appropriate statement
-            if statement_type == 'income':
-                statement = self.income_statement()
-            elif statement_type == 'balance':
-                statement = self.balance_sheet()
-            elif statement_type == 'cashflow':
-                statement = self.cashflow_statement()
-            else:
-                return None
-
-            if statement is None:
-                return None
-
-            # Render with standardization enabled
-            rendered = statement.render(standard=True)
-            df = rendered.to_dataframe()
-
-            if df.empty:
-                return None
-
-            # Filter out abstract rows - they never have values
-            if 'abstract' in df.columns:
-                df = df[~df['abstract']].copy()
-
-            # Find the concept using pattern matching
-            for pattern in concept_patterns:
-                matches = df[df['label'].str.contains(pattern, case=False, na=False)]
-                if not matches.empty:
-                    # Get available period columns (excluding metadata columns)
-                    period_columns = [col for col in df.columns if col not in ['concept', 'label', 'level', 'abstract', 'dimension', 'is_breakdown']]
-
-                    if len(period_columns) > period_offset:
-                        period_col = period_columns[period_offset]
-
-                        # Try each match until we find one with a valid value
-                        for idx in range(len(matches)):
-                            value = matches.iloc[idx][period_col]
-
-                            # Skip empty/NA values
-                            if pd.isna(value) or value == '':
-                                continue
-
-                            # Convert to numeric
-                            try:
-                                return float(value) if '.' in str(value) else int(value)
-                            except (ValueError, TypeError):
-                                continue
-
-            return None
-
+            # Rendering can raise on malformed XBRL; a metric miss must never propagate.
+            df = statement.render(standard=True).to_dataframe()
         except Exception as e:
-            log.debug(f"Error getting standardized concept value: {e}")
+            log.debug(f"Error rendering {statement_type} statement for metric lookup: {e}")
             return None
+
+        if df.empty or 'concept' not in df.columns:
+            return None
+
+        # Abstract rows are section headers and never carry values.
+        if 'abstract' in df.columns:
+            df = df[~df['abstract']].copy()
+
+        period_columns = [col for col in df.columns if col not in _STATEMENT_META_COLUMNS]
+        if len(period_columns) <= period_offset:
+            return None
+        period_col = period_columns[period_offset]
+
+        concept_bare = df['concept'].astype(str).map(_bare_local_name)
+        for name in concept_local_names:
+            target = _bare_local_name(name)
+            matches = df[concept_bare == target]
+            for idx in range(len(matches)):
+                value = matches.iloc[idx][period_col]
+
+                # Skip empty/NA values - the same concept may appear on dimensional
+                # rows with no top-level value; keep scanning to the populated row.
+                if pd.isna(value) or value == '':
+                    continue
+
+                try:
+                    return float(value) if '.' in str(value) else int(value)
+                except (ValueError, TypeError):
+                    continue
+        return None
 
     def get_revenue(self, period_offset: int = 0) -> Optional[Union[int, float]]:
         """
-        Get revenue from the income statement using standardized XBRL concepts.
+        Get revenue from the income statement by XBRL concept.
 
-        This method uses a robust concept-based search that works across different
-        companies regardless of how they label their revenue in presentations.
+        Resolves the us-gaap revenue concepts and the IFRS
+        ``ifrs-full_RevenueFromContractsWithCustomers`` used by 20-F filers,
+        regardless of how the row is labeled in the presentation.
 
         Args:
             period_offset: Which period to get (0=most recent, 1=previous, etc.)
@@ -342,35 +319,17 @@ class Financials:
             >>> revenue = financials.get_revenue()  # Most recent revenue
             >>> prev_revenue = financials.get_revenue(1)  # Previous period revenue
         """
-        # First try concept-based search using standardization mappings
-        # Try "Contract Revenue" first (more specific), then "Revenue" (more general)
-        result = self._get_standardized_concept_by_xbrl(
-            'income',
-            ['Contract Revenue', 'Revenue'],
-            period_offset
-        )
-
-        if result is not None:
-            return result
-
-        # Fallback to label-based search for edge cases
-        patterns = [
-            r'Revenue$',           # Exact match for "Revenue"
-            r'^Revenue',           # Starts with "Revenue"
-            r'Contract Revenue',   # Common standardized label
-            r'Sales Revenue',      # Alternative form
-            r'Total Revenue',      # Comprehensive revenue
-            r'Net Revenue'         # Net form
-        ]
-        return self._get_standardized_concept_value('income', patterns, period_offset)
+        return self._resolve_metric_value('income', _METRIC_CONCEPTS['revenue'], period_offset)
 
     def get_net_income(self, period_offset: int = 0) -> Optional[Union[int, float]]:
         """
-        Get net income from the income statement using standardized XBRL concepts.
+        Get net income from the income statement by XBRL concept.
 
-        Concept-based lookup runs first so the canonical
-        ``us-gaap:NetIncomeLoss`` is preferred over rows that happen to be
-        labeled "Net income ..." (e.g. noncontrolling-interest lines).
+        Resolves ``us-gaap_NetIncomeLoss`` first (the parent-attributable line for
+        filers reporting noncontrolling interest) then ``ifrs-full_ProfitLoss`` for
+        20-F filers. Exact concept match avoids the
+        NetIncomeLossAttributableToNoncontrollingInterest row that a substring match
+        would wrongly pick (GH #814).
 
         Args:
             period_offset: Which period to get (0=most recent, 1=previous, etc.)
@@ -383,42 +342,15 @@ class Financials:
             >>> financials = company.get_financials()
             >>> net_income = financials.get_net_income()
         """
-        # First try concept-based search using standardization mappings.
-        # 'Net Income' covers us-gaap_NetIncome / us-gaap_NetIncomeLoss (the
-        # parent-attributable line for US GAAP filers reporting NCI).
-        # 'Profit or Loss' covers us-gaap_ProfitLoss and the IFRS variants
-        # (ifrs-full_ProfitLoss, ifrs-full_ProfitLossAttributableToOwnersOfParent)
-        # used by 20-F filers — these would otherwise miss when the row label
-        # is not "Net income" (e.g. "Profit after tax").
-        result = self._get_standardized_concept_by_xbrl(
-            'income',
-            ['Net Income', 'Profit or Loss'],
-            period_offset
-        )
-        if result is not None:
-            return result
-
-        # Fallback to label-based search for filers whose concept isn't in
-        # the standardization map. Includes 'Net Loss' variants (filer reporting
-        # a loss labels the row "Net loss attributable to ...") and 'Profit/Loss'
-        # for IFRS labels like "Profit (loss) for the year". All patterns
-        # explicitly exclude "noncontrolling" so we don't pick the NCI row.
-        patterns = [
-            r'Net Income$',
-            r'^Net Income(?!.*[Nn]oncontrolling)',
-            r'^Net Loss(?!.*[Nn]oncontrolling)',
-            r'Net Income.*Common',
-            r'Net Income.*Shareholders',
-            r'Net Loss.*Common',
-            r'Net Loss.*Shareholders',
-            r'Net Earnings',
-            r'Profit.*Loss(?!.*[Nn]oncontrolling)',
-        ]
-        return self._get_standardized_concept_value('income', patterns, period_offset)
+        return self._resolve_metric_value('income', _METRIC_CONCEPTS['net_income'], period_offset)
 
     def get_operating_income(self, period_offset: int = 0) -> Optional[Union[int, float]]:
         """
-        Get operating income from the income statement using standardized XBRL concepts.
+        Get operating income from the income statement by XBRL concept.
+
+        Resolves ``us-gaap_OperatingIncomeLoss`` and the IFRS
+        ``ifrs-full_ProfitLossFromOperatingActivities`` (20-F filers). Returns None
+        for filers that do not report an operating-income line (e.g. banks).
 
         Args:
             period_offset: Which period to get (0=most recent, 1=previous, etc.)
@@ -431,23 +363,7 @@ class Financials:
             >>> financials = company.get_financials()
             >>> operating_income = financials.get_operating_income()
         """
-        # First try concept-based search using standardization mappings
-        result = self._get_standardized_concept_by_xbrl(
-            'income',
-            ['Operating Income'],
-            period_offset
-        )
-        if result is not None:
-            return result
-
-        # Fallback to label-based search for edge cases
-        patterns = [
-            r'Operating Income$',
-            r'^Operating Income',
-            r'Income.*Operations',
-            r'Operating.*Income.*Loss',
-        ]
-        return self._get_standardized_concept_value('income', patterns, period_offset)
+        return self._resolve_metric_value('income', _METRIC_CONCEPTS['operating_income'], period_offset)
 
     def get_total_assets(self, period_offset: int = 0) -> Optional[Union[int, float]]:
         """
@@ -464,16 +380,11 @@ class Financials:
             >>> financials = company.get_financials()
             >>> total_assets = financials.get_total_assets()
         """
-        patterns = [
-            r'Total Assets$',      # Exact match
-            r'^Total Assets',      # Starts with
-            r'Assets$'             # Just "Assets"
-        ]
-        return self._get_standardized_concept_value('balance', patterns, period_offset)
+        return self._resolve_metric_value('balance', _METRIC_CONCEPTS['total_assets'], period_offset)
 
     def get_total_liabilities(self, period_offset: int = 0) -> Optional[Union[int, float]]:
         """
-        Get total liabilities from the balance sheet using standardized labels.
+        Get total liabilities from the balance sheet by XBRL concept.
 
         Args:
             period_offset: Which period to get (0=most recent, 1=previous, etc.)
@@ -481,16 +392,14 @@ class Financials:
         Returns:
             Total liabilities value if found, None otherwise
         """
-        patterns = [
-            r'Total Liabilities$',
-            r'^Total Liabilities',
-            r'Liabilities$'
-        ]
-        return self._get_standardized_concept_value('balance', patterns, period_offset)
+        return self._resolve_metric_value('balance', _METRIC_CONCEPTS['total_liabilities'], period_offset)
 
     def get_stockholders_equity(self, period_offset: int = 0) -> Optional[Union[int, float]]:
         """
-        Get stockholders' equity from the balance sheet using standardized labels.
+        Get stockholders' equity from the balance sheet by XBRL concept.
+
+        Resolves ``us-gaap_StockholdersEquity`` and the IFRS ``ifrs-full_Equity`` /
+        ``ifrs-full_EquityAttributableToOwnersOfParent`` (20-F filers).
 
         Args:
             period_offset: Which period to get (0=most recent, 1=previous, etc.)
@@ -498,18 +407,17 @@ class Financials:
         Returns:
             Stockholders' equity value if found, None otherwise
         """
-        patterns = [
-            r'Total.*Stockholders.*Equity',
-            r'Stockholders.*Equity$',
-            r'Shareholders.*Equity',
-            r'Total.*Equity$',
-            r'^Equity$'
-        ]
-        return self._get_standardized_concept_value('balance', patterns, period_offset)
+        return self._resolve_metric_value('balance', _METRIC_CONCEPTS['stockholders_equity'], period_offset)
 
     def get_operating_cash_flow(self, period_offset: int = 0) -> Optional[Union[int, float]]:
         """
-        Get operating cash flow from the cash flow statement using standardized labels.
+        Get operating cash flow from the cash flow statement by XBRL concept.
+
+        Resolves ``us-gaap_NetCashProvidedByUsedInOperatingActivities`` (and its
+        continuing-operations variant) plus the IFRS
+        ``ifrs-full_CashFlowsFromUsedInOperatingActivities`` (20-F filers). Concept
+        match means the AAPL label "Cash generated by operating activities" - which
+        no label regex caught - now resolves (GH #814 sibling fix).
 
         Args:
             period_offset: Which period to get (0=most recent, 1=previous, etc.)
@@ -517,14 +425,7 @@ class Financials:
         Returns:
             Operating cash flow value if found, None otherwise
         """
-        patterns = [
-            r'^Net Cash from Operating',          # Most specific - matches "Net Cash from Operating Activities"
-            r'^Net Cash Provided by Operating',   # Alternative phrasing
-            r'Net Cash.*Operating Activities$',   # Anchored to end
-            r'Operating.*Cash.*Flow',
-            r'Net Cash.*Operations$',             # Avoid matching "adjustments to reconcile..."
-        ]
-        return self._get_standardized_concept_value('cashflow', patterns, period_offset)
+        return self._resolve_metric_value('cashflow', _METRIC_CONCEPTS['operating_cash_flow'], period_offset)
 
     def get_free_cash_flow(self, period_offset: int = 0) -> Optional[Union[int, float]]:
         """
@@ -546,7 +447,12 @@ class Financials:
 
     def get_capital_expenditures(self, period_offset: int = 0) -> Optional[Union[int, float]]:
         """
-        Get capital expenditures from the cash flow statement using standardized XBRL concepts.
+        Get capital expenditures from the cash flow statement by XBRL concept.
+
+        Resolves the us-gaap purchase-of-PP&E concepts and the IFRS / company
+        extensions (e.g. ``infy_PurchaseOfPropertyPlantAndEquipment...``) that 20-F
+        filers use. The bare local-name match strips the company prefix, so those
+        extension tags resolve through the shared list.
 
         Args:
             period_offset: Which period to get (0=most recent, 1=previous, etc.)
@@ -554,24 +460,7 @@ class Financials:
         Returns:
             Capital expenditures value if found, None otherwise
         """
-        # First try concept-based search using standardization mappings
-        result = self._get_standardized_concept_by_xbrl(
-            'cashflow',
-            ['Payments for Property, Plant and Equipment'],
-            period_offset
-        )
-
-        if result is not None:
-            return result
-
-        # Fallback to label-based search for edge cases
-        patterns = [
-            r'Capital Expenditures',
-            r'Additions.*property.*equipment',  # MSFT: "Additions to property and equipment"
-            r'Purchase.*Property',
-            r'Capex'
-        ]
-        return self._get_standardized_concept_value('cashflow', patterns, period_offset)
+        return self._resolve_metric_value('cashflow', _METRIC_CONCEPTS['capital_expenditures'], period_offset)
 
     def get_current_assets(self, period_offset: int = 0) -> Optional[Union[int, float]]:
         """
@@ -583,16 +472,11 @@ class Financials:
         Returns:
             Current assets value if found, None otherwise
         """
-        patterns = [
-            r'Total Current Assets',
-            r'^Current Assets',
-            r'Assets Current'
-        ]
-        return self._get_standardized_concept_value('balance', patterns, period_offset)
+        return self._resolve_metric_value('balance', _METRIC_CONCEPTS['current_assets'], period_offset)
 
     def get_current_liabilities(self, period_offset: int = 0) -> Optional[Union[int, float]]:
         """
-        Get current liabilities from the balance sheet using standardized labels.
+        Get current liabilities from the balance sheet by XBRL concept.
 
         Args:
             period_offset: Which period to get (0=most recent, 1=previous, etc.)
@@ -600,86 +484,15 @@ class Financials:
         Returns:
             Current liabilities value if found, None otherwise
         """
-        patterns = [
-            r'Total Current Liabilities',
-            r'^Current Liabilities',
-            r'Liabilities Current'
-        ]
-        return self._get_standardized_concept_value('balance', patterns, period_offset)
-
-    def _get_concept_value(self, statement_type: str, concept_patterns: List[str], period_offset: int = 0) -> Optional[Union[int, float]]:
-        """
-        Helper method to extract values by XBRL concept name (not label).
-
-        This is more reliable than label-based search for concepts like shares outstanding
-        where the display label varies by company but the XBRL concept is standardized.
-
-        Args:
-            statement_type: Type of statement ('income', 'balance', 'cashflow')
-            concept_patterns: List of concept name patterns to search for (case-insensitive regex)
-            period_offset: Which period to get (0=most recent, 1=previous, etc.)
-
-        Returns:
-            The concept value if found, None otherwise
-        """
-        if self.xb is None:
-            return None
-
-        try:
-            # Get the appropriate statement
-            if statement_type == 'income':
-                statement = self.income_statement()
-            elif statement_type == 'balance':
-                statement = self.balance_sheet()
-            elif statement_type == 'cashflow':
-                statement = self.cashflow_statement()
-            else:
-                return None
-
-            if statement is None:
-                return None
-
-            # Render with standardization enabled
-            rendered = statement.render(standard=True)
-            df = rendered.to_dataframe()
-
-            if df.empty or 'concept' not in df.columns:
-                return None
-
-            # Find the concept using pattern matching on concept column
-            for pattern in concept_patterns:
-                matches = df[df['concept'].str.contains(pattern, case=False, na=False)]
-                if not matches.empty:
-                    # Get available period columns (excluding metadata columns)
-                    period_columns = [col for col in df.columns if col not in ['concept', 'label', 'level', 'abstract', 'dimension', 'is_breakdown']]
-
-                    if len(period_columns) > period_offset:
-                        period_col = period_columns[period_offset]
-                        value = matches.iloc[0][period_col]
-
-                        # Skip empty/NA values - try next pattern
-                        if pd.isna(value) or value == '':
-                            continue
-
-                        # Convert to numeric
-                        try:
-                            return float(value) if '.' in str(value) else int(value)
-                        except (ValueError, TypeError):
-                            # Non-numeric value, try next pattern
-                            continue
-
-            return None
-
-        except Exception as e:
-            log.debug(f"Error getting concept value: {e}")
-            return None
+        return self._resolve_metric_value('balance', _METRIC_CONCEPTS['current_liabilities'], period_offset)
 
     def get_shares_outstanding_basic(self, period_offset: int = 0) -> Optional[Union[int, float]]:
         """
         Get weighted average basic shares outstanding from the income statement.
 
-        This returns the weighted average number of basic shares outstanding used
-        in computing basic earnings per share (EPS).
+        Returns the weighted average basic shares used in computing basic EPS.
+        Resolves the us-gaap concept and the IFRS ``ifrs-full_WeightedAverageShares``
+        (20-F filers); falls back to ``CommonStockSharesOutstanding``.
 
         Args:
             period_offset: Which period to get (0=most recent, 1=previous, etc.)
@@ -700,20 +513,16 @@ class Financials:
             >>> quarterly = company.get_quarterly_financials()
             >>> q_shares = quarterly.get_shares_outstanding_basic()
         """
-        # Search by XBRL concept name - more reliable than label matching
-        concept_patterns = [
-            r'WeightedAverageNumberOfSharesOutstandingBasic',
-            r'CommonStockSharesOutstanding',  # Fallback for some filings
-        ]
-        return self._get_concept_value('income', concept_patterns, period_offset)
+        return self._resolve_metric_value('income', _METRIC_CONCEPTS['shares_outstanding_basic'], period_offset)
 
     def get_shares_outstanding_diluted(self, period_offset: int = 0) -> Optional[Union[int, float]]:
         """
         Get weighted average diluted shares outstanding from the income statement.
 
-        This returns the weighted average number of diluted shares outstanding used
-        in computing diluted earnings per share (EPS). Diluted shares include the
-        effect of stock options, convertible securities, and other dilutive instruments.
+        Returns the weighted average diluted shares used in computing diluted EPS
+        (includes options, convertibles, and other dilutive instruments). Resolves
+        the us-gaap concepts and the IFRS ``ifrs-full_AdjustedWeightedAverageShares``
+        (20-F filers).
 
         Args:
             period_offset: Which period to get (0=most recent, 1=previous, etc.)
@@ -733,12 +542,7 @@ class Financials:
             >>> dilution = (diluted - basic) / basic * 100 if basic else None
             >>> print(f"Dilution effect: {dilution:.2f}%")
         """
-        # Search by XBRL concept name - more reliable than label matching
-        concept_patterns = [
-            r'WeightedAverageNumberOfDilutedSharesOutstanding',
-            r'WeightedAverageNumberOfSharesOutstandingDiluted',  # Alternative naming
-        ]
-        return self._get_concept_value('income', concept_patterns, period_offset)
+        return self._resolve_metric_value('income', _METRIC_CONCEPTS['shares_outstanding_diluted'], period_offset)
 
     def get_financial_metrics(self) -> Dict[str, Any]:
         """
@@ -834,8 +638,6 @@ class Financials:
         if self.xb is None:
             return "$"
         try:
-            from collections import Counter
-            from edgar.xbrl.core import get_currency_symbol as _get_sym
             # Count currency measures across all unit definitions
             currencies = Counter()
             for unit_info in self.xb.units.values():
@@ -845,9 +647,9 @@ class Financials:
                         currencies[measure] += 1
             if currencies:
                 most_common = currencies.most_common(1)[0][0]
-                return _get_sym(most_common)
-        except Exception:
-            pass
+                return get_currency_symbol(most_common)
+        except Exception as e:
+            log.debug(f"Currency detection failed, defaulting to $: {e}")
         return "$"
 
     def to_context(self) -> str:

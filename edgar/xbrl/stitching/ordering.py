@@ -15,7 +15,7 @@ except ImportError:
     # Fallback to difflib if rapidfuzz is not available
     from difflib import SequenceMatcher
 
-    class fuzz:
+    class fuzz:  # noqa: N801 - mirrors the rapidfuzz module interface
         @staticmethod
         def ratio(s1: str, s2: str) -> float:
             return SequenceMatcher(None, s1, s2).ratio() * 100

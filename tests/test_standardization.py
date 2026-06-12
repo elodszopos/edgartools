@@ -9,21 +9,17 @@ Consolidated from: test_xbrl_standardization.py, test_enhanced_standardization.p
 test_sga_standardization.py, test_company_specific_standardization.py
 """
 
-import os
 import json
+import os
 import shutil
 import tempfile
 from unittest.mock import MagicMock
 
 import pytest
 
-from edgar.xbrl.standardization import (
-    StandardConcept, MappingStore, ConceptMapper,
-    standardize_statement, initialize_default_mappings
-)
+from edgar.xbrl.standardization import ConceptMapper, MappingStore, StandardConcept, initialize_default_mappings, standardize_statement
 from edgar.xbrl.standardization.core import _assign_sections_bottom_up
 from edgar.xbrl.statement_resolver import statement_registry
-
 
 # ── Fixtures ──────────────────────────────────────────────────────────────────
 
@@ -358,8 +354,9 @@ def test_sic_to_fama_french_mapping():
 
 def test_standardization_cache_set_industry():
     """StandardizationCache.set_industry_from_sic converts SIC to FF48."""
-    from edgar.xbrl.standardization.cache import StandardizationCache
     from unittest.mock import MagicMock
+
+    from edgar.xbrl.standardization.cache import StandardizationCache
 
     cache = StandardizationCache(MagicMock())
     assert cache.industry is None
@@ -463,6 +460,7 @@ def test_ifrs_labels_skip_in_label_matching():
 def test_stitch_statements_auto_detects_industry():
     """stitch_statements auto-detects industry from XBRL standardization cache."""
     from unittest.mock import MagicMock, patch
+
     from edgar.xbrl.stitching.core import stitch_statements
 
     # Create mock XBRL objects with standardization.industry
@@ -481,7 +479,8 @@ def test_stitch_statements_auto_detects_industry():
 def test_stitch_statements_explicit_industry_overrides_auto():
     """Explicit industry parameter takes precedence over auto-detection."""
     from unittest.mock import MagicMock, patch
-    from edgar.xbrl.stitching.core import stitch_statements, StatementStitcher
+
+    from edgar.xbrl.stitching.core import StatementStitcher, stitch_statements
 
     mock_xbrl = MagicMock()
     mock_xbrl.standardization.industry = "Banks"
@@ -502,36 +501,22 @@ class TestIFRSClassification:
 
     def test_ifrs_profit_or_loss_classified_as_income_statement(self):
         """ifrs-full_StatementOfProfitOrLossAbstract → IncomeStatement."""
-        from edgar.xbrl.xbrl import XBRL
-        # The IFRS mapping dict is defined inline in get_all_statements;
-        # verify the concept is recognized by the xbrl module.
-        _IFRS_CONCEPT_TO_TYPE = {
-            "ifrs-full_StatementOfProfitOrLossAbstract": "IncomeStatement",
-            "ifrs-full_IncomeStatementAbstract": "IncomeStatement",
-            "ifrs-full_StatementOfFinancialPositionAbstract": "BalanceSheet",
-            "ifrs-full_StatementOfCashFlowsAbstract": "CashFlowStatement",
-            "ifrs-full_StatementOfChangesInEquityAbstract": "StatementOfEquity",
-            "ifrs-full_StatementOfComprehensiveIncomeAbstract": "ComprehensiveIncome",
-            "ifrs-full_StatementOfProfitOrLossAndOtherComprehensiveIncomeAbstract": "ComprehensiveIncome",
-        }
-        assert _IFRS_CONCEPT_TO_TYPE["ifrs-full_StatementOfProfitOrLossAbstract"] == "IncomeStatement"
-        assert _IFRS_CONCEPT_TO_TYPE["ifrs-full_IncomeStatementAbstract"] == "IncomeStatement"
+        from edgar.xbrl.xbrl import IFRS_CONCEPT_TO_TYPE
+        assert IFRS_CONCEPT_TO_TYPE["ifrs-full_StatementOfProfitOrLossAbstract"] == "IncomeStatement"
+        assert IFRS_CONCEPT_TO_TYPE["ifrs-full_IncomeStatementAbstract"] == "IncomeStatement"
 
     def test_ifrs_comprehensive_income_classified_correctly(self):
         """ifrs-full_StatementOfComprehensiveIncomeAbstract → ComprehensiveIncome."""
-        _IFRS_CONCEPT_TO_TYPE = {
-            "ifrs-full_StatementOfComprehensiveIncomeAbstract": "ComprehensiveIncome",
-            "ifrs-full_StatementOfProfitOrLossAndOtherComprehensiveIncomeAbstract": "ComprehensiveIncome",
-        }
-        assert _IFRS_CONCEPT_TO_TYPE["ifrs-full_StatementOfComprehensiveIncomeAbstract"] == "ComprehensiveIncome"
-        assert _IFRS_CONCEPT_TO_TYPE["ifrs-full_StatementOfProfitOrLossAndOtherComprehensiveIncomeAbstract"] == "ComprehensiveIncome"
+        from edgar.xbrl.xbrl import IFRS_CONCEPT_TO_TYPE
+        assert IFRS_CONCEPT_TO_TYPE["ifrs-full_StatementOfComprehensiveIncomeAbstract"] == "ComprehensiveIncome"
+        assert IFRS_CONCEPT_TO_TYPE["ifrs-full_StatementOfProfitOrLossAndOtherComprehensiveIncomeAbstract"] == "ComprehensiveIncome"
 
     def test_ifrs_balance_sheet_classified_correctly(self):
         """ifrs-full_StatementOfFinancialPositionAbstract → BalanceSheet."""
-        _IFRS_CONCEPT_TO_TYPE = {
-            "ifrs-full_StatementOfFinancialPositionAbstract": "BalanceSheet",
-        }
-        assert _IFRS_CONCEPT_TO_TYPE["ifrs-full_StatementOfFinancialPositionAbstract"] == "BalanceSheet"
+        from edgar.xbrl.xbrl import IFRS_CONCEPT_TO_TYPE
+        assert IFRS_CONCEPT_TO_TYPE["ifrs-full_StatementOfFinancialPositionAbstract"] == "BalanceSheet"
+        assert IFRS_CONCEPT_TO_TYPE["ifrs-full_StatementOfCashFlowsAbstract"] == "CashFlowStatement"
+        assert IFRS_CONCEPT_TO_TYPE["ifrs-full_StatementOfChangesInEquityAbstract"] == "StatementOfEquity"
 
     def test_income_statement_alternative_concepts_exclude_comprehensive(self):
         """Issue #673: IncomeStatement alt_concepts must NOT include ComprehensiveIncome abstract."""
@@ -546,3 +531,32 @@ class TestIFRSClassification:
         ci_type = statement_registry["ComprehensiveIncome"]
         assert "ifrs-full_StatementOfComprehensiveIncomeAbstract" in ci_type.alternative_concepts
         assert "ifrs-full_StatementOfProfitOrLossAndOtherComprehensiveIncomeAbstract" in ci_type.alternative_concepts
+
+
+def test_dividend_cluster_mappings():
+    """Cash dividend tags resolve to dividend concepts, never NCI or subtotals.
+
+    Learned mappings shipped PaymentsOfDividends -> DistributionsToMinorityInterests
+    and sibling detail tags -> NetCashFromFinancingActivities (a subtotal), which
+    mislabeled shareholder dividends on AAPL, O, and INFY cash flow statements.
+    Ground truth: AAPL FY2024 10-K "Payments of dividends" -15,234M is common
+    dividends; INFY 20-F labels the NCI line "Payment of dividends to
+    non-controlling interests of subsidiary".
+    """
+    from edgar.xbrl.standardization.reverse_index import get_reverse_index
+    idx = get_reverse_index()
+
+    assert idx.get_standard_concept("us-gaap_PaymentsOfDividends") == "CommonDividendsPaid"
+    assert idx.get_standard_concept("us-gaap_PaymentsOfDividendsCommonStock") == "CommonDividendsPaid"
+    assert idx.get_standard_concept("us-gaap_PaymentsOfOrdinaryDividends") == "CommonDividendsPaid"
+    assert idx.get_standard_concept(
+        "us-gaap_PaymentsOfDividendsPreferredStockAndPreferenceStock") == "PreferredDividendExpense"
+
+    # NCI distributions stay distinct from shareholder dividends, both directions
+    assert idx.get_standard_concept("us-gaap_PaymentsOfDividendsMinorityInterest") == "DistributionsToMinorityInterests"
+    assert idx.get_standard_concept(
+        "ifrs-full_DividendsPaidToNoncontrollingInterestsClassifiedAsFinancingActivities") == "DistributionsToMinorityInterests"
+
+    # Industry overrides carry the same correction (AAPL resolves via Comps)
+    assert idx.get_standard_concept("us-gaap_PaymentsOfDividends", industry="Comps") == "CommonDividendsPaid"
+    assert idx.get_standard_concept("us-gaap_PaymentsOfDividendsCommonStock", industry="Banks") == "CommonDividendsPaid"

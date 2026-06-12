@@ -13,8 +13,8 @@ Pipeline Optimization:
 
 from typing import Optional
 
-from edgar.xbrl.standardization.core import ConceptMapper, MappingStore, StandardConcept, initialize_default_mappings, standardize_statement
 from edgar.xbrl.standardization.cache import StandardizationCache
+from edgar.xbrl.standardization.core import ConceptMapper, MappingStore, StandardConcept, initialize_default_mappings, standardize_statement
 
 # Module-level singletons for performance optimization
 _default_store: Optional[MappingStore] = None

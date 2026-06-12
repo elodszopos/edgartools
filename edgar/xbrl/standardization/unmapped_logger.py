@@ -470,7 +470,6 @@ class UnmappedTagLogger:
         """Rich console representation."""
         from rich.panel import Panel
         from rich.table import Table
-        from rich.text import Text
 
         # Create summary table
         table = Table(show_header=True, header_style="bold cyan")

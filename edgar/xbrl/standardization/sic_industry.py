@@ -12,7 +12,6 @@ https://mba.tuck.dartmouth.edu/pages/faculty/ken.french/Data_Library/det_48_ind_
 from functools import lru_cache
 from typing import Optional
 
-
 # Each entry: (start_sic, end_sic, ff48_code)
 # Sorted by SIC range for binary search
 _FF48_SIC_RANGES = [

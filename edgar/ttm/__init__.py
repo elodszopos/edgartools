@@ -18,7 +18,10 @@ For direct access to TTM calculation utilities:
 from edgar.ttm.calculator import (
     DurationBucket,
     TTMCalculator,
+    TTMConceptNotFoundError,
+    TTMInsufficientDataError,
     TTMMetric,
+    TTMUnavailableReason,
 )
 from edgar.ttm.splits import apply_split_adjustments, detect_splits
 from edgar.ttm.statement import TTMStatement, TTMStatementBuilder
@@ -28,6 +31,10 @@ __all__ = [
     "TTMCalculator",
     "TTMMetric",
     "DurationBucket",
+    # Unavailability classification (concept absent vs. too few quarters)
+    "TTMUnavailableReason",
+    "TTMConceptNotFoundError",
+    "TTMInsufficientDataError",
     # Statement building
     "TTMStatement",
     "TTMStatementBuilder",

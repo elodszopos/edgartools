@@ -330,7 +330,6 @@ class TTMStatementBuilder:
             rows = []
             for i in range(3, len(ni_quarters)):
                 window = ni_quarters[i - 3:i + 1]
-                window_ends = [q.period_end for q in window]
                 window_shares = []
                 for quarter in window:
                     end = quarter.period_end

@@ -13,16 +13,19 @@ Root cause was twofold:
    and would also fall through to the noncontrolling-interest row.
 
 Fix:
-- Helper now does exact (case-insensitive) local-name match on concepts.
-- get_net_income() runs concept-based lookup first via the helper,
-  then falls back to label patterns expanded to handle 'Net Loss' variants
-  with explicit noncontrolling-interest exclusion.
+- Metric getters resolve by exact (case-insensitive) bare-local-name match on
+  XBRL concepts via Financials._resolve_metric_value -- never substring, never
+  label-regex.
+- get_net_income() resolves the ordered concept list ['NetIncomeLoss',
+  'ProfitLoss'], so us-gaap:NetIncomeLoss matches exactly and the
+  NetIncomeLossAttributableToNoncontrollingInterest row can never win.
 
 The MU 10-Q (accession 0000723125-13-000042) is a structural canary —
 it has BOTH a net loss row AND a separate NCI row, exercising the full
 failure mode.
 """
 import pytest
+
 from edgar import Company
 
 
@@ -54,11 +57,11 @@ def test_mu_q2_2013_net_income_returns_correct_loss():
 @pytest.mark.network
 @pytest.mark.regression
 def test_helper_exact_concept_match_prefers_netincomeloss_over_nci():
-    """_get_standardized_concept_by_xbrl must exact-match concept names.
+    """_resolve_metric_value must exact-match concept local-names.
 
     Substring matching would pick NetIncomeLossAttributableToNoncontrollingInterest
-    when searching for 'NetIncome'. With exact match, only us-gaap_NetIncomeLoss
-    matches the 'Net Income' standardized mapping for MU's filing.
+    when searching for 'NetIncomeLoss'. With exact bare-local-name match, only
+    us-gaap_NetIncomeLoss matches MU's net-income row.
     """
     filing = (
         Company('MU')
@@ -67,11 +70,11 @@ def test_helper_exact_concept_match_prefers_netincomeloss_over_nci():
     )
     fin = filing.obj().financials
 
-    # Direct helper call — should hit the canonical NetIncomeLoss row
-    value = fin._get_standardized_concept_by_xbrl('income', ['Net Income'], 0)
+    # Direct resolver call — should hit the canonical NetIncomeLoss row
+    value = fin._resolve_metric_value('income', ['NetIncomeLoss', 'ProfitLoss'], 0)
     assert value == -286_000_000.0, (
-        f"Helper expected -286M (us-gaap:NetIncomeLoss), got {value}. "
-        f"+2M means substring-match regression to NCI row."
+        f"Resolver expected -286M (us-gaap:NetIncomeLoss), got {value}. "
+        f"+2M means substring-match regression to the NCI row."
     )
 
 
@@ -81,12 +84,13 @@ def test_ifrs_filer_resolves_via_profit_or_loss_concept():
     """get_net_income() must resolve for IFRS 20-F filers via ifrs-full_ProfitLoss.
 
     Barclays FY2023 20-F is the canary: the canonical net-income row is tagged
-    ifrs-full_ProfitLoss and labeled 'Profit after tax' — no label pattern from
-    the US-centric fallback list would match. Resolution depends on:
-      (a) ifrs-full_ProfitLoss being present in the 'Profit or Loss' concept
-          mapping (concept_mappings.json),
-      (b) the helper stripping the 'ifrs-full_' namespace prefix in _strip_ns,
-      (c) get_net_income() falling through from 'Net Income' to 'Profit or Loss'.
+    ifrs-full_ProfitLoss and labeled 'Profit after tax' — no US-centric label
+    pattern would match. Resolution depends on:
+      (a) ifrs-full_ProfitLoss being in _METRIC_CONCEPTS['net_income'] (as
+          'ProfitLoss'),
+      (b) _bare_local_name stripping the 'ifrs-full_' namespace prefix,
+      (c) the resolver falling through from 'NetIncomeLoss' (no match) to
+          'ProfitLoss' (match).
 
     Without (a)-(c), this filing returns None (regression).
     """
@@ -106,12 +110,12 @@ def test_ifrs_filer_resolves_via_profit_or_loss_concept():
 @pytest.mark.network
 @pytest.mark.regression
 def test_concept_iteration_is_deterministic():
-    """Helper must iterate the mapped concept set in a deterministic order.
+    """get_net_income() must return the same value across repeated calls.
 
-    The standardizer stores mappings as a set, so without explicit sorting the
-    iteration order is hash-randomized. For filers (e.g. BCS) whose statement
-    contains multiple concepts mapped to the same standardized name, this would
-    cause get_net_income() to return different values across runs.
+    The resolver iterates a fixed, ordered concept list and exact-matches it
+    against the rendered statement. For filers (e.g. BCS) whose statement
+    contains multiple net-income-related concepts, the result must not vary
+    across runs.
     """
     filing = (
         Company('BCS')
@@ -122,6 +126,5 @@ def test_concept_iteration_is_deterministic():
     results = {fin.get_net_income() for _ in range(3)}
     assert len(results) == 1, (
         f"Non-deterministic get_net_income() — got {results} across 3 calls. "
-        f"xbrl_concepts iteration order in _get_standardized_concept_by_xbrl "
-        f"is not sorted."
+        f"Concept resolution order in _resolve_metric_value is not stable."
     )

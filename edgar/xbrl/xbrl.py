@@ -29,17 +29,39 @@ from edgar.attachments import Attachments
 from edgar.config import VERBOSE_EXCEPTIONS
 from edgar.core import log
 from edgar.richtools import repr_rich
-from edgar.xbrl.core import STANDARD_LABEL, STANDARD_TAXONOMIES, split_element_id
+from edgar.xbrl.core import STANDARD_LABEL, split_element_id
 from edgar.xbrl.models import PresentationNode
 from edgar.xbrl.parsers import XBRLParser
 from edgar.xbrl.period_selector import select_periods
 from edgar.xbrl.periods import get_period_views
+from edgar.xbrl.presentation import StatementView
 from edgar.xbrl.rendering import RenderedStatement, generate_rich_representation, render_statement
 from edgar.xbrl.statement_resolver import StatementResolver
 from edgar.xbrl.statements import statement_to_concepts
 
+# IFRS presentation-tree root concepts that identify a statement type when
+# statement_to_concepts (US-GAAP oriented) finds no match
+IFRS_CONCEPT_TO_TYPE = {
+    "ifrs-full_StatementOfProfitOrLossAbstract": "IncomeStatement",
+    "ifrs-full_IncomeStatementAbstract": "IncomeStatement",
+    "ifrs-full_StatementOfFinancialPositionAbstract": "BalanceSheet",
+    "ifrs-full_StatementOfCashFlowsAbstract": "CashFlowStatement",
+    "ifrs-full_StatementOfChangesInEquityAbstract": "StatementOfEquity",
+    "ifrs-full_StatementOfComprehensiveIncomeAbstract": "ComprehensiveIncome",
+    "ifrs-full_StatementOfProfitOrLossAndOtherComprehensiveIncomeAbstract": "ComprehensiveIncome",
+}
 
-class XBRLFilingWithNoXbrlData(Exception):
+# FilingSummary.xml menu categories mapped to internal statement classifications
+MENU_CATEGORY_TO_CLASSIFICATION = {
+    "Notes": "note",
+    "Tables": "note",
+    "Policies": "note",
+    "Details": "disclosure",
+    "Cover": "document",
+}
+
+
+class XBRLFilingWithNoXbrlData(Exception):  # noqa: N818 - public API name
     """Exception raised when a filing does not contain XBRL data."""
 
     def __init__(self, message: str):
@@ -431,7 +453,6 @@ class XBRL:
             return xbrl_date
 
         # Extract years from both dates
-        xbrl_year = int(xbrl_date[:4]) if xbrl_date else None
         sgml_year = int(sgml_date[:4]) if sgml_date else None
 
         # Check if any annual period ends in the SGML year
@@ -632,7 +653,7 @@ class XBRL:
             # data was embedded in the .htm file but not extracted to a separate
             # _htm.xml in the feed bundle. Fall back to fetching just the instance
             # from the filing homepage if network fallback is allowed.
-            from edgar.storage import is_using_local_storage, is_network_fallback_allowed
+            from edgar.storage import is_network_fallback_allowed, is_using_local_storage
             if is_using_local_storage() and is_network_fallback_allowed():
                 homepage_xbrl = XBRLAttachments(filing.homepage.attachments)
                 if homepage_xbrl.get('instance'):
@@ -659,8 +680,8 @@ class XBRL:
         # Capture SGML period_of_report for date discrepancy detection
         try:
             xbrl._sgml_period_of_report = filing.period_of_report
-        except Exception:
-            pass
+        except Exception as e:
+            log.debug(f"Could not capture SGML period_of_report: {e}")
 
         # Try to set industry from filing header SIC for industry-specific standardization
         try:
@@ -671,8 +692,8 @@ class XBRL:
                     sic = header.filers[0].company_data.assigned_sic
                     if sic:
                         xbrl.standardization.set_industry_from_sic(sic)
-        except Exception:
-            pass
+        except Exception as e:
+            log.debug(f"Could not set industry from SIC: {e}")
 
         # Load authoritative categories from FilingSummary.xml
         # SGML is already loaded from filing.attachments above, so this is zero-cost
@@ -681,22 +702,15 @@ class XBRL:
             if sgml:
                 filing_summary = sgml.filing_summary
                 if filing_summary:
-                    _MENU_CATEGORY_TO_CLASSIFICATION = {
-                        'Notes': 'note',
-                        'Tables': 'note',
-                        'Policies': 'note',
-                        'Details': 'disclosure',
-                        'Cover': 'document',
-                    }
                     for report in filing_summary.reports:
                         if report.role and report.menu_category:
-                            classification = _MENU_CATEGORY_TO_CLASSIFICATION.get(report.menu_category)
+                            classification = MENU_CATEGORY_TO_CLASSIFICATION.get(report.menu_category)
                             if classification:
                                 xbrl._filing_summary_categories[report.role] = classification
                             xbrl._filing_summary_menu_categories[report.role] = report.menu_category
                     xbrl._filing_summary = filing_summary
-        except Exception:
-            pass
+        except Exception as e:
+            log.debug(f"Could not load FilingSummary categories: {e}")
 
         return xbrl
 
@@ -899,16 +913,7 @@ class XBRL:
 
             # If we didn't find a match, try IFRS concept → type mapping
             if not statement_type:
-                _IFRS_CONCEPT_TO_TYPE = {
-                    "ifrs-full_StatementOfProfitOrLossAbstract": "IncomeStatement",
-                    "ifrs-full_IncomeStatementAbstract": "IncomeStatement",
-                    "ifrs-full_StatementOfFinancialPositionAbstract": "BalanceSheet",
-                    "ifrs-full_StatementOfCashFlowsAbstract": "CashFlowStatement",
-                    "ifrs-full_StatementOfChangesInEquityAbstract": "StatementOfEquity",
-                    "ifrs-full_StatementOfComprehensiveIncomeAbstract": "ComprehensiveIncome",
-                    "ifrs-full_StatementOfProfitOrLossAndOtherComprehensiveIncomeAbstract": "ComprehensiveIncome",
-                }
-                matched_type = _IFRS_CONCEPT_TO_TYPE.get(primary_concept)
+                matched_type = IFRS_CONCEPT_TO_TYPE.get(primary_concept)
                 if matched_type:
                     if 'parenthetical' in role_def:
                         statement_type = f"{matched_type}Parenthetical"
@@ -1124,7 +1129,7 @@ class XBRL:
     def get_statement(self, role_or_type: str,
                       period_filter: Optional[str] = None,
                       should_display_dimensions: Optional[bool] = None,
-                      view: Optional['StatementView'] = None) -> List[Dict[str, Any]]:
+                      view: Optional[StatementView] = None) -> List[Dict[str, Any]]:
         """
         Get a financial statement by role URI, statement type, or statement short name.
 
@@ -1144,7 +1149,6 @@ class XBRL:
         Returns:
             List of line items with values
         """
-        from edgar.xbrl.presentation import StatementView
         # Use the centralized statement finder to get statement information
         matching_statements, found_role, actual_statement_type = self.find_statement(role_or_type)
 
@@ -1192,7 +1196,7 @@ class XBRL:
                              result: List[Dict[str, Any]], period_filter: Optional[str] = None,
                              path: Optional[List[str]] = None, should_display_dimensions: bool = False,
                              valid_dimensional_members: Optional[Dict[str, Set[str]]] = None,
-                             view: Optional['StatementView'] = None,
+                             view: Optional[StatementView] = None,
                              statement_role: Optional[str] = None,
                              preferred_label_override: Optional[str] = None) -> None:
         """
@@ -1218,7 +1222,6 @@ class XBRL:
                 roles (e.g. cash-flow periodStart vs periodEnd balances).
                 (edgartools-0609)
         """
-        from edgar.xbrl.presentation import StatementView
         if element_id not in nodes:
             return
 
@@ -1827,7 +1830,7 @@ class XBRL:
 
         # Remove items that need to be moved (in reverse order to preserve indices)
         result = list(line_items)
-        for i, item, _ in sorted(items_to_move, key=lambda x: x[0], reverse=True):
+        for i, _, _ in sorted(items_to_move, key=lambda x: x[0], reverse=True):
             result.pop(i)
 
         # Re-insert items before their calculation parent
@@ -2251,7 +2254,7 @@ class XBRL:
                          show_date_range: bool = False,
                          parenthetical: bool = False,
                          include_dimensions: bool = False,
-                         view: Optional['StatementView'] = None) -> Optional[RenderedStatement]:
+                         view: Optional[StatementView] = None) -> Optional[RenderedStatement]:
         """
         Render a statement in a rich table format similar to how it would appear in an actual filing.
         Args:
@@ -2267,7 +2270,6 @@ class XBRL:
         Returns:
             RichTable: A formatted table representation of the statement
         """
-        from edgar.xbrl.presentation import StatementView
 
         # Find the statement using the unified statement finder with parenthetical support
         matching_statements, found_role, actual_statement_type = self.find_statement(statement_type, parenthetical)
