@@ -755,30 +755,36 @@ def test_financials_ttm(client: TestClient, golden) -> None:
         "as_of": None,
         "concept": None,
         "revenue": {
-            "concept": "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax",
-            "label": "Revenue from Contract with Customer, Excluding Assessed Tax",
-            "value": 451442000000.0,
-            "unit": "USD",
-            "as_of_date": "2026-03-28",
-            # the TTM through 2026-03-28 became publicly knowable when its last
-            # source fact was filed: the Q2 FY26 10-Q on 2026-05-01
-            "public_date": "2026-05-01",
-            "periods": current_window,
-            "has_gaps": False,
-            "has_calculated_q4": True,
-            "warning": _TTM_DERIVED_WARNING,
+            "metric": {
+                "concept": "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax",
+                "label": "Revenue from Contract with Customer, Excluding Assessed Tax",
+                "value": 451442000000.0,
+                "unit": "USD",
+                "as_of_date": "2026-03-28",
+                # the TTM through 2026-03-28 became publicly knowable when its last
+                # source fact was filed: the Q2 FY26 10-Q on 2026-05-01
+                "public_date": "2026-05-01",
+                "periods": current_window,
+                "has_gaps": False,
+                "has_calculated_q4": True,
+                "warning": _TTM_DERIVED_WARNING,
+            },
+            "unavailable_reason": None,
         },
         "net_income": {
-            "concept": "us-gaap:NetIncomeLoss",
-            "label": "Net Income (Loss) Attributable to Parent",
-            "value": 122575000000.0,
-            "unit": "USD",
-            "as_of_date": "2026-03-28",
-            "public_date": "2026-05-01",
-            "periods": current_window,
-            "has_gaps": False,
-            "has_calculated_q4": True,
-            "warning": _TTM_DERIVED_WARNING,
+            "metric": {
+                "concept": "us-gaap:NetIncomeLoss",
+                "label": "Net Income (Loss) Attributable to Parent",
+                "value": 122575000000.0,
+                "unit": "USD",
+                "as_of_date": "2026-03-28",
+                "public_date": "2026-05-01",
+                "periods": current_window,
+                "has_gaps": False,
+                "has_calculated_q4": True,
+                "warning": _TTM_DERIVED_WARNING,
+            },
+            "unavailable_reason": None,
         },
         "metric": None,
     }
@@ -854,6 +860,16 @@ def test_financials_ttm_silence(client: TestClient) -> None:
     response = client.get("/company/AAPL/financials/ttm", params={"as_of": "bogus"})
     assert response.status_code == 422
     assert response.json() == {"detail": "as_of must be YYYY-MM-DD or YYYY-QN, got 'bogus'"}
+
+    # as_of parses but its year is outside what EntityFacts._parse_ttm_date accepts -> 422,
+    # not a downstream crash; the ISO branch and the YYYY-QN branch are both gated
+    response = client.get("/company/AAPL/financials/ttm", params={"as_of": "1850-06-30"})
+    assert response.status_code == 422
+    assert response.json() == {"detail": "as_of year must be between 1900 and 2100, got 1850"}
+
+    response = client.get("/company/AAPL/financials/ttm", params={"as_of": "2200-Q1"})
+    assert response.status_code == 422
+    assert response.json() == {"detail": "as_of year must be between 1900 and 2100, got 2200"}
 
     response = client.get("/company/0001347842/financials/ttm")
     assert response.status_code == 404

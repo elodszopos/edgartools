@@ -668,6 +668,14 @@ export const TTMMetricModel = zod.strictObject({
 export type TTMMetricModel = zod.input<typeof TTMMetricModel>;
 export type TTMMetricModelOutput = zod.output<typeof TTMMetricModel>;
 
+export const TTMConvenienceMetric = zod.strictObject({
+  "metric": zod.union([TTMMetricModel,zod.null()]),
+  "unavailable_reason": zod.union([zod.enum(['concept_absent', 'insufficient_quarters', 'malformed']),zod.null()]).describe('Why metric is null: \'concept_absent\' (no matching concept in the company facts), \'insufficient_quarters\' (fewer than 4 consecutive quarters), or \'malformed\' (library returned a non-finite value or no unit). Null when metric is present.')
+});
+
+export type TTMConvenienceMetric = zod.input<typeof TTMConvenienceMetric>;
+export type TTMConvenienceMetricOutput = zod.output<typeof TTMConvenienceMetric>;
+
 export const tTMResponseCikRegExp = new RegExp('^\\d{10}$');
 
 
@@ -676,8 +684,8 @@ export const TTMResponse = zod.strictObject({
   "company": zod.union([zod.string(),zod.null()]),
   "as_of": zod.union([zod.string(),zod.null()]),
   "concept": zod.union([zod.string(),zod.null()]),
-  "revenue": zod.union([TTMMetricModel,zod.null()]),
-  "net_income": zod.union([TTMMetricModel,zod.null()]),
+  "revenue": TTMConvenienceMetric,
+  "net_income": TTMConvenienceMetric,
   "metric": zod.union([TTMMetricModel,zod.null()])
 });
 

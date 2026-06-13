@@ -171,15 +171,32 @@ class TTMMetricModel(WireModel):
     warning: str | None
 
 
+# wire reason a convenience TTM is unavailable. The first two mirror the library's
+# TTMUnavailableReason (concept_absent / insufficient_quarters); "malformed" is the
+# sidecar's own classification for a metric the library returns with no finite value
+# or no unit. A unit test guards the library-sourced pair against drift.
+TTMUnavailable = Literal["concept_absent", "insufficient_quarters", "malformed"]
+
+
+class TTMConvenienceMetric(WireModel):
+    # revenue/net_income are best-effort: rather than a bare null (which conflated
+    # "concept not reported" with "couldn't compute"), carry the metric OR the reason.
+    # Exactly one of metric / unavailable_reason is non-null.
+    metric: TTMMetricModel | None
+    unavailable_reason: TTMUnavailable | None = Field(
+        description="Why metric is null: 'concept_absent' (no matching concept in the company facts), 'insufficient_quarters' (fewer than 4 consecutive quarters), or 'malformed' (library returned a non-finite value or no unit). Null when metric is present."
+    )
+
+
 class TTMResponse(WireModel):
     cik: str = Field(pattern=CIK_PATTERN)
     company: str | None
     as_of: str | None  # request echo: ISO date or YYYY-QN
     concept: str | None  # request echo
-    # convenience metrics: null when the company facts lack a matching concept
-    # or fewer than 4 consecutive quarters exist (TTM not computable)
-    revenue: TTMMetricModel | None
-    net_income: TTMMetricModel | None
+    # convenience metrics: always present; the wrapper says whether the TTM computed
+    # or why it didn't (the explicit ?concept= path below fails loudly instead)
+    revenue: TTMConvenienceMetric
+    net_income: TTMConvenienceMetric
     metric: TTMMetricModel | None  # TTM for the requested concept
 
 

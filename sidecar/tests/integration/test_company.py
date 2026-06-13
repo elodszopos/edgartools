@@ -241,6 +241,16 @@ def test_company_not_found_silence_checks(client: TestClient) -> None:
     assert response.json()["detail"].startswith("Company not found: 'ZZZZJUNK'")
 
 
+def test_company_not_found_pads_short_cik(client: TestClient) -> None:
+    # regression for the unpadded-CIK 404 detail (the 9999999999 case above can't catch
+    # it - a 10-digit CIK is already its own padded form). 999999999 is in the unassigned
+    # high range like the 10-nine sentinel, but its padded form (0999999999) differs from
+    # the bare int, so a missing pad_cik would surface here.
+    response = client.get("/company/999999999")
+    assert response.status_code == 404
+    assert response.json()["detail"] == "no entity at SEC with CIK 0999999999"
+
+
 def test_company_param_validation(client: TestClient) -> None:
     # all-digit id beyond the 10-digit CIK ceiling
     response = client.get("/company/99999999990")

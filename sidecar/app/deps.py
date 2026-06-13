@@ -8,7 +8,7 @@ from edgar.entity.core import Company
 from edgar.reference.tickers import find_cik
 from fastapi import HTTPException, Query
 
-from app.cik import parse_entity_id
+from app.cik import pad_cik, parse_entity_id
 
 # common offset cursor for every list endpoint
 StartParam = Annotated[int, Query(ge=0)]
@@ -42,5 +42,5 @@ def lookup_company(id: str) -> Company:
     # unknown ticker raises CompanyNotFoundError (mapped to 404 in errors.py, with suggestions)
     company = Company(resolve_entity_id(id))
     if company.not_found:
-        raise HTTPException(status_code=404, detail=f"no entity at SEC with CIK {company.cik}")
+        raise HTTPException(status_code=404, detail=f"no entity at SEC with CIK {pad_cik(company.cik)}")
     return company

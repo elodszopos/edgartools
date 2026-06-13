@@ -4996,6 +4996,44 @@
         ],
         "title": "SubmissionsPage"
       },
+      "TTMConvenienceMetric": {
+        "properties": {
+          "metric": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TTMMetricModel"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "unavailable_reason": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "concept_absent",
+                  "insufficient_quarters",
+                  "malformed"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unavailable Reason",
+            "description": "Why metric is null: 'concept_absent' (no matching concept in the company facts), 'insufficient_quarters' (fewer than 4 consecutive quarters), or 'malformed' (library returned a non-finite value or no unit). Null when metric is present."
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "metric",
+          "unavailable_reason"
+        ],
+        "title": "TTMConvenienceMetric"
+      },
       "TTMMetricModel": {
         "properties": {
           "concept": {
@@ -5172,24 +5210,10 @@
             "title": "Concept"
           },
           "revenue": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/TTMMetricModel"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "$ref": "#/components/schemas/TTMConvenienceMetric"
           },
           "net_income": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/TTMMetricModel"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "$ref": "#/components/schemas/TTMConvenienceMetric"
           },
           "metric": {
             "anyOf": [

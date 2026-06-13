@@ -11,6 +11,7 @@ from edgar._filings import Filing
 from edgar.entity.core import ANNUAL_FINANCIAL_FORMS, QUARTERLY_FINANCIAL_FORMS, Company
 from edgar.entity.filings import EntityFiling
 from edgar.financials import Financials
+from edgar.ttm import TTMConceptNotFoundError, TTMInsufficientDataError
 from edgar.xbrl.presentation import StatementView
 from edgar.xbrl.stitching.xbrls import XBRLS
 from fastapi import APIRouter, HTTPException, Query
@@ -30,6 +31,7 @@ from app.models.financials import (
     FinancialsResponse,
     FinancialsView,
     MultiFinancialsResponse,
+    TTMConvenienceMetric,
     TTMMetricModel,
     TTMResponse,
 )
@@ -187,11 +189,21 @@ def get_company_financials_multi(
     )
 
 
-def _ttm_or_none(compute: Callable[[], TTMMetric]) -> TTMMetricModel | None:
+def _ttm_convenience(compute: Callable[[], TTMMetric]) -> TTMConvenienceMetric:
+    """Convenience TTM (revenue/net_income): never fatal. A missing concept,
+    insufficient quarters, or a metric the library returns malformed becomes a
+    typed unavailable_reason rather than nulling out the reason or failing the
+    whole response. The explicit ?concept= path fails loudly instead (404/502).
+    A bare KeyError/ValueError is NOT swallowed here - the as_of gate keeps one
+    from reaching this far, so anything that does is an unexpected library break."""
     try:
-        return ttm_metric_model(compute())
-    except (KeyError, ValueError):  # concept absent or <4 consecutive quarters
-        return None
+        return TTMConvenienceMetric(metric=ttm_metric_model(compute()), unavailable_reason=None)
+    except TTMConceptNotFoundError:
+        return TTMConvenienceMetric(metric=None, unavailable_reason="concept_absent")
+    except TTMInsufficientDataError:
+        return TTMConvenienceMetric(metric=None, unavailable_reason="insufficient_quarters")
+    except TypeError:  # ttm_metric_model rejects a non-finite value / unitless metric (#50)
+        return TTMConvenienceMetric(metric=None, unavailable_reason="malformed")
 
 
 @router.get("/company/{id}/financials/ttm")
@@ -201,11 +213,18 @@ def get_company_financials_ttm(
     as_of: str | None = None,
 ) -> TTMResponse:
     company = lookup_company(id)
-    if as_of is not None and _TTM_QUARTER_KEY.match(as_of) is None:
-        try:  # the library accepts ISO dates or YYYY-QN quarter keys
-            date.fromisoformat(as_of)
-        except ValueError:
-            raise HTTPException(status_code=422, detail=f"as_of must be YYYY-MM-DD or YYYY-QN, got {as_of!r}") from None
+    if as_of is not None:
+        if _TTM_QUARTER_KEY.match(as_of) is not None:
+            year = int(as_of[:4])
+        else:
+            try:  # the library accepts ISO dates or YYYY-QN quarter keys
+                year = date.fromisoformat(as_of).year
+            except ValueError:
+                raise HTTPException(status_code=422, detail=f"as_of must be YYYY-MM-DD or YYYY-QN, got {as_of!r}") from None
+        # EntityFacts._parse_ttm_date rejects years outside this range; gate it here so a
+        # router-accepted as_of can never raise a bare ValueError inside _ttm_convenience
+        if not (1900 <= year <= 2100):
+            raise HTTPException(status_code=422, detail=f"as_of year must be between 1900 and 2100, got {year}")
     facts = company.get_facts()
     if facts is None:
         raise HTTPException(status_code=404, detail=f"no XBRL facts at SEC for CIK {pad_cik(company.cik)}")
@@ -215,12 +234,14 @@ def get_company_financials_ttm(
             metric = ttm_metric_model(facts.get_ttm(concept, as_of))
         except (KeyError, ValueError) as exc:
             raise HTTPException(status_code=404, detail=str(exc).strip("'\"")) from None
+        except TypeError as exc:  # library produced a structurally invalid metric (#50)
+            raise HTTPException(status_code=502, detail=str(exc)) from None
     return TTMResponse(
         cik=pad_cik(company.cik),
         company=to_str(company.display_name),
         as_of=as_of,
         concept=concept,
-        revenue=_ttm_or_none(lambda: facts.get_ttm_revenue(as_of)),
-        net_income=_ttm_or_none(lambda: facts.get_ttm_net_income(as_of)),
+        revenue=_ttm_convenience(lambda: facts.get_ttm_revenue(as_of)),
+        net_income=_ttm_convenience(lambda: facts.get_ttm_net_income(as_of)),
         metric=metric,
     )
