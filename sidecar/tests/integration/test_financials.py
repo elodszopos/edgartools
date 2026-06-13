@@ -370,6 +370,197 @@ def test_financial_metrics(client: TestClient, golden) -> None:
     golden("company_financials_metrics", "aapl_annual", body)
 
 
+def test_financials_bank_unclassified_balance_sheet(client: TestClient, golden) -> None:
+    # JPM: banks file unclassified balance sheets - no AssetsCurrent/LiabilitiesCurrent
+    # subtotals exist, so current_* metrics and current_ratio must be null, not fabricated
+    response = client.get("/company/JPM/financials")
+    assert response.status_code == 200
+    body = response.json()
+    assert body["cik"] == "0000019617"
+    assert body["form"] == "10-K"
+    assert body["accession_number"] == "0001628280-26-008131"
+    assert body["filing_date"] == "2026-02-13"
+    assert body["period_of_report"] == "2025-12-31"
+    assert body["superseded_by"] is None
+
+    # ground truth verified against the iXBRL tags in the recorded filing (scale 6)
+    income = body["income_statement"]
+    assert [p["key"] for p in income["periods"]] == [
+        "duration_2025-01-01_2025-12-31",
+        "duration_2024-01-01_2024-12-31",
+        "duration_2023-01-01_2023-12-31",
+    ]
+    assert _values(_record(income, "us-gaap_RevenuesNetOfInterestExpense", "Total net revenue")) == [
+        182447000000.0,
+        177556000000.0,
+        158104000000.0,
+    ]
+    assert _values(_record(income, "us-gaap_InterestIncomeExpenseNet", "Net interest income")) == [
+        95443000000.0,
+        92583000000.0,
+        89267000000.0,
+    ]
+    assert _values(_record(income, "us-gaap_NetIncomeLoss", "Net income")) == [
+        57048000000.0,
+        58471000000.0,
+        49552000000.0,
+    ]
+
+    balance = body["balance_sheet"]
+    concepts = {record["concept"] for record in balance["records"]}
+    assert "us-gaap_AssetsCurrent" not in concepts
+    assert "us-gaap_LiabilitiesCurrent" not in concepts
+    assert _values(_record(balance, "us-gaap_Assets", "Total assets")) == [4424900000000.0, 4002814000000.0]
+    assert _values(_record(balance, "us-gaap_Liabilities", "Total liabilities")) == [4062462000000.0, 3658056000000.0]
+    golden("company_financials", "jpm_annual_standardized", body)
+
+    response = client.get("/company/JPM/financials/metrics")
+    assert response.status_code == 200
+    metrics = response.json()
+    # revenue/operating_income null: JPM tags RevenuesNetOfInterestExpense (net of
+    # interest expense - not equivalent to gross Revenues) and never OperatingIncomeLoss.
+    # operating_cash_flow is genuinely NEGATIVE (sign="-" in the iXBRL): trading and
+    # credit-card asset growth consumed $147.8B of operating cash in FY2025.
+    # capex concepts are never tagged (premises spend sits in other investing) -> FCF null
+    assert metrics == {
+        "cik": "0000019617",
+        "company": "JPMORGAN CHASE & CO",
+        "form": "10-K",
+        "accession_number": "0001628280-26-008131",
+        "filing_date": "2026-02-13",
+        "period_of_report": "2025-12-31",
+        "superseded_by": None,
+        "period": "annual",
+        "amendments": False,
+        "revenue": None,
+        "operating_income": None,
+        "net_income": 57048000000.0,
+        "total_assets": 4424900000000.0,
+        "total_liabilities": 4062462000000.0,
+        "stockholders_equity": 362438000000.0,
+        "current_assets": None,
+        "current_liabilities": None,
+        "operating_cash_flow": -147782000000.0,
+        "capital_expenditures": None,
+        "free_cash_flow": None,
+        "shares_outstanding_basic": 2776500000.0,
+        "shares_outstanding_diluted": 2781500000.0,
+        "current_ratio": None,
+        "debt_to_assets": 0.9180912562995774,
+    }
+    golden("company_financials_metrics", "jpm_annual", metrics)
+
+
+def test_financials_metrics_missing_liabilities(client: TestClient, golden) -> None:
+    # AMZN has NEVER tagged us-gaap:Liabilities (confirmed via the XBRL frames API):
+    # its balance sheet runs line items straight into LiabilitiesAndStockholdersEquity.
+    # total_liabilities and the derived debt_to_assets must surface as null
+    response = client.get("/company/AMZN/financials")
+    assert response.status_code == 200
+    body = response.json()
+    assert body["cik"] == "0001018724"
+    assert body["form"] == "10-K"
+    assert body["accession_number"] == "0001018724-26-000004"
+
+    # ground truth verified against the iXBRL tags in the recorded filing (scale 6)
+    income = body["income_statement"]
+    assert _values(_record(income, "us-gaap_RevenueFromContractWithCustomerExcludingAssessedTax", "Total net sales")) == [
+        716924000000.0,
+        637959000000.0,
+        574785000000.0,
+    ]
+    assert _values(_record(income, "us-gaap_OperatingIncomeLoss", "Operating income")) == [
+        79975000000.0,
+        68593000000.0,
+        36852000000.0,
+    ]
+    assert _values(_record(income, "us-gaap_NetIncomeLoss", "Net income")) == [
+        77670000000.0,
+        59248000000.0,
+        30425000000.0,
+    ]
+
+    balance = body["balance_sheet"]
+    concepts = {record["concept"] for record in balance["records"]}
+    assert "us-gaap_Liabilities" not in concepts
+    assert _values(_record(balance, "us-gaap_Assets", "Total assets")) == [818042000000.0, 624894000000.0]
+    assert _values(_record(balance, "us-gaap_LiabilitiesAndStockholdersEquity", "Total liabilities and stockholders’ equity")) == [
+        818042000000.0,
+        624894000000.0,
+    ]
+    golden("company_financials", "amzn_annual_standardized", body)
+
+    response = client.get("/company/AMZN/financials/metrics")
+    assert response.status_code == 200
+    metrics = response.json()
+    assert metrics == {
+        "cik": "0001018724",
+        "company": "AMAZON COM INC",
+        "form": "10-K",
+        "accession_number": "0001018724-26-000004",
+        "filing_date": "2026-02-06",
+        "period_of_report": "2025-12-31",
+        "superseded_by": None,
+        "period": "annual",
+        "amendments": False,
+        "revenue": 716924000000.0,
+        "operating_income": 79975000000.0,
+        "net_income": 77670000000.0,
+        "total_assets": 818042000000.0,
+        "total_liabilities": None,
+        "stockholders_equity": 411065000000.0,
+        "current_assets": 229083000000.0,
+        "current_liabilities": 218005000000.0,
+        "operating_cash_flow": 139514000000.0,
+        "capital_expenditures": 131819000000.0,
+        "free_cash_flow": 7695000000.0,
+        "shares_outstanding_basic": 10656000000.0,
+        "shares_outstanding_diluted": 10827000000.0,
+        "current_ratio": 1.0508153482718285,
+        "debt_to_assets": None,
+    }
+    golden("company_financials_metrics", "amzn_annual", metrics)
+
+
+def test_financials_amended_filing_supersession(client: TestClient, golden) -> None:
+    # FDCTECH amended its FY2025 10-K three times, twice on the same day - the as-filed
+    # default serves the original stamped with the LATEST superseding /A (same-day pair
+    # resolved by the higher accession, monotonic per filer)
+    response = client.get("/company/1722731/financials")
+    assert response.status_code == 200
+    as_filed = response.json()
+    assert as_filed["form"] == "10-K"
+    assert as_filed["accession_number"] == "0001493152-26-017945"
+    assert as_filed["filing_date"] == "2026-04-17"
+    assert as_filed["period_of_report"] == "2025-12-31"
+    assert as_filed["amendments"] is False
+    assert as_filed["superseded_by"] == "0001493152-26-027771"
+
+    # as-filed FY2024 comparative shows a small attributable LOSS (verified in the
+    # original filing's iXBRL, unscaled values)
+    label = "Net income (loss) attributable to FDCTech’s shareholders"
+    assert _values(_record(as_filed["income_statement"], "us-gaap_NetIncomeLoss", label)) == [5783223.0, -18781.0]
+    assert _values(_record(as_filed["balance_sheet"], "us-gaap_Assets", "Total assets")) == [63771196.0, 33502601.0]
+    golden("company_financials", "fdctech_annual_as_filed", as_filed)
+
+    # restated view: the latest 10-K/A itself serves and nothing supersedes it
+    response = client.get("/company/1722731/financials", params={"amendments": "true"})
+    assert response.status_code == 200
+    restated = response.json()
+    assert restated["form"] == "10-K/A"
+    assert restated["accession_number"] == "0001493152-26-027771"
+    assert restated["filing_date"] == "2026-06-08"
+    assert restated["period_of_report"] == "2025-12-31"
+    assert restated["amendments"] is True
+    assert restated["superseded_by"] is None
+
+    # the restatement is real, not cosmetic: the FY2024 comparative flips from a
+    # -18,781 loss to +247,544 income and total assets move (verified in the /A's iXBRL)
+    assert _values(_record(restated["income_statement"], "us-gaap_NetIncomeLoss", label)) == [5797589.0, 247544.0]
+    assert _values(_record(restated["balance_sheet"], "us-gaap_Assets", "Total assets")) == [64051886.0, 33768927.0]
+    golden("company_financials", "fdctech_annual_restated", restated)
+
+
 def test_financials_silence_no_annual_filing(client: TestClient) -> None:
     # individual filer (Form 4s only) - the error names the form chain that was tried
     response = client.get("/company/0001347842/financials")
