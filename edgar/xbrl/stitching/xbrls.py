@@ -5,6 +5,8 @@ This module contains the XBRLS class which represents multiple XBRL filings
 stitched together for multi-period analysis.
 """
 
+import logging
+from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 import pandas as pd
@@ -16,6 +18,18 @@ if TYPE_CHECKING:
     from edgar._filings import Filings
     from edgar.xbrl.statements import StitchedStatements
 
+log = logging.getLogger(__name__)
+
+
+@dataclass(frozen=True)
+class ParseOutcome:
+    """Per-filing parse result from XBRLS.from_filings."""
+    accession_number: str
+    form: str
+    filing_date: Any
+    parsed: bool
+    error: Optional[str] = None
+
 
 class XBRLS:
     """
@@ -25,16 +39,21 @@ class XBRLS:
     automatically handling the complexities of statement stitching.
     """
 
-    def __init__(self, xbrl_list: List[Any]):
+    def __init__(self, xbrl_list: List[Any], parse_outcomes: Optional[List[ParseOutcome]] = None):
         """
         Initialize an XBRLS instance with a list of XBRL objects.
 
         Args:
             xbrl_list: List of XBRL objects, should be from the same company
                        and ordered from newest to oldest
+            parse_outcomes: Per-filing parse results from from_filings.
+                           None when constructed directly via from_xbrl_objects.
         """
         # Store the list of XBRL objects
         self.xbrl_list = xbrl_list
+
+        # Per-filing parse results (populated by from_filings; empty on direct construction)
+        self.parse_outcomes: List[ParseOutcome] = parse_outcomes or []
 
         # Extract entity info from the most recent XBRL
         self.entity_info = xbrl_list[0].entity_info if xbrl_list else {}
@@ -74,16 +93,19 @@ class XBRLS:
         # Sort filings by date (newest first)
         sorted_filings = sorted(filtered_filings, key=lambda f: f.filing_date, reverse=True)
 
-        # Create XBRL objects from filings
+        # Create XBRL objects from filings, tracking parse outcomes
         xbrl_list = []
+        outcomes: List[ParseOutcome] = []
         for filing in sorted_filings:
             try:
                 xbrl = XBRL.from_filing(filing)
                 xbrl_list.append(xbrl)
-            except Exception:
-                pass
+                outcomes.append(ParseOutcome(filing.accession_no, filing.form, filing.filing_date, parsed=True))
+            except Exception as e:
+                log.warning("XBRL parse failed for %s: %s", filing.accession_no, e)
+                outcomes.append(ParseOutcome(filing.accession_no, filing.form, filing.filing_date, parsed=False, error=str(e)))
 
-        return cls(xbrl_list)
+        return cls(xbrl_list, parse_outcomes=outcomes)
 
     @classmethod
     def from_xbrl_objects(cls, xbrl_list: List[Any]) -> 'XBRLS':

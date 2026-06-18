@@ -8,7 +8,7 @@ in ``text_render``/``html_render``.
 """
 import itertools
 from functools import cached_property
-from typing import List, Union
+from typing import List, Optional, Union
 
 import numpy as np
 import pandas as pd
@@ -34,7 +34,7 @@ from edgar.ownership.summary_records import SecurityHolding, TransactionActivity
 from edgar.ownership.html_render import ownership_to_html
 from edgar.ownership.text_render import ownership_to_context
 from edgar.richtools import repr_rich
-from edgar.xmltools import child_text
+from edgar.xmltools import child_text, parse_bool_flag
 
 __all__ = [
     'Ownership',
@@ -59,7 +59,8 @@ class Ownership:
                  signatures: OwnerSignatures,
                  reporting_period: str,
                  remarks: str,
-                 no_securities: bool = False
+                 no_securities: bool = False,
+                 aff_10b5_one: Optional[bool] = None
                  ):
         self.form: str = form
         self.footnotes: Footnotes = footnotes
@@ -71,6 +72,7 @@ class Ownership:
         self.reporting_period: str = reporting_period
         self.remarks: str = remarks
         self.no_securities = no_securities
+        self.aff_10b5_one: Optional[bool] = aff_10b5_one
 
     @property
     def insider_name(self):
@@ -138,6 +140,12 @@ class Ownership:
 
     def get_transaction_activities(self) -> List[TransactionActivity]:
         """Extract all transaction activities from the filing"""
+        # TODO(REVISIT): per-transaction footnotes_text is empty when a transaction's footnoteId
+        # reference sits on a child element (e.g. <transactionShares>) rather than the row, because
+        # the table extractor does not harvest those into row.footnotes -- so per-row
+        # TransactionActivity.is_10b5_1_plan returns None even when a 10b5-1 footnote is cited.
+        # Document-level 10b5-1 is now authoritative via aff_10b5_one; the per-transaction harvest
+        # in the table extractor (tables.py) still needs fixing for per-row 10b5-1 attribution.
         activities = []
 
         # Process non-derivative market transactions (P and S codes)
@@ -291,6 +299,7 @@ class Ownership:
                 transactions=activities,
                 remaining_shares=remaining,
                 has_derivative_transactions=has_derivative,
+                aff_10b5_one=self.aff_10b5_one,
                 remarks=self.remarks if self.remarks else ""
             )
 
@@ -325,6 +334,8 @@ class Ownership:
     @cached_property
     def shares_traded(self):
         # Sum the Shares if Shares is all numeric
+        if self.market_trades is None or self.market_trades.empty:
+            return None
         if np.issubdtype(self.market_trades.Shares.dtype, np.number):
             return self.market_trades.Shares.sum()
 
@@ -348,6 +359,10 @@ class Ownership:
         remarks = child_text(root, "remarks") or ""
 
         no_securities = child_text(root, "noSecuritiesOwned") == "1"
+
+        # Rule 10b5-1 trading-plan affirmation (document-level checkbox); SEC XML mixes 1/0 and
+        # true/false conventions, so normalize via parse_bool_flag. None when the element is absent.
+        aff_10b5_one = parse_bool_flag(child_text(root, "aff10b5One"))
 
         # Footnotes
         footnotes = Footnotes.extract(root)
@@ -391,7 +406,8 @@ class Ownership:
             'derivative_table': derivative_table,
             'reporting_period': report_period,
             'remarks': remarks,
-            'no_securities': no_securities
+            'no_securities': no_securities,
+            'aff_10b5_one': aff_10b5_one
         }
         return ownership_document
 

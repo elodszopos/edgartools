@@ -216,6 +216,10 @@ class Owner:
         self._needs_reversal = needs_reversal
 
     @property
+    def raw_name(self) -> str:
+        return self._raw_name or ''
+
+    @property
     def name(self) -> str:
         if self._resolved_name is not None:
             return self._resolved_name
@@ -449,7 +453,7 @@ class FilingHeader:
         if self.subject_companies:
             numbers.extend(
                 [subject_company.filing_information.file_number for subject_company in self.subject_companies])
-        return list(set(numbers))
+        return list(dict.fromkeys(numbers))
 
     @classmethod
     def parse_submission_format_header(cls, parsed_data: Dict[str, Any]):

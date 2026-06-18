@@ -1,0 +1,68 @@
+[project]
+name = "edgar-sidecar"
+version = "0.1.0"
+description = "Self-sufficient HTTP sidecar wrapping the local edgartools package as the single SEC egress"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "edgartools",
+    "fastapi==0.136.3",
+    "uvicorn[standard]==0.49.0",
+    # Imported directly by app code (serialize / converters / routers) but provided
+    # transitively through edgartools; floors mirror the parent pyproject. numpy has
+    # no parent floor - it is pulled in via pandas/pyarrow.
+    "numpy",
+    "orjson>=3.6.0",
+    "pandas>=2.0.0",
+    "pyarrow>=17.0.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest==9.0.3",
+    "httpx==0.28.1",
+    # pyyaml: read by scripts/decompose_cassettes.py (the vcrpy cassette migration);
+    # no longer transitive once vcrpy is gone, so declared explicitly.
+    "pyyaml==6.0.3",
+    "ruff==0.15.17",
+    "pyright==1.1.410",
+]
+
+[tool.uv]
+# app, not a library: sync deps only, never build/install the project itself
+package = false
+
+[tool.uv.sources]
+edgartools = { path = "../", editable = true }
+
+# mirrors the fork's ruff rule set (root pyproject), minus its tests/ exclude — sidecar tests are linted
+[tool.ruff]
+line-length = 150
+
+[tool.ruff.lint]
+select = ["F", "E", "W", "S", "B", "G", "N", "I001", "T", "PD", "C90"]
+# fork list minus PD901: rule retired in ruff 0.15, ignoring it only emits warnings
+ignore = ["W291", "E501", "S608", "C901", "S101"]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]
+# one-off migration CLI: stdout reporting is its UX; CSafeLoader is the safe C loader (S506 false positive)
+"scripts/*" = ["T201", "S506"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+# live (real-SEC) tests are excluded from every default run; opt in with -m live
+addopts = ["-m", "not live"]
+markers = [
+    "live: true SEC round-trip, opt-in (excluded from default gates)",
+]
+
+[tool.pyright]
+typeCheckingMode = "standard"
+pythonVersion = "3.12"
+venvPath = "."
+venv = ".venv"
+include = ["app", "tests", "scripts"]
+exclude = [".venv"]
+# tests/ doubles as an import root: conftest + scripts/decompose_cassettes import sec_replay from it
+extraPaths = ["tests"]

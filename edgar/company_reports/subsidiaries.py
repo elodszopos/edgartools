@@ -13,10 +13,13 @@ __all__ = ['Subsidiary', 'SubsidiaryList', 'parse_subsidiaries']
 # Strong header patterns — safe to match against any single cell
 _STRONG_HEADER_PATTERNS = re.compile(
     r'(name\s+of\s+(subsidiary|subsidiaries|company|entity|companies)|'
-    r'^subsidiary$|^subsidiaries$|company\s+name|entity\s+name|'
+    r'^subsidiary$|^subsidiaries$|^entity$|^name$|'
+    r'company\s+name|entity\s+name|'
     r'percent(age)?\s+(of\s+)?own|'
     r'organized\s+under\s+the\s+laws|'
-    r'state\s+or\s+(other\s+)?jurisdiction)',
+    r'state\s+or\s+(other\s+)?jurisdiction|'
+    r'state\s+of\s+incorporation|'
+    r'jurisdiction\s+of\s+(organization|incorporation|formation))',
     re.IGNORECASE
 )
 

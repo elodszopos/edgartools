@@ -1,0 +1,7 @@
+{
+  "headers": {
+    "content-type": "application/atom+xml"
+  },
+  "status": 200,
+  "url": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcurrent&count=40&start=0&type=4&owner=include&output=atom"
+}

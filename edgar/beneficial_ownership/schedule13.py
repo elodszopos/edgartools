@@ -240,6 +240,13 @@ class Schedule13D:
         result['date_of_event'] = child_text(cover, 'dateOfEvent') or ''
         result['previously_filed'] = get_bool(child_text(cover, 'previouslyFiledFlag'))
 
+        amendment_no_text = child_text(cover, 'amendmentNo')
+        if amendment_no_text:
+            try:
+                result['amendment_number'] = int(amendment_no_text)
+            except (ValueError, TypeError):
+                pass
+
         # Parse issuer info
         issuer_el = cover.find('issuerInfo')
         if issuer_el:
@@ -427,6 +434,7 @@ class Schedule13D:
         xml = filing.xml()
         if xml:
             parsed = cls.parse_xml(xml)
+            amendment_number = parsed.pop('amendment_number', None) or amendment_number
             return cls(filing=filing, amendment_number=amendment_number, **parsed)
         return cls.from_header(filing)
 
@@ -715,6 +723,13 @@ class Schedule13G:
 
         result['event_date'] = child_text(cover, 'eventDateRequiresFilingThisStatement') or ''
 
+        amendment_no_text = child_text(cover, 'amendmentNo')
+        if amendment_no_text:
+            try:
+                result['amendment_number'] = int(amendment_no_text)
+            except (ValueError, TypeError):
+                pass
+
         # Rule designation (note: parent is plural "Rules", child is singular "Rule")
         rules_parent_el = cover.find('designateRulesPursuantThisScheduleFiled')
         if rules_parent_el:
@@ -929,6 +944,7 @@ class Schedule13G:
         xml = filing.xml()
         if xml:
             parsed = cls.parse_xml(xml)
+            amendment_number = parsed.pop('amendment_number', None) or amendment_number
             return cls(filing=filing, amendment_number=amendment_number, **parsed)
         return cls.from_header(filing)
 

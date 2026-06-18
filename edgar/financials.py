@@ -355,12 +355,11 @@ class Financials:
 
         # Fallback to label-based search for edge cases
         patterns = [
-            r'Revenue$',           # Exact match for "Revenue"
-            r'^Revenue',           # Starts with "Revenue"
+            r'^Revenues?$',        # "Revenue" or "Revenues" exactly (not "Noninterest revenue")
             r'Contract Revenue',   # Common standardized label
             r'Sales Revenue',      # Alternative form
-            r'Total Revenue',      # Comprehensive revenue
-            r'Net Revenue'         # Net form
+            r'^Total Revenue',     # Comprehensive revenue
+            r'^Net Revenue'        # Net form
         ]
         return self._get_standardized_concept_value('income', patterns, period_offset)
 
@@ -442,8 +441,9 @@ class Financials:
 
         # Fallback to label-based search for edge cases
         patterns = [
-            r'Operating Income$',
+            r'^Operating Income$',
             r'^Operating Income',
+            r'^Operating [Pp]rofit$',
             r'Income.*Operations',
             r'Operating.*Income.*Loss',
         ]
@@ -464,6 +464,9 @@ class Financials:
             >>> financials = company.get_financials()
             >>> total_assets = financials.get_total_assets()
         """
+        result = self._get_concept_value('balance', [r'^Assets$'], period_offset)
+        if result is not None:
+            return result
         patterns = [
             r'Total Assets$',      # Exact match
             r'^Total Assets',      # Starts with
@@ -481,10 +484,12 @@ class Financials:
         Returns:
             Total liabilities value if found, None otherwise
         """
+        result = self._get_concept_value('balance', [r'^Liabilities$'], period_offset)
+        if result is not None:
+            return result
         patterns = [
-            r'Total Liabilities$',
-            r'^Total Liabilities',
-            r'Liabilities$'
+            r'^Total Liabilities$',
+            r'^Total Liabilities(?!\s+and)',
         ]
         return self._get_standardized_concept_value('balance', patterns, period_offset)
 
@@ -498,6 +503,13 @@ class Financials:
         Returns:
             Stockholders' equity value if found, None otherwise
         """
+        result = self._get_concept_value(
+            'balance',
+            [r'^StockholdersEquity$', r'^EquityAttributableToOwnersOfParent$', r'^Equity$'],
+            period_offset
+        )
+        if result is not None:
+            return result
         patterns = [
             r'Total.*Stockholders.*Equity',
             r'Stockholders.*Equity$',
@@ -517,6 +529,15 @@ class Financials:
         Returns:
             Operating cash flow value if found, None otherwise
         """
+        result = self._get_concept_value(
+            'cashflow',
+            [r'NetCashProvidedByUsedInOperatingActivities$',
+             r'NetCashProvidedByUsedInOperatingActivitiesContinuingOperations$',
+             r'CashFlowsFromUsedInOperatingActivities$'],
+            period_offset
+        )
+        if result is not None:
+            return result
         patterns = [
             r'^Net Cash from Operating',          # Most specific - matches "Net Cash from Operating Activities"
             r'^Net Cash Provided by Operating',   # Alternative phrasing
@@ -568,7 +589,8 @@ class Financials:
         patterns = [
             r'Capital Expenditures',
             r'Additions.*property.*equipment',  # MSFT: "Additions to property and equipment"
-            r'Purchase.*Property',
+            r'Purchase.*[Pp]roperty',
+            r'Expenditure.*[Pp]roperty',        # IFRS: "Expenditure on property, plant and equipment..."
             r'Capex'
         ]
         return self._get_standardized_concept_value('cashflow', patterns, period_offset)
@@ -583,6 +605,9 @@ class Financials:
         Returns:
             Current assets value if found, None otherwise
         """
+        result = self._get_concept_value('balance', [r'AssetsCurrent$'], period_offset)
+        if result is not None:
+            return result
         patterns = [
             r'Total Current Assets',
             r'^Current Assets',
@@ -600,6 +625,9 @@ class Financials:
         Returns:
             Current liabilities value if found, None otherwise
         """
+        result = self._get_concept_value('balance', [r'LiabilitiesCurrent$'], period_offset)
+        if result is not None:
+            return result
         patterns = [
             r'Total Current Liabilities',
             r'^Current Liabilities',
@@ -646,9 +674,22 @@ class Financials:
             if df.empty or 'concept' not in df.columns:
                 return None
 
-            # Find the concept using pattern matching on concept column
+            if 'abstract' in df.columns:
+                df = df[~df['abstract']].copy()
+
+            # Strip namespace prefixes for exact local-name matching.
+            # str.contains is unsafe: 'AssetsCurrent$' matches OtherAssetsCurrent
+            # before AssetsCurrent, returning the wrong value (Issue #814 fix pattern).
+            def _strip_ns(name: str) -> str:
+                return (str(name)
+                        .replace('us-gaap_', '').replace('us-gaap:', '')
+                        .replace('dei_', '').replace('dei:', '')
+                        .replace('ifrs-full_', '').replace('ifrs-full:', ''))
+
+            concept_local = df['concept'].astype(str).map(_strip_ns)
+
             for pattern in concept_patterns:
-                matches = df[df['concept'].str.contains(pattern, case=False, na=False)]
+                matches = df[concept_local.str.fullmatch(pattern, case=False, na=False)]
                 if not matches.empty:
                     # Get available period columns (excluding metadata columns)
                     period_columns = [col for col in df.columns if col not in ['concept', 'label', 'level', 'abstract', 'dimension', 'is_breakdown']]
@@ -703,6 +744,7 @@ class Financials:
         # Search by XBRL concept name - more reliable than label matching
         concept_patterns = [
             r'WeightedAverageNumberOfSharesOutstandingBasic',
+            r'WeightedAverageShares',  # IFRS basic shares
             r'CommonStockSharesOutstanding',  # Fallback for some filings
         ]
         return self._get_concept_value('income', concept_patterns, period_offset)
@@ -737,6 +779,7 @@ class Financials:
         concept_patterns = [
             r'WeightedAverageNumberOfDilutedSharesOutstanding',
             r'WeightedAverageNumberOfSharesOutstandingDiluted',  # Alternative naming
+            r'AdjustedWeightedAverageShares',  # IFRS diluted shares
         ]
         return self._get_concept_value('income', concept_patterns, period_offset)
 

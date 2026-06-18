@@ -2,6 +2,8 @@
 
 This directory contains Claude Code agent prompts and slash commands for EdgarTools development.
 
+> **Core code policy (sidecar work):** This fork hosts the **edgar-sidecar** (`.claude/plans/edgar-sidecar.md`), an HTTP wrapper around the local `edgar` library. For sidecar work, **`edgar/` is strictly READ-ONLY** — never patch, rewrite, or regenerate core. On a suspected edgar bug: STOP and discuss (assume it's the sidecar's own bug first, 99% of the time); handle genuine gaps additively in `sidecar/`, never in `edgar/`. Do not build regeneration/justification machinery (base snapshots, correction overlays, generators) around core data files — that is core surgery in disguise.
+
 ## Directory Structure
 
 ### `agents/` (14 files)

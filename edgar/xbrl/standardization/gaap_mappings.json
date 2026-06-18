@@ -40895,9 +40895,9 @@
   },
   "DividendsPaidToNoncontrollingInterestsClassifiedAsFinancingActivities": {
     "standard_tags": [
-      "CommonDividendsPaid"
+      "DistributionsToMinorityInterests"
     ],
-    "display_name": "Dividends Paid",
+    "display_name": "Distributions to Minority Interests",
     "statement": "CashFlowStatement",
     "section": null,
     "is_total": false,
@@ -98118,9 +98118,9 @@
   },
   "PaymentsOfDividends": {
     "standard_tags": [
-      "DistributionsToMinorityInterests"
+      "CommonDividendsPaid"
     ],
-    "display_name": "Distributions to Minority Interests",
+    "display_name": "Dividends Paid",
     "statement": "CashFlowStatement",
     "section": "Financing Activities",
     "is_total": true,
@@ -98134,324 +98134,324 @@
     "industry_overrides": {
       "Aero": {
         "standard_tags": [
-          "DistributionsToMinorityInterests"
+          "CommonDividendsPaid"
         ],
-        "display_name": "Distributions to Minority Interests",
+        "display_name": "Dividends Paid",
         "section": "Financing Activities",
         "is_total": false,
         "confidence": 1.0
       },
       "Agric": {
         "standard_tags": [
-          "DistributionsToMinorityInterests"
+          "CommonDividendsPaid"
         ],
-        "display_name": "Distributions to Minority Interests",
+        "display_name": "Dividends Paid",
         "section": "Financing Activities",
         "is_total": false,
         "confidence": 1.0
       },
       "Autos": {
         "standard_tags": [
-          "DistributionsToMinorityInterests"
+          "CommonDividendsPaid"
         ],
-        "display_name": "Distributions to Minority Interests",
+        "display_name": "Dividends Paid",
         "section": "Financing Activities",
         "is_total": false,
         "confidence": 1.0
       },
       "Banks": {
         "standard_tags": [
-          "DistributionsToMinorityInterests"
+          "CommonDividendsPaid"
         ],
-        "display_name": "Distributions to Minority Interests",
+        "display_name": "Dividends Paid",
         "section": "Financing Activities",
         "is_total": false,
         "confidence": 1.0
       },
       "Beer": {
         "standard_tags": [
-          "DistributionsToMinorityInterests"
+          "CommonDividendsPaid"
         ],
-        "display_name": "Distributions to Minority Interests",
+        "display_name": "Dividends Paid",
         "section": "Financing Activities",
         "is_total": false,
         "confidence": 1.0
       },
       "BldMt": {
         "standard_tags": [
-          "DistributionsToMinorityInterests"
+          "CommonDividendsPaid"
         ],
-        "display_name": "Distributions to Minority Interests",
+        "display_name": "Dividends Paid",
         "section": "Financing Activities",
         "is_total": false,
         "confidence": 1.0
       },
       "BusSv": {
         "standard_tags": [
-          "DistributionsToMinorityInterests"
+          "CommonDividendsPaid"
         ],
-        "display_name": "Distributions to Minority Interests",
+        "display_name": "Dividends Paid",
         "section": "Financing Activities",
         "is_total": false,
         "confidence": 1.0
       },
       "Chems": {
         "standard_tags": [
-          "DistributionsToMinorityInterests"
+          "CommonDividendsPaid"
         ],
-        "display_name": "Distributions to Minority Interests",
+        "display_name": "Dividends Paid",
         "section": "Financing Activities",
         "is_total": false,
         "confidence": 1.0
       },
       "Chips": {
         "standard_tags": [
-          "DistributionsToMinorityInterests"
+          "CommonDividendsPaid"
         ],
-        "display_name": "Distributions to Minority Interests",
+        "display_name": "Dividends Paid",
         "section": "Financing Activities",
         "is_total": false,
         "confidence": 1.0
       },
       "Clths": {
         "standard_tags": [
-          "DistributionsToMinorityInterests"
+          "CommonDividendsPaid"
         ],
-        "display_name": "Distributions to Minority Interests",
+        "display_name": "Dividends Paid",
         "section": "Financing Activities",
         "is_total": false,
         "confidence": 1.0
       },
       "Cnstr": {
         "standard_tags": [
-          "DistributionsToMinorityInterests"
+          "CommonDividendsPaid"
         ],
-        "display_name": "Distributions to Minority Interests",
+        "display_name": "Dividends Paid",
         "section": "Financing Activities",
         "is_total": false,
         "confidence": 1.0
       },
       "Coal": {
         "standard_tags": [
-          "DistributionsToMinorityInterests"
+          "CommonDividendsPaid"
         ],
-        "display_name": "Distributions to Minority Interests",
+        "display_name": "Dividends Paid",
         "section": "Financing Activities",
         "is_total": false,
         "confidence": 1.0
       },
       "Comps": {
         "standard_tags": [
-          "DistributionsToMinorityInterests"
+          "CommonDividendsPaid"
         ],
-        "display_name": "Distributions to Minority Interests",
+        "display_name": "Dividends Paid",
         "section": "Financing Activities",
         "is_total": false,
         "confidence": 1.0
       },
       "Drugs": {
         "standard_tags": [
-          "DistributionsToMinorityInterests"
+          "CommonDividendsPaid"
         ],
-        "display_name": "Distributions to Minority Interests",
+        "display_name": "Dividends Paid",
         "section": "Financing Activities",
         "is_total": false,
         "confidence": 1.0
       },
       "ElcEq": {
         "standard_tags": [
-          "DistributionsToMinorityInterests"
+          "CommonDividendsPaid"
         ],
-        "display_name": "Distributions to Minority Interests",
+        "display_name": "Dividends Paid",
         "section": "Financing Activities",
         "is_total": false,
         "confidence": 1.0
       },
       "Fin": {
         "standard_tags": [
-          "DistributionsToMinorityInterests"
+          "CommonDividendsPaid"
         ],
-        "display_name": "Distributions to Minority Interests",
+        "display_name": "Dividends Paid",
         "section": "Financing Activities",
         "is_total": false,
         "confidence": 0.995
       },
       "Food": {
         "standard_tags": [
-          "DistributionsToMinorityInterests"
+          "CommonDividendsPaid"
         ],
-        "display_name": "Distributions to Minority Interests",
+        "display_name": "Dividends Paid",
         "section": "Financing Activities",
         "is_total": false,
         "confidence": 1.0
       },
       "Fun": {
         "standard_tags": [
-          "DistributionsToMinorityInterests"
+          "CommonDividendsPaid"
         ],
-        "display_name": "Distributions to Minority Interests",
+        "display_name": "Dividends Paid",
         "section": "Financing Activities",
         "is_total": false,
         "confidence": 1.0
       },
       "Hlth": {
         "standard_tags": [
-          "DistributionsToMinorityInterests"
+          "CommonDividendsPaid"
         ],
-        "display_name": "Distributions to Minority Interests",
+        "display_name": "Dividends Paid",
         "section": "Financing Activities",
         "is_total": false,
         "confidence": 1.0
       },
       "Hshld": {
         "standard_tags": [
-          "DistributionsToMinorityInterests"
+          "CommonDividendsPaid"
         ],
-        "display_name": "Distributions to Minority Interests",
+        "display_name": "Dividends Paid",
         "section": "Financing Activities",
         "is_total": false,
         "confidence": 1.0
       },
       "Insur": {
         "standard_tags": [
-          "DistributionsToMinorityInterests"
+          "CommonDividendsPaid"
         ],
-        "display_name": "Distributions to Minority Interests",
+        "display_name": "Dividends Paid",
         "section": "Financing Activities",
         "is_total": false,
         "confidence": 1.0
       },
       "LabEq": {
         "standard_tags": [
-          "DistributionsToMinorityInterests"
+          "CommonDividendsPaid"
         ],
-        "display_name": "Distributions to Minority Interests",
+        "display_name": "Dividends Paid",
         "section": "Financing Activities",
         "is_total": false,
         "confidence": 1.0
       },
       "Mach": {
         "standard_tags": [
-          "DistributionsToMinorityInterests"
+          "CommonDividendsPaid"
         ],
-        "display_name": "Distributions to Minority Interests",
+        "display_name": "Dividends Paid",
         "section": "Financing Activities",
         "is_total": false,
         "confidence": 1.0
       },
       "Meals": {
         "standard_tags": [
-          "DistributionsToMinorityInterests"
+          "CommonDividendsPaid"
         ],
-        "display_name": "Distributions to Minority Interests",
+        "display_name": "Dividends Paid",
         "section": "Financing Activities",
         "is_total": false,
         "confidence": 1.0
       },
       "MedEq": {
         "standard_tags": [
-          "DistributionsToMinorityInterests"
+          "CommonDividendsPaid"
         ],
-        "display_name": "Distributions to Minority Interests",
+        "display_name": "Dividends Paid",
         "section": "Financing Activities",
         "is_total": false,
         "confidence": 1.0
       },
       "Mines": {
         "standard_tags": [
-          "DistributionsToMinorityInterests"
+          "CommonDividendsPaid"
         ],
-        "display_name": "Distributions to Minority Interests",
+        "display_name": "Dividends Paid",
         "section": "Financing Activities",
         "is_total": false,
         "confidence": 1.0
       },
       "Oil": {
         "standard_tags": [
-          "DistributionsToMinorityInterests"
+          "CommonDividendsPaid"
         ],
-        "display_name": "Distributions to Minority Interests",
+        "display_name": "Dividends Paid",
         "section": "Financing Activities",
         "is_total": false,
         "confidence": 1.0
       },
       "Paper": {
         "standard_tags": [
-          "DistributionsToMinorityInterests"
+          "CommonDividendsPaid"
         ],
-        "display_name": "Distributions to Minority Interests",
+        "display_name": "Dividends Paid",
         "section": "Financing Activities",
         "is_total": false,
         "confidence": 1.0
       },
       "PerSv": {
         "standard_tags": [
-          "DistributionsToMinorityInterests"
+          "CommonDividendsPaid"
         ],
-        "display_name": "Distributions to Minority Interests",
+        "display_name": "Dividends Paid",
         "section": "Financing Activities",
         "is_total": false,
         "confidence": 1.0
       },
       "RlEst": {
         "standard_tags": [
-          "DistributionsToMinorityInterests"
+          "CommonDividendsPaid"
         ],
-        "display_name": "Distributions to Minority Interests",
+        "display_name": "Dividends Paid",
         "section": "Financing Activities",
         "is_total": false,
         "confidence": 1.0
       },
       "Rtail": {
         "standard_tags": [
-          "DistributionsToMinorityInterests"
+          "CommonDividendsPaid"
         ],
-        "display_name": "Distributions to Minority Interests",
+        "display_name": "Dividends Paid",
         "section": "Financing Activities",
         "is_total": false,
         "confidence": 1.0
       },
       "Steel": {
         "standard_tags": [
-          "DistributionsToMinorityInterests"
+          "CommonDividendsPaid"
         ],
-        "display_name": "Distributions to Minority Interests",
+        "display_name": "Dividends Paid",
         "section": "Financing Activities",
         "is_total": false,
         "confidence": 1.0
       },
       "Telcm": {
         "standard_tags": [
-          "DistributionsToMinorityInterests"
+          "CommonDividendsPaid"
         ],
-        "display_name": "Distributions to Minority Interests",
+        "display_name": "Dividends Paid",
         "section": "Financing Activities",
         "is_total": false,
         "confidence": 1.0
       },
       "Trans": {
         "standard_tags": [
-          "DistributionsToMinorityInterests"
+          "CommonDividendsPaid"
         ],
-        "display_name": "Distributions to Minority Interests",
+        "display_name": "Dividends Paid",
         "section": "Financing Activities",
         "is_total": false,
         "confidence": 1.0
       },
       "Util": {
         "standard_tags": [
-          "DistributionsToMinorityInterests"
+          "CommonDividendsPaid"
         ],
-        "display_name": "Distributions to Minority Interests",
+        "display_name": "Dividends Paid",
         "section": "Financing Activities",
         "is_total": false,
         "confidence": 1.0
       },
       "Whlsl": {
         "standard_tags": [
-          "DistributionsToMinorityInterests"
+          "CommonDividendsPaid"
         ],
-        "display_name": "Distributions to Minority Interests",
+        "display_name": "Dividends Paid",
         "section": "Financing Activities",
         "is_total": false,
         "confidence": 1.0
@@ -98460,9 +98460,9 @@
   },
   "PaymentsOfDividendsCommonStock": {
     "standard_tags": [
-      "NetCashFromFinancingActivities"
+      "CommonDividendsPaid"
     ],
-    "display_name": "Net Cash from Financing Activities",
+    "display_name": "Dividends Paid",
     "statement": "CashFlowStatement",
     "section": null,
     "is_total": true,
@@ -98476,342 +98476,342 @@
     "industry_overrides": {
       "Aero": {
         "standard_tags": [
-          "NetCashFromFinancingActivities"
+          "CommonDividendsPaid"
         ],
-        "display_name": "Net Cash from Financing Activities",
+        "display_name": "Dividends Paid",
         "section": null,
         "is_total": false,
         "confidence": 1.0
       },
       "Agric": {
         "standard_tags": [
-          "NetCashFromFinancingActivities"
+          "CommonDividendsPaid"
         ],
-        "display_name": "Net Cash from Financing Activities",
+        "display_name": "Dividends Paid",
         "section": null,
         "is_total": false,
         "confidence": 1.0
       },
       "Autos": {
         "standard_tags": [
-          "NetCashFromFinancingActivities"
+          "CommonDividendsPaid"
         ],
-        "display_name": "Net Cash from Financing Activities",
+        "display_name": "Dividends Paid",
         "section": null,
         "is_total": false,
         "confidence": 1.0
       },
       "Banks": {
         "standard_tags": [
-          "NetCashFromFinancingActivities"
+          "CommonDividendsPaid"
         ],
-        "display_name": "Net Cash from Financing Activities",
+        "display_name": "Dividends Paid",
         "section": null,
         "is_total": false,
         "confidence": 1.0
       },
       "BldMt": {
         "standard_tags": [
-          "NetCashFromFinancingActivities"
+          "CommonDividendsPaid"
         ],
-        "display_name": "Net Cash from Financing Activities",
+        "display_name": "Dividends Paid",
         "section": null,
         "is_total": false,
         "confidence": 1.0
       },
       "Books": {
         "standard_tags": [
-          "NetCashFromFinancingActivities"
+          "CommonDividendsPaid"
         ],
-        "display_name": "Net Cash from Financing Activities",
+        "display_name": "Dividends Paid",
         "section": null,
         "is_total": false,
         "confidence": 1.0
       },
       "Boxes": {
         "standard_tags": [
-          "NetCashFromFinancingActivities"
+          "CommonDividendsPaid"
         ],
-        "display_name": "Net Cash from Financing Activities",
+        "display_name": "Dividends Paid",
         "section": null,
         "is_total": false,
         "confidence": 1.0
       },
       "BusSv": {
         "standard_tags": [
-          "NetCashFromFinancingActivities"
+          "CommonDividendsPaid"
         ],
-        "display_name": "Net Cash from Financing Activities",
+        "display_name": "Dividends Paid",
         "section": null,
         "is_total": false,
         "confidence": 1.0
       },
       "Chems": {
         "standard_tags": [
-          "NetCashFromFinancingActivities"
+          "CommonDividendsPaid"
         ],
-        "display_name": "Net Cash from Financing Activities",
+        "display_name": "Dividends Paid",
         "section": null,
         "is_total": false,
         "confidence": 1.0
       },
       "Chips": {
         "standard_tags": [
-          "NetCashFromFinancingActivities"
+          "CommonDividendsPaid"
         ],
-        "display_name": "Net Cash from Financing Activities",
+        "display_name": "Dividends Paid",
         "section": null,
         "is_total": false,
         "confidence": 1.0
       },
       "Clths": {
         "standard_tags": [
-          "NetCashFromFinancingActivities"
+          "CommonDividendsPaid"
         ],
-        "display_name": "Net Cash from Financing Activities",
+        "display_name": "Dividends Paid",
         "section": null,
         "is_total": false,
         "confidence": 1.0
       },
       "Cnstr": {
         "standard_tags": [
-          "NetCashFromFinancingActivities"
+          "CommonDividendsPaid"
         ],
-        "display_name": "Net Cash from Financing Activities",
+        "display_name": "Dividends Paid",
         "section": null,
         "is_total": false,
         "confidence": 1.0
       },
       "Comps": {
         "standard_tags": [
-          "NetCashFromFinancingActivities"
+          "CommonDividendsPaid"
         ],
-        "display_name": "Net Cash from Financing Activities",
+        "display_name": "Dividends Paid",
         "section": null,
         "is_total": false,
         "confidence": 1.0
       },
       "Drugs": {
         "standard_tags": [
-          "NetCashFromFinancingActivities"
+          "CommonDividendsPaid"
         ],
-        "display_name": "Net Cash from Financing Activities",
+        "display_name": "Dividends Paid",
         "section": null,
         "is_total": false,
         "confidence": 1.0
       },
       "ElcEq": {
         "standard_tags": [
-          "NetCashFromFinancingActivities"
+          "CommonDividendsPaid"
         ],
-        "display_name": "Net Cash from Financing Activities",
+        "display_name": "Dividends Paid",
         "section": null,
         "is_total": false,
         "confidence": 1.0
       },
       "Fin": {
         "standard_tags": [
-          "NetCashFromFinancingActivities"
+          "CommonDividendsPaid"
         ],
-        "display_name": "Net Cash from Financing Activities",
+        "display_name": "Dividends Paid",
         "section": null,
         "is_total": false,
         "confidence": 0.999
       },
       "Food": {
         "standard_tags": [
-          "NetCashFromFinancingActivities"
+          "CommonDividendsPaid"
         ],
-        "display_name": "Net Cash from Financing Activities",
+        "display_name": "Dividends Paid",
         "section": null,
         "is_total": false,
         "confidence": 1.0
       },
       "Fun": {
         "standard_tags": [
-          "NetCashFromFinancingActivities"
+          "CommonDividendsPaid"
         ],
-        "display_name": "Net Cash from Financing Activities",
+        "display_name": "Dividends Paid",
         "section": null,
         "is_total": false,
         "confidence": 1.0
       },
       "Hlth": {
         "standard_tags": [
-          "NetCashFromFinancingActivities"
+          "CommonDividendsPaid"
         ],
-        "display_name": "Net Cash from Financing Activities",
+        "display_name": "Dividends Paid",
         "section": null,
         "is_total": false,
         "confidence": 1.0
       },
       "Hshld": {
         "standard_tags": [
-          "NetCashFromFinancingActivities"
+          "CommonDividendsPaid"
         ],
-        "display_name": "Net Cash from Financing Activities",
+        "display_name": "Dividends Paid",
         "section": null,
         "is_total": false,
         "confidence": 1.0
       },
       "Insur": {
         "standard_tags": [
-          "NetCashFromFinancingActivities"
+          "CommonDividendsPaid"
         ],
-        "display_name": "Net Cash from Financing Activities",
+        "display_name": "Dividends Paid",
         "section": null,
         "is_total": false,
         "confidence": 1.0
       },
       "LabEq": {
         "standard_tags": [
-          "NetCashFromFinancingActivities"
+          "CommonDividendsPaid"
         ],
-        "display_name": "Net Cash from Financing Activities",
+        "display_name": "Dividends Paid",
         "section": null,
         "is_total": false,
         "confidence": 1.0
       },
       "Mach": {
         "standard_tags": [
-          "NetCashFromFinancingActivities"
+          "CommonDividendsPaid"
         ],
-        "display_name": "Net Cash from Financing Activities",
+        "display_name": "Dividends Paid",
         "section": null,
         "is_total": false,
         "confidence": 1.0
       },
       "Meals": {
         "standard_tags": [
-          "NetCashFromFinancingActivities"
+          "CommonDividendsPaid"
         ],
-        "display_name": "Net Cash from Financing Activities",
+        "display_name": "Dividends Paid",
         "section": null,
         "is_total": false,
         "confidence": 1.0
       },
       "MedEq": {
         "standard_tags": [
-          "NetCashFromFinancingActivities"
+          "CommonDividendsPaid"
         ],
-        "display_name": "Net Cash from Financing Activities",
+        "display_name": "Dividends Paid",
         "section": null,
         "is_total": false,
         "confidence": 1.0
       },
       "Mines": {
         "standard_tags": [
-          "NetCashFromFinancingActivities"
+          "CommonDividendsPaid"
         ],
-        "display_name": "Net Cash from Financing Activities",
+        "display_name": "Dividends Paid",
         "section": null,
         "is_total": false,
         "confidence": 1.0
       },
       "Oil": {
         "standard_tags": [
-          "NetCashFromFinancingActivities"
+          "CommonDividendsPaid"
         ],
-        "display_name": "Net Cash from Financing Activities",
+        "display_name": "Dividends Paid",
         "section": null,
         "is_total": false,
         "confidence": 1.0
       },
       "Other": {
         "standard_tags": [
-          "NetCashFromFinancingActivities"
+          "CommonDividendsPaid"
         ],
-        "display_name": "Net Cash from Financing Activities",
+        "display_name": "Dividends Paid",
         "section": null,
         "is_total": false,
         "confidence": 1.0
       },
       "Paper": {
         "standard_tags": [
-          "NetCashFromFinancingActivities"
+          "CommonDividendsPaid"
         ],
-        "display_name": "Net Cash from Financing Activities",
+        "display_name": "Dividends Paid",
         "section": null,
         "is_total": false,
         "confidence": 1.0
       },
       "PerSv": {
         "standard_tags": [
-          "NetCashFromFinancingActivities"
+          "CommonDividendsPaid"
         ],
-        "display_name": "Net Cash from Financing Activities",
+        "display_name": "Dividends Paid",
         "section": null,
         "is_total": false,
         "confidence": 1.0
       },
       "RlEst": {
         "standard_tags": [
-          "NetCashFromFinancingActivities"
+          "CommonDividendsPaid"
         ],
-        "display_name": "Net Cash from Financing Activities",
+        "display_name": "Dividends Paid",
         "section": null,
         "is_total": false,
         "confidence": 1.0
       },
       "Rtail": {
         "standard_tags": [
-          "NetCashFromFinancingActivities"
+          "CommonDividendsPaid"
         ],
-        "display_name": "Net Cash from Financing Activities",
+        "display_name": "Dividends Paid",
         "section": null,
         "is_total": false,
         "confidence": 1.0
       },
       "Rubbr": {
         "standard_tags": [
-          "NetCashFromFinancingActivities"
+          "CommonDividendsPaid"
         ],
-        "display_name": "Net Cash from Financing Activities",
+        "display_name": "Dividends Paid",
         "section": null,
         "is_total": false,
         "confidence": 1.0
       },
       "Steel": {
         "standard_tags": [
-          "NetCashFromFinancingActivities"
+          "CommonDividendsPaid"
         ],
-        "display_name": "Net Cash from Financing Activities",
+        "display_name": "Dividends Paid",
         "section": null,
         "is_total": false,
         "confidence": 1.0
       },
       "Telcm": {
         "standard_tags": [
-          "NetCashFromFinancingActivities"
+          "CommonDividendsPaid"
         ],
-        "display_name": "Net Cash from Financing Activities",
+        "display_name": "Dividends Paid",
         "section": null,
         "is_total": false,
         "confidence": 1.0
       },
       "Trans": {
         "standard_tags": [
-          "NetCashFromFinancingActivities"
+          "CommonDividendsPaid"
         ],
-        "display_name": "Net Cash from Financing Activities",
+        "display_name": "Dividends Paid",
         "section": null,
         "is_total": false,
         "confidence": 1.0
       },
       "Util": {
         "standard_tags": [
-          "NetCashFromFinancingActivities"
+          "CommonDividendsPaid"
         ],
-        "display_name": "Net Cash from Financing Activities",
+        "display_name": "Dividends Paid",
         "section": null,
         "is_total": false,
         "confidence": 1.0
       },
       "Whlsl": {
         "standard_tags": [
-          "NetCashFromFinancingActivities"
+          "CommonDividendsPaid"
         ],
-        "display_name": "Net Cash from Financing Activities",
+        "display_name": "Dividends Paid",
         "section": null,
         "is_total": false,
         "confidence": 1.0
@@ -98836,9 +98836,9 @@
   },
   "PaymentsOfDividendsPreferredStockAndPreferenceStock": {
     "standard_tags": [
-      "NetCashFromFinancingActivities"
+      "PreferredDividendExpense"
     ],
-    "display_name": "Net Cash from Financing Activities",
+    "display_name": "Preferred Dividends Paid",
     "statement": "CashFlowStatement",
     "section": null,
     "is_total": false,

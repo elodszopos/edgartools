@@ -14,7 +14,29 @@ __all__ = [
     'extract_child_text',
     'extract_child_value',
     'value_with_footnotes',
+    'parse_bool_flag',
 ]
+
+# SEC XML booleans are filed inconsistently across form families: 1/0, true/false, y/n.
+_TRUE_FLAGS = frozenset({"1", "true", "yes", "y"})
+_FALSE_FLAGS = frozenset({"0", "false", "no", "n"})
+
+
+def parse_bool_flag(text: Optional[str]) -> Optional[bool]:
+    """Normalize a SEC XML boolean flag to True/False, or None when absent/unrecognized.
+
+    SEC filings mix conventions (1/0, true/false, y/n; case-insensitive). None is returned
+    for a missing element so callers keep the absent-vs-false distinction rather than
+    collapsing an unset flag to False.
+    """
+    if text is None:
+        return None
+    token = text.strip().lower()
+    if token in _TRUE_FLAGS:
+        return True
+    if token in _FALSE_FLAGS:
+        return False
+    return None
 
 
 def find_element(

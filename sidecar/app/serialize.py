@@ -1,0 +1,179 @@
+"""JSON scalar policy for everything that crosses the wire.
+
+Policy (plan "Wire conventions"): numpy -> int/float, Decimal -> float, dates ->
+datetime.date (pydantic renders ISO), NaN/NaT/inf -> None, DataFrames -> typed records
+built by explicit field-by-field converters ONLY - no attribute walking, no generic
+to_dict() dumps. Coercers are strict: unexpected types raise instead of guessing.
+"""
+
+from __future__ import annotations
+
+import math
+from datetime import UTC, date, datetime
+from decimal import Decimal
+from zoneinfo import ZoneInfo
+
+import numpy as np
+import pandas as pd
+from pandas.api.typing import NaTType
+
+_TRUE_STRINGS = ("1", "true", "yes")
+_FALSE_STRINGS = ("0", "false", "no")
+
+_EASTERN = ZoneInfo("America/New_York")
+
+
+def _is_missing(value: object) -> bool:
+    if value is None or value is pd.NaT:
+        return True
+    if isinstance(value, (float, np.floating)) and math.isnan(float(value)):
+        return True
+    if isinstance(value, Decimal) and value.is_nan():
+        return True
+    if isinstance(value, np.datetime64) and bool(np.isnat(value)):
+        return True
+    return False
+
+
+def to_int(value: object) -> int | None:
+    if _is_missing(value):
+        return None
+    if isinstance(value, bool):
+        raise TypeError(f"refusing bool -> int coercion: {value!r}")
+    if isinstance(value, (int, np.integer)):
+        return int(value)
+    if isinstance(value, (float, np.floating)):
+        as_float = float(value)
+        if math.isinf(as_float):
+            return None
+        if as_float.is_integer():
+            return int(as_float)
+        raise TypeError(f"non-integral float cannot become int: {value!r}")
+    if isinstance(value, Decimal):
+        if value.is_infinite():
+            return None
+        if value == value.to_integral_value():
+            return int(value)
+        raise TypeError(f"non-integral Decimal cannot become int: {value!r}")
+    raise TypeError(f"cannot coerce {type(value).__name__} to int: {value!r}")
+
+
+def to_float(value: object) -> float | None:
+    if _is_missing(value):
+        return None
+    if isinstance(value, bool):
+        raise TypeError(f"refusing bool -> float coercion: {value!r}")
+    if isinstance(value, (int, np.integer)):
+        return float(value)
+    if isinstance(value, (float, np.floating, Decimal)):
+        as_float = float(value)
+        return None if math.isinf(as_float) else as_float
+    raise TypeError(f"cannot coerce {type(value).__name__} to float: {value!r}")
+
+
+def to_str(value: object) -> str | None:
+    if _is_missing(value):
+        return None
+    if isinstance(value, str):
+        stripped = value.strip()
+        return stripped or None
+    raise TypeError(f"cannot coerce {type(value).__name__} to str: {value!r}")
+
+
+def to_iso_str(value: object) -> str | None:
+    """Coerce a date, datetime, or string to an ISO date string, or None if missing.
+
+    Filing.filing_date can be str (from SGML init) or date (from pyarrow data); this
+    accepts both without the TypeError that to_str raises on non-string types.
+    """
+    if _is_missing(value):
+        return None
+    if isinstance(value, str):
+        stripped = value.strip()
+        return stripped or None
+    if isinstance(value, datetime):
+        return value.date().isoformat()
+    if isinstance(value, date):
+        return value.isoformat()
+    raise TypeError(f"cannot coerce {type(value).__name__} to ISO str: {value!r}")
+
+
+def to_bool(value: object) -> bool | None:
+    if _is_missing(value):
+        return None
+    if isinstance(value, (bool, np.bool_)):
+        return bool(value)
+    if isinstance(value, (int, np.integer)):
+        if int(value) in (0, 1):
+            return bool(value)
+        raise TypeError(f"cannot coerce int to bool: {value!r}")
+    if isinstance(value, str):
+        lowered = value.strip().lower()
+        if not lowered:
+            return None
+        if lowered in _TRUE_STRINGS:
+            return True
+        if lowered in _FALSE_STRINGS:
+            return False
+        raise TypeError(f"cannot coerce str to bool: {value!r}")
+    raise TypeError(f"cannot coerce {type(value).__name__} to bool: {value!r}")
+
+
+def to_utc_datetime(value: object) -> datetime | None:
+    """Wire datetimes are UTC (pydantic renders trailing 'Z', which generated Zod accepts)."""
+    if _is_missing(value):
+        return None
+    if isinstance(value, pd.Timestamp):
+        value = value.to_pydatetime()
+    if isinstance(value, datetime):
+        if value.tzinfo is None:
+            # naive timestamps are ambiguous (SEC mixes Eastern and UTC sources) - never guess
+            raise ValueError(f"naive datetime is ambiguous on the wire: {value!r}")
+        return value.astimezone(UTC)
+    raise TypeError(f"cannot coerce {type(value).__name__} to UTC datetime: {value!r}")
+
+
+def eastern_naive_to_utc(value: object) -> datetime | None:
+    """EDGAR SEC-HEADER timestamps (ACCEPTANCE-DATETIME) carry no offset and are US Eastern."""
+    if _is_missing(value):
+        return None
+    if isinstance(value, datetime):
+        if value.tzinfo is not None:
+            raise ValueError(f"aware datetime belongs in to_utc_datetime, not here: {value!r}")
+        return value.replace(tzinfo=_EASTERN).astimezone(UTC)
+    raise TypeError(f"cannot coerce {type(value).__name__} to UTC datetime: {value!r}")
+
+
+def utc_naive_to_utc(value: object) -> datetime | None:
+    """Submissions-store acceptanceDateTime is UTC-Z at source; pyarrow round-trips drop the tz."""
+    if _is_missing(value):
+        return None
+    if isinstance(value, datetime):
+        if value.tzinfo is not None:
+            return value.astimezone(UTC)
+        return value.replace(tzinfo=UTC)
+    raise TypeError(f"cannot coerce {type(value).__name__} to UTC datetime: {value!r}")
+
+
+def to_date(value: object) -> date | None:
+    if _is_missing(value):
+        return None
+    # order matters: pd.Timestamp subclasses datetime, datetime subclasses date
+    if isinstance(value, pd.Timestamp):
+        return value.date()
+    if isinstance(value, np.datetime64):
+        converted = pd.Timestamp(value)
+        return None if isinstance(converted, NaTType) else converted.date()
+    if isinstance(value, datetime):
+        return value.date()
+    if isinstance(value, date):
+        return value
+    if isinstance(value, str):
+        stripped = value.strip()
+        if not stripped:
+            return None
+        try:
+            return date.fromisoformat(stripped)
+        except ValueError:
+            return datetime.fromisoformat(stripped).date()
+    raise TypeError(f"cannot coerce {type(value).__name__} to date: {value!r}")

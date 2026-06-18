@@ -64,7 +64,8 @@ class SecuritiesInformation:
             'units_outstanding': self.units_outstanding,
             'approx_sale_date': self.approx_sale_date,
             'exchange_name': self.exchange_name,
-            'broker_name': self.broker_name
+            'broker_name': self.broker_name,
+            'broker_address': self.broker_address
         }
 
     @classmethod
@@ -205,7 +206,8 @@ class SecuritiesSoldPast3Months:
             'seller_name': self.seller_name,
             'sale_date': self.sale_date,
             'amount_sold': self.amount_of_securities_sold,
-            'gross_proceeds': self.gross_proceeds
+            'gross_proceeds': self.gross_proceeds,
+            'seller_address': self.seller_address
         }
 
     @classmethod
@@ -859,7 +861,8 @@ class Form144:
             for el in form_data.find_all('securitiesToBeSold')
         ])
         # Nothing to report flag
-        form144['nothing_to_report'] = child_text(form_data, 'nothingToReportFlagOnSecuritiesSoldInPast3Months')
+        nothing_to_report_flag = child_text(form_data, 'nothingToReportFlagOnSecuritiesSoldInPast3Months')
+        form144['nothing_to_report'] = (nothing_to_report_flag or '').strip().upper() == 'Y'
 
         # Securities sold in past 3 months
         form144['securities_sold_past_3_months'] = pd.DataFrame([

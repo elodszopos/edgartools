@@ -1332,7 +1332,7 @@ def get_filings(year: Optional[Years] = None,
 
     filings = Filings(filing_index)
 
-    if form or filing_date:
+    if form or filing_date or not amendments:
         filings = filings.filter(form=form, amendments=amendments, filing_date=filing_date)
 
     # Warn if using defaults and data appears stale

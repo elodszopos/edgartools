@@ -594,22 +594,28 @@ class StatementOrderingManager:
 
         return final_ordering
 
-    def _extract_all_concepts(self, statements: List[Dict]) -> set:
-        """Extract all unique concepts from statements"""
-        all_concepts = set()
+    def _extract_all_concepts(self, statements: List[Dict]) -> dict:
+        """Extract all unique concepts/labels from statements in XBRL presentation order.
+
+        Returns a dict (keys only) instead of a set so iteration order is
+        deterministic -- Python dicts preserve insertion order, sets do not.
+        The insertion order follows the XBRL presentation tree across filings,
+        which is the SEC filing's own logical ordering.
+        """
+        all_concepts: dict[str, None] = {}
 
         for statement in statements:
             for item in statement.get('data', []):
                 concept = item.get('concept')
                 label = item.get('label')
-                if concept:
-                    all_concepts.add(concept)
-                if label:
-                    all_concepts.add(label)
+                if concept and concept not in all_concepts:
+                    all_concepts[concept] = None
+                if label and label not in all_concepts:
+                    all_concepts[label] = None
 
         return all_concepts
 
-    def _apply_template_ordering(self, concepts: set, statements: List[Dict]) -> Dict[str, float]:
+    def _apply_template_ordering(self, concepts, statements: List[Dict]) -> Dict[str, float]:
         """Apply template-based ordering for known concepts using concept-first matching"""
         template_order = {}
 
@@ -675,7 +681,7 @@ class StatementOrderingManager:
 
         return template_order
 
-    def _apply_reference_ordering(self, concepts: set, statements: List[Dict],
+    def _apply_reference_ordering(self, concepts, statements: List[Dict],
                                  template_positioned: Dict[str, float]) -> Dict[str, float]:
         """Apply reference statement ordering for remaining concepts"""
         reference_order = self.reference_strategy.establish_reference_order(statements)
@@ -688,7 +694,7 @@ class StatementOrderingManager:
 
         return combined_order
 
-    def _apply_semantic_positioning(self, concepts: set, template_positioned: Dict[str, float],
+    def _apply_semantic_positioning(self, concepts, template_positioned: Dict[str, float],
                                    reference_positioned: Dict[str, float]) -> Dict[str, float]:
         """Apply semantic positioning for orphan concepts"""
         final_order = reference_positioned.copy()

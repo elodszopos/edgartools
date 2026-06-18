@@ -454,6 +454,10 @@ class StatementStitcher:
             # If we've already seen this concept, only update metadata if it's from a more recent period
             # This ensures we use labels from the most recent filing when merging rows
             if concept_key not in self.concept_metadata:
+                # Pick a representative unit from per-period units dict
+                item_units = item.get('units') or {}
+                unit_ref = next((u for u in item_units.values() if u), None)
+
                 self.concept_metadata[concept_key] = {
                     'level': item.get('level', 0),
                     'is_abstract': item.get('is_abstract', False),
@@ -462,6 +466,9 @@ class StatementStitcher:
                     'latest_label': label,  # Store the original label too
                     'standard_concept': item.get('standard_concept'),
                     'preferred_sign': self._extract_preferred_sign(item),
+                    'balance': item.get('balance'),
+                    'weight': item.get('weight'),
+                    'unit': unit_ref,
                 }
             else:
                 # For existing concepts, update the label to use the most recent one
@@ -492,6 +499,22 @@ class StatementStitcher:
                         ps = self._extract_preferred_sign(item)
                         if ps is not None:
                             self.concept_metadata[concept_key]['preferred_sign'] = ps
+
+                    if self.concept_metadata[concept_key].get('balance') is None:
+                        bal = item.get('balance')
+                        if bal is not None:
+                            self.concept_metadata[concept_key]['balance'] = bal
+
+                    if self.concept_metadata[concept_key].get('weight') is None:
+                        wt = item.get('weight')
+                        if wt is not None:
+                            self.concept_metadata[concept_key]['weight'] = wt
+
+                    if self.concept_metadata[concept_key].get('unit') is None:
+                        item_units = item.get('units') or {}
+                        unit_ref = next((u for u in item_units.values() if u), None)
+                        if unit_ref:
+                            self.concept_metadata[concept_key]['unit'] = unit_ref
 
             # Store values for relevant periods
             for period_id in relevant_periods:
@@ -917,6 +940,10 @@ class StatementStitcher:
                 if period_id in self.data[concept]:
                     item['values'][period_id] = self.data[concept][period_id]['value']
                     item['decimals'][period_id] = self.data[concept][period_id]['decimals']
+
+            item['balance'] = metadata.get('balance')
+            item['weight'] = metadata.get('weight')
+            item['unit'] = metadata.get('unit')
 
             # Add preferred_signs for rendering and DataFrame sign application
             preferred_sign = metadata.get('preferred_sign')

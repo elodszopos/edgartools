@@ -1,0 +1,7 @@
+{
+  "headers": {
+    "content-type": "application/xml"
+  },
+  "status": 404,
+  "url": "https://data.sec.gov/api/xbrl/companyfacts/CIK0001347842.json"
+}

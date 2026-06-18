@@ -177,14 +177,27 @@ class TTMCalculator:
         # 7. Generate warning if data quality issues exist
         warning = self._generate_warning(quarterly, ttm_quarters, has_calculated_q4)
 
-        # 8. Build and return result
+        # 8. Derive label fiscal years from period_end + FYE month (GH #793).
+        # Raw q.fiscal_year reflects the filing's SEC-tagged fy, which is wrong
+        # for comparative re-filings selected by _deduplicate_by_period_end.
+        from edgar.entity.enhanced_statement import (
+            calculate_fiscal_year_for_label,
+            detect_fiscal_year_end,
+        )
+        fiscal_year_end_month = detect_fiscal_year_end(self.facts)
+        periods = [
+            (calculate_fiscal_year_for_label(q.period_end, fiscal_year_end_month), q.fiscal_period)
+            for q in ttm_quarters
+        ]
+
+        # 9. Build and return result
         return TTMMetric(
             concept=ttm_quarters[0].concept,
             label=ttm_quarters[0].label,
             value=ttm_value,
             unit=ttm_quarters[0].unit,
             as_of_date=ttm_quarters[-1].period_end,  # Most recent quarter
-            periods=[(q.fiscal_year, q.fiscal_period) for q in ttm_quarters],
+            periods=periods,
             period_facts=ttm_quarters,
             has_gaps=has_gaps,
             has_calculated_q4=has_calculated_q4,

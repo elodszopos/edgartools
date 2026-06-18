@@ -8,6 +8,10 @@ Python library for SEC Edgar filings analysis.
 - **Progressive disclosure**: Basic usage is easy; advanced features available when needed
 - **Read before write**: Understand existing patterns before modifying code
 
+## edgar/ is read-only for sidecar work
+
+This fork hosts the **edgar-sidecar** (`.claude/plans/edgar-sidecar.md`), a FastAPI wrapper around the local `edgar` library. When doing **sidecar work**, `edgar/` core is **STRICTLY READ-ONLY** — never patch, rewrite, or regenerate it. On a suspected edgar bug: STOP and discuss; assume it is the sidecar's own bug first (99% of the time). Handle genuine gaps additively in `sidecar/`, never in `edgar/`. Do not build regeneration/justification machinery (base snapshots, correction overlays, generators, "generated artifact" docstrings) around core data files — that is core surgery in disguise. (Normal upstream development of this library is free to edit `edgar/`; this rule scopes the sidecar campaign only.)
+
 ## Quick Navigation
 
 | Need | Location | Key Classes |

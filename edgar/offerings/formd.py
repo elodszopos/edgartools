@@ -109,7 +109,7 @@ class SalesCompensationRecipient:
                  states_of_solicitation: Optional[List[str]] = None):
         self.name: str = name
         self.crd: str = crd
-        self.associated_bd_name: associated_bd_name
+        self.associated_bd_name: str = associated_bd_name
         self.associated_bd_crd: str = associated_bd_crd
         self.address: Address = address
         self.states_of_solicitation: List[str] = states_of_solicitation
@@ -130,7 +130,7 @@ class SalesCompensationRecipient:
             city=child_text(address_tag, "city"),
             state_or_country=child_text(address_tag, "stateOrCountry"),
             state_or_country_description=child_text(address_tag, "stateOrCountryDescription"),
-            zipcode=child_text(address_tag, "30361")
+            zipcode=child_text(address_tag, "zipCode")
         ) if address_tag else None
 
         # States of Solicitation List
