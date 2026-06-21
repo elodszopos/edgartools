@@ -1,0 +1,19 @@
+# Only the sidecar Dockerfile needs: edgar/, sidecar/pyproject.toml, sidecar/uv.lock,
+# sidecar/.python-version, sidecar/app/. Exclude everything else to keep build context small.
+.git/
+.claude/
+.github/
+.ruff_cache/
+__pycache__/
+*.pyc
+data/
+docs/
+notebooks/
+workbooks/
+tests/
+sidecar/.venv/
+sidecar/tests/
+sidecar/ts/
+sidecar/.pytest_cache/
+sidecar/.ruff_cache/
+*.ipynb

@@ -13,6 +13,7 @@ from app.serialize import (
     to_date,
     to_float,
     to_int,
+    to_iso_str,
     to_str,
     to_utc_datetime,
     utc_naive_to_utc,
@@ -89,6 +90,38 @@ def test_to_float_bool_raises():
 def test_to_float_str_raises():
     with pytest.raises(TypeError):
         to_float("3.14")
+
+
+def test_to_iso_str_passthrough():
+    assert to_iso_str("2024-05-01") == "2024-05-01"
+
+
+def test_to_iso_str_strips():
+    assert to_iso_str("  2024-05-01  ") == "2024-05-01"
+
+
+def test_to_iso_str_date():
+    assert to_iso_str(date(2024, 5, 1)) == "2024-05-01"
+
+
+def test_to_iso_str_datetime():
+    assert to_iso_str(datetime(2024, 5, 1, 12, 30)) == "2024-05-01"
+
+
+def test_to_iso_str_none_and_nan():
+    assert to_iso_str(None) is None
+    assert to_iso_str(float("nan")) is None
+    assert to_iso_str(pd.NaT) is None
+
+
+def test_to_iso_str_empty_is_null():
+    assert to_iso_str("") is None
+    assert to_iso_str("   ") is None
+
+
+def test_to_iso_str_int_raises():
+    with pytest.raises(TypeError, match="cannot coerce int to ISO str"):
+        to_iso_str(42)
 
 
 def test_to_str_strips():
