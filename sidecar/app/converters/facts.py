@@ -9,6 +9,7 @@ from edgar.entity.models import FinancialFact
 
 from app.cik import pad_cik
 from app.models.facts import Fact, FactsResponse
+from app.pagination import paginate
 from app.serialize import to_date, to_float, to_int, to_str
 
 
@@ -60,15 +61,15 @@ def facts_page(
 ) -> FactsResponse:
     """Page an already-materialized fact list in memory (the facts store is in-memory)."""
     total = len(facts)
-    page = facts[start : start + page_size]
-    has_more = start + len(page) < total
+    page_info = paginate(total, start, page_size)
+    window = facts[start : start + page_size]
     return FactsResponse(
         cik=pad_cik(company.cik),
         company=to_str(company.name),
         total=total,
         start=start,
         page_size=page_size,
-        has_more=has_more,
-        next_start=start + len(page) if has_more else None,
-        facts=[fact_model(fact) for fact in page],
+        has_more=page_info.has_more,
+        next_start=page_info.next_start,
+        facts=[fact_model(fact) for fact in window],
     )

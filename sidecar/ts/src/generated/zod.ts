@@ -24,7 +24,7 @@ export const AttachmentContentResponse = zod.strictObject({
   "sequence": zod.string(),
   "document": zod.union([zod.string(),zod.null()]),
   "document_type": zod.union([zod.string(),zod.null()]),
-  "fmt": zod.enum(['raw', 'text', 'markdown']),
+  "fmt": zod.enum(['text', 'markdown', 'raw']),
   "content": zod.union([zod.string(),zod.null()])
 });
 
@@ -66,8 +66,9 @@ export const Auditor = zod.strictObject({
   "name": zod.string(),
   "location": zod.union([zod.string(),zod.null()]),
   "firm_id": zod.union([zod.number(),zod.null()]),
-  "icfr_attestation": zod.boolean()
-}).describe('edgar `AuditorInfo` -- the signing audit firm from XBRL DEI facts (chiefly annual filings).');
+  "icfr_attestation": zod.boolean(),
+  "period_end": zod.union([zod.string(),zod.null()])
+}).describe('One audit firm from the XBRL DEI facts. A filing carries several when it reports an\nauditor change -- current + prior, each tagged on its own period context.');
 
 export type Auditor = zod.input<typeof Auditor>;
 export type AuditorOutput = zod.output<typeof Auditor>;
@@ -200,6 +201,20 @@ export const CurrentPageSize = zod.union([zod.literal(10),zod.literal(20),zod.li
 export type CurrentPageSize = zod.input<typeof CurrentPageSize>;
 export type CurrentPageSizeOutput = zod.output<typeof CurrentPageSize>;
 
+export const OfferingFeeSecurity = zod.strictObject({
+  "security_type": zod.union([zod.string(),zod.null()]),
+  "security_title": zod.union([zod.string(),zod.null()]),
+  "fee_rule": zod.union([zod.string(),zod.null()]),
+  "amount_registered": zod.union([zod.string(),zod.null()]),
+  "price_per_unit": zod.union([zod.number(),zod.null()]),
+  "max_aggregate_amount": zod.union([zod.number(),zod.null()]),
+  "fee_rate": zod.union([zod.number(),zod.null()]),
+  "fee_amount": zod.union([zod.number(),zod.null()])
+}).describe('One security line of a registration fee table (Exhibit 107 EX-FILING FEES).');
+
+export type OfferingFeeSecurity = zod.input<typeof OfferingFeeSecurity>;
+export type OfferingFeeSecurityOutput = zod.output<typeof OfferingFeeSecurity>;
+
 export const S1CoverPage = zod.strictObject({
   "company_name": zod.string(),
   "registration_number": zod.union([zod.string(),zod.null()]),
@@ -220,20 +235,6 @@ export const S1CoverPage = zod.strictObject({
 
 export type S1CoverPage = zod.input<typeof S1CoverPage>;
 export type S1CoverPageOutput = zod.output<typeof S1CoverPage>;
-
-export const OfferingFeeSecurity = zod.strictObject({
-  "security_type": zod.union([zod.string(),zod.null()]),
-  "security_title": zod.union([zod.string(),zod.null()]),
-  "fee_rule": zod.union([zod.string(),zod.null()]),
-  "amount_registered": zod.union([zod.string(),zod.null()]),
-  "price_per_unit": zod.union([zod.number(),zod.null()]),
-  "max_aggregate_amount": zod.union([zod.number(),zod.null()]),
-  "fee_rate": zod.union([zod.number(),zod.null()]),
-  "fee_amount": zod.union([zod.number(),zod.null()])
-}).describe('One security line of a registration fee table (Exhibit 107 EX-FILING FEES).');
-
-export type OfferingFeeSecurity = zod.input<typeof OfferingFeeSecurity>;
-export type OfferingFeeSecurityOutput = zod.output<typeof OfferingFeeSecurity>;
 
 export const OfferingFeeTable = zod.strictObject({
   "total_offering_amount": zod.union([zod.number(),zod.null()]),
@@ -328,12 +329,23 @@ export const RegistrationS1Data = zod.strictObject({
   "accession_number": zod.union([zod.string(),zod.null()]),
   "is_amendment": zod.boolean(),
   "offering_type": zod.enum(['ipo', 'spac', 'resale', 'debt', 'follow_on', 'unknown']),
+  "registration_number": zod.union([zod.string(),zod.null()]),
+  "ein": zod.union([zod.string(),zod.null()]),
+  "sic_code": zod.union([zod.string(),zod.null()]),
+  "state_of_incorporation": zod.union([zod.string(),zod.null()]),
+  "total_offering": zod.union([zod.number(),zod.null()]),
+  "net_fee": zod.union([zod.number(),zod.null()]),
+  "securities": zod.array(OfferingFeeSecurity),
   "cover_page": S1CoverPage,
   "fee_table": zod.union([OfferingFeeTable,zod.null()]),
   "selling_stockholders": zod.union([OfferingSellingStockholders,zod.null()]),
   "dilution": zod.union([OfferingDilution,zod.null()]),
   "capitalization": zod.union([OfferingCapitalization,zod.null()]),
-  "underwriting": zod.union([OfferingUnderwriting,zod.null()])
+  "underwriting": zod.union([OfferingUnderwriting,zod.null()]),
+  "is_effective": zod.union([zod.boolean(),zod.null()]).optional(),
+  "effective_date": zod.union([zod.string(),zod.null()]).optional(),
+  "related_filings": zod.null().optional(),
+  "takedowns": zod.null().optional()
 }).describe('filing.obj() for an S-1\/F-1 (and \/A) -- the edgar RegistrationS1 object, full fidelity.');
 
 export type RegistrationS1Data = zod.input<typeof RegistrationS1Data>;
@@ -369,8 +381,17 @@ export const RegistrationS3Data = zod.strictObject({
   "is_amendment": zod.boolean(),
   "is_auto_shelf": zod.boolean(),
   "offering_type": zod.enum(['universal_shelf', 'resale', 'debt', 'auto_shelf', 'unknown']),
+  "registration_number": zod.union([zod.string(),zod.null()]),
+  "ein": zod.union([zod.string(),zod.null()]),
+  "state_of_incorporation": zod.union([zod.string(),zod.null()]),
+  "total_offering": zod.union([zod.number(),zod.null()]),
+  "net_fee": zod.union([zod.number(),zod.null()]),
+  "fee_deferred": zod.boolean(),
+  "securities": zod.array(OfferingFeeSecurity),
   "cover_page": S3CoverPage,
-  "fee_table": zod.union([OfferingFeeTable,zod.null()])
+  "fee_table": zod.union([OfferingFeeTable,zod.null()]),
+  "related_filings": zod.null().optional(),
+  "takedowns": zod.null().optional()
 }).describe('filing.obj() for an S-3\/F-3 shelf registration (and \/A) -- the edgar RegistrationS3, full fidelity.');
 
 export type RegistrationS3Data = zod.input<typeof RegistrationS3Data>;
@@ -457,11 +478,18 @@ export const EightKData = zod.strictObject({
   "kind": zod.literal("form8k").default(eightKDataKindDefault),
   "form": zod.string(),
   "is_amendment": zod.boolean(),
+  "company": zod.union([zod.string(),zod.null()]),
+  "filing_date": zod.union([zod.string(),zod.null()]),
+  "period_of_report": zod.union([zod.string(),zod.null()]),
   "content_type": zod.string(),
   "date_of_report": zod.union([zod.string(),zod.null()]),
   "items": zod.array(EightKItem),
+  "auditor": zod.union([Auditor,zod.null()]),
   "has_press_release": zod.boolean(),
   "has_earnings": zod.boolean(),
+  "balance_sheet": zod.union([zod.string(),zod.null()]),
+  "income_statement": zod.union([zod.string(),zod.null()]),
+  "cash_flow_statement": zod.union([zod.string(),zod.null()]),
   "exhibits": zod.array(DocumentRef)
 }).describe('filing.obj() for an 8-K -- the edgar CurrentReport, full structural fidelity.');
 
@@ -600,7 +628,8 @@ export type HeaderReportingOwnerOutput = zod.output<typeof HeaderReportingOwner>
 export const HeaderIssuer = zod.strictObject({
   "company": zod.union([CompanyInfo,zod.null()]),
   "business_address": zod.union([Address,zod.null()]),
-  "mailing_address": zod.union([Address,zod.null()])
+  "mailing_address": zod.union([Address,zod.null()]),
+  "former_names": zod.array(FormerName)
 });
 
 export type HeaderIssuer = zod.input<typeof HeaderIssuer>;
@@ -711,7 +740,10 @@ export const OwnershipData = zod.strictObject({
   "reporting_period": zod.union([zod.string(),zod.null()]),
   "remarks": zod.union([zod.string(),zod.null()]),
   "no_securities": zod.boolean(),
-  "aff_10b5_one": zod.union([zod.boolean(),zod.null()])
+  "aff_10b5_one": zod.union([zod.boolean(),zod.null()]),
+  "insider_name": zod.union([zod.string(),zod.null()]),
+  "position": zod.union([zod.string(),zod.null()]),
+  "shares_traded": zod.union([zod.number(),zod.null()])
 }).describe('filing.obj() for Forms 3\/4\/5 - the edgar Ownership object, full fidelity.');
 
 export type OwnershipData = zod.input<typeof OwnershipData>;
@@ -722,6 +754,8 @@ export const sixKDataKindDefault = `form6k`;
 export const SixKData = zod.strictObject({
   "kind": zod.literal("form6k").default(sixKDataKindDefault),
   "form": zod.string(),
+  "company": zod.union([zod.string(),zod.null()]),
+  "filing_date": zod.union([zod.string(),zod.null()]),
   "date_of_report": zod.union([zod.string(),zod.null()]),
   "commission_file_number": zod.union([zod.string(),zod.null()]),
   "report_month": zod.union([zod.string(),zod.null()]),
@@ -796,6 +830,8 @@ export const Schedule13DData = zod.strictObject({
   "items": Schedule13DItems,
   "signatures": zod.array(Schedule13Signature),
   "event_date": zod.union([zod.string(),zod.null()]),
+  "date_of_event": zod.union([zod.string(),zod.null()]),
+  "filing_date": zod.union([zod.string(),zod.null()]),
   "previously_filed": zod.boolean(),
   "is_amendment": zod.boolean(),
   "amendment_number": zod.union([zod.number(),zod.null()]),
@@ -842,6 +878,8 @@ export const Schedule13GData = zod.strictObject({
   "items": Schedule13GItems,
   "signatures": zod.array(Schedule13Signature),
   "event_date": zod.union([zod.string(),zod.null()]),
+  "date_of_event": zod.union([zod.string(),zod.null()]),
+  "filing_date": zod.union([zod.string(),zod.null()]),
   "rule_designation": zod.union([zod.string(),zod.null()]),
   "is_passive_investor": zod.boolean(),
   "is_amendment": zod.boolean(),
@@ -932,11 +970,24 @@ export const Form13FData = zod.strictObject({
   "report_period": zod.union([zod.iso.date(),zod.null()]),
   "is_amendment": zod.boolean(),
   "has_holdings": zod.boolean(),
+  "accession_number": zod.union([zod.string(),zod.null()]),
+  "filing_date": zod.union([zod.string(),zod.null()]),
+  "total_holdings": zod.union([zod.number(),zod.null()]),
+  "total_value": zod.union([zod.number(),zod.null()]),
   "cover_page": zod.union([ThirteenFCoverPage,zod.null()]),
   "summary": zod.union([ThirteenFSummary,zod.null()]),
   "signature": zod.union([ThirteenFSignature,zod.null()]),
   "additional_information": zod.union([zod.string(),zod.null()]),
-  "holdings": zod.array(ThirteenFHolding)
+  "holdings": zod.array(ThirteenFHolding),
+  "filing_signer_name": zod.union([zod.string(),zod.null()]),
+  "filing_signer_title": zod.union([zod.string(),zod.null()]),
+  "signer": zod.union([zod.string(),zod.null()]),
+  "investment_manager": zod.union([zod.string(),zod.null()]),
+  "management_company_name": zod.union([zod.string(),zod.null()]),
+  "manager_name": zod.union([zod.string(),zod.null()]),
+  "other_managers": zod.array(ThirteenFOtherManager),
+  "infotable_txt": zod.union([zod.string(),zod.null()]),
+  "infotable_xml": zod.union([zod.string(),zod.null()])
 }).describe('filing.obj() for the 13F family - one institutional manager\'s quarterly holdings report.');
 
 export type Form13FData = zod.input<typeof Form13FData>;
@@ -955,7 +1006,7 @@ export const Subsidiary = zod.strictObject({
   "name": zod.string(),
   "jurisdiction": zod.string(),
   "ownership_pct": zod.union([zod.number(),zod.null()])
-}).describe('edgar `Subsidiary` -- one significant-subsidiary row parsed from the EX-21 exhibit.');
+});
 
 export type Subsidiary = zod.input<typeof Subsidiary>;
 export type SubsidiaryOutput = zod.output<typeof Subsidiary>;
@@ -967,12 +1018,19 @@ export const TenKData = zod.strictObject({
   "form": zod.string(),
   "is_amendment": zod.boolean(),
   "report_period": zod.union([zod.iso.date(),zod.null()]),
+  "company": zod.union([zod.string(),zod.null()]),
+  "filing_date": zod.union([zod.iso.date(),zod.null()]),
   "items": zod.array(ReportItem),
   "auditor": zod.union([Auditor,zod.null()]),
+  "auditors": zod.array(Auditor),
   "has_subsidiaries": zod.boolean(),
   "subsidiaries": zod.array(Subsidiary),
-  "has_financials": zod.boolean()
-}).describe('filing.obj() for a 10-K -- the edgar TenK, lean structural fidelity.');
+  "has_financials": zod.boolean(),
+  "business": zod.union([zod.string(),zod.null()]),
+  "risk_factors": zod.union([zod.string(),zod.null()]),
+  "management_discussion": zod.union([zod.string(),zod.null()]),
+  "directors_officers_and_governance": zod.union([zod.string(),zod.null()])
+});
 
 export type TenKData = zod.input<typeof TenKData>;
 export type TenKDataOutput = zod.output<typeof TenKData>;
@@ -984,8 +1042,11 @@ export const TenQData = zod.strictObject({
   "form": zod.string(),
   "is_amendment": zod.boolean(),
   "report_period": zod.union([zod.iso.date(),zod.null()]),
+  "company": zod.union([zod.string(),zod.null()]),
+  "filing_date": zod.union([zod.string(),zod.null()]),
   "items": zod.array(ReportItem),
   "auditor": zod.union([Auditor,zod.null()]),
+  "auditors": zod.array(Auditor),
   "has_financials": zod.boolean()
 }).describe('filing.obj() for a 10-Q -- the edgar TenQ, lean structural fidelity.');
 
@@ -999,9 +1060,22 @@ export const TwentyFData = zod.strictObject({
   "form": zod.string(),
   "is_amendment": zod.boolean(),
   "report_period": zod.union([zod.iso.date(),zod.null()]),
+  "company": zod.union([zod.string(),zod.null()]),
+  "filing_date": zod.union([zod.string(),zod.null()]),
   "items": zod.array(ReportItem),
   "auditor": zod.union([Auditor,zod.null()]),
-  "has_financials": zod.boolean()
+  "auditors": zod.array(Auditor),
+  "has_financials": zod.boolean(),
+  "business": zod.union([zod.string(),zod.null()]),
+  "risk_factors": zod.union([zod.string(),zod.null()]),
+  "management_discussion": zod.union([zod.string(),zod.null()]),
+  "operating_review": zod.union([zod.string(),zod.null()]),
+  "key_information": zod.union([zod.string(),zod.null()]),
+  "major_shareholders": zod.union([zod.string(),zod.null()]),
+  "directors_and_employees": zod.union([zod.string(),zod.null()]),
+  "company_information": zod.union([zod.string(),zod.null()]),
+  "controls_and_procedures": zod.union([zod.string(),zod.null()]),
+  "financial_information": zod.union([zod.string(),zod.null()])
 }).describe('filing.obj() for a 20-F -- the edgar TwentyF, lean structural fidelity.');
 
 export type TwentyFData = zod.input<typeof TwentyFData>;
@@ -1014,9 +1088,20 @@ export const FortyFData = zod.strictObject({
   "form": zod.string(),
   "is_amendment": zod.boolean(),
   "report_period": zod.union([zod.iso.date(),zod.null()]),
+  "company": zod.union([zod.string(),zod.null()]),
+  "filing_date": zod.union([zod.string(),zod.null()]),
+  "items": zod.array(zod.string()),
+  "business": zod.union([zod.string(),zod.null()]),
+  "risk_factors": zod.union([zod.string(),zod.null()]),
+  "corporate_structure": zod.union([zod.string(),zod.null()]),
+  "capital_structure": zod.union([zod.string(),zod.null()]),
+  "dividends": zod.union([zod.string(),zod.null()]),
+  "directors_and_officers": zod.union([zod.string(),zod.null()]),
+  "legal_proceedings": zod.union([zod.string(),zod.null()]),
   "auditor": zod.union([Auditor,zod.null()]),
+  "auditors": zod.array(Auditor),
   "has_financials": zod.boolean()
-}).describe('filing.obj() for a 40-F -- the edgar FortyF, lean structural fidelity (no item index).');
+}).describe('filing.obj() for a 40-F -- the edgar FortyF.');
 
 export type FortyFData = zod.input<typeof FortyFData>;
 export type FortyFDataOutput = zod.output<typeof FortyFData>;
@@ -1100,6 +1185,7 @@ export const Form144Data = zod.strictObject({
   "kind": zod.literal("form144").default(form144DataKindDefault),
   "form": zod.string(),
   "is_amendment": zod.boolean(),
+  "filing_date": zod.union([zod.string(),zod.null()]),
   "issuer_cik": zod.union([zod.string().regex(form144DataIssuerCikOneRegExp),zod.null()]),
   "issuer_name": zod.union([zod.string(),zod.null()]),
   "sec_file_number": zod.union([zod.string(),zod.null()]),
@@ -1114,7 +1200,31 @@ export const Form144Data = zod.strictObject({
   "securities_sold_past_3_months": zod.array(Form144PriorSale),
   "nothing_to_report": zod.boolean(),
   "remarks": zod.union([zod.string(),zod.null()]),
-  "notice_signature": zod.union([Form144Signature,zod.null()])
+  "notice_signature": zod.union([Form144Signature,zod.null()]),
+  "num_securities": zod.union([zod.number(),zod.null()]),
+  "is_multi_security": zod.union([zod.boolean(),zod.null()]),
+  "total_units_to_be_sold": zod.union([zod.number(),zod.null()]),
+  "total_market_value": zod.union([zod.number(),zod.null()]),
+  "total_amount_acquired": zod.union([zod.number(),zod.null()]),
+  "total_amount_sold_past_3_months": zod.union([zod.number(),zod.null()]),
+  "total_gross_proceeds_past_3_months": zod.union([zod.number(),zod.null()]),
+  "avg_price_per_unit": zod.union([zod.number(),zod.null()]),
+  "percent_of_holdings": zod.union([zod.number(),zod.null()]),
+  "units_to_be_sold": zod.union([zod.number(),zod.null()]),
+  "market_value": zod.union([zod.number(),zod.null()]),
+  "approx_sale_date": zod.union([zod.string(),zod.null()]),
+  "security_class": zod.union([zod.string(),zod.null()]),
+  "broker_name": zod.union([zod.string(),zod.null()]),
+  "exchange_name": zod.union([zod.string(),zod.null()]),
+  "holding_period_days": zod.union([zod.number(),zod.null()]),
+  "holding_period_years": zod.union([zod.number(),zod.null()]),
+  "is_10b5_1_plan": zod.union([zod.boolean(),zod.null()]),
+  "has_multiple_plans": zod.union([zod.boolean(),zod.null()]),
+  "days_since_plan_adoption": zod.union([zod.number(),zod.null()]),
+  "cooling_off_compliant": zod.union([zod.boolean(),zod.null()]),
+  "is_short_hold": zod.union([zod.boolean(),zod.null()]),
+  "is_large_liquidation": zod.union([zod.boolean(),zod.null()]),
+  "anomaly_flags": zod.array(zod.string())
 });
 
 export type Form144Data = zod.input<typeof Form144Data>;
@@ -1141,8 +1251,11 @@ export type FormDIssuerOutput = zod.output<typeof FormDIssuer>;
 
 export const FormDPerson = zod.strictObject({
   "first_name": zod.union([zod.string(),zod.null()]),
+  "middle_name": zod.union([zod.string(),zod.null()]),
   "last_name": zod.union([zod.string(),zod.null()]),
-  "address": zod.union([Address,zod.null()])
+  "address": zod.union([Address,zod.null()]),
+  "relationships": zod.array(zod.string()),
+  "relationship_clarification": zod.union([zod.string(),zod.null()])
 }).describe('One relatedPersonInfo: an executive officer, director, or promoter of the issuer.');
 
 export type FormDPerson = zod.input<typeof FormDPerson>;
@@ -1267,9 +1380,11 @@ export const FormDData = zod.strictObject({
   "submission_type": zod.string(),
   "is_live": zod.boolean(),
   "primary_issuer": zod.union([FormDIssuer,zod.null()]),
+  "additional_issuers": zod.array(FormDIssuer),
   "related_persons": zod.array(FormDPerson),
   "offering": FormDOffering,
-  "signatures": zod.union([FormDSignatureBlock,zod.null()])
+  "signatures": zod.union([FormDSignatureBlock,zod.null()]),
+  "is_new": zod.boolean()
 });
 
 export type FormDData = zod.input<typeof FormDData>;
@@ -1390,6 +1505,9 @@ export type FormCSignatureInfo = zod.input<typeof FormCSignatureInfo>;
 export type FormCSignatureInfoOutput = zod.output<typeof FormCSignatureInfo>;
 
 export const formCDataKindDefault = `formc`;
+export const formCDataIssuerCikOneRegExp = new RegExp('^\\d{10}$');
+export const formCDataPortalCikOneRegExp = new RegExp('^\\d{10}$');
+
 
 export const FormCData = zod.strictObject({
   "kind": zod.literal("formc").default(formCDataKindDefault),
@@ -1398,7 +1516,16 @@ export const FormCData = zod.strictObject({
   "issuer": FormCIssuer,
   "offering": zod.union([FormCOffering,zod.null()]),
   "annual_report": zod.union([FormCAnnualReport,zod.null()]),
-  "signatures": FormCSignatureInfo
+  "signatures": FormCSignatureInfo,
+  "issuer_cik": zod.union([zod.string().regex(formCDataIssuerCikOneRegExp),zod.null()]).optional(),
+  "issuer_name": zod.union([zod.string(),zod.null()]).optional(),
+  "portal_cik": zod.union([zod.string().regex(formCDataPortalCikOneRegExp),zod.null()]).optional(),
+  "portal_name": zod.union([zod.string(),zod.null()]).optional(),
+  "portal_file_number": zod.union([zod.string(),zod.null()]).optional(),
+  "description": zod.union([zod.string(),zod.null()]).optional(),
+  "campaign_status": zod.union([zod.string(),zod.null()]).optional(),
+  "days_to_deadline": zod.union([zod.number(),zod.null()]).optional(),
+  "is_expired": zod.union([zod.boolean(),zod.null()]).optional()
 });
 
 export type FormCData = zod.input<typeof FormCData>;
@@ -1568,7 +1695,8 @@ export const ProxyData = zod.strictObject({
   "beneficial_ownership": zod.array(ProxyBeneficialOwner),
   "voting_proposals": zod.array(ProxyVotingProposal),
   "ceo_pay_ratio": zod.union([ProxyCeoPayRatio,zod.null()]),
-  "audit_fees": zod.union([ProxyAuditFees,zod.null()])
+  "audit_fees": zod.union([ProxyAuditFees,zod.null()]),
+  "season": zod.null().optional()
 }).describe('filing.obj() for the DEF 14A \/ 14A family - the edgar ProxyStatement object, full fidelity.');
 
 export type ProxyData = zod.input<typeof ProxyData>;
@@ -1684,6 +1812,14 @@ export const Prospectus424BData = zod.strictObject({
   "is_amendment": zod.boolean(),
   "amendment_number": zod.union([zod.number(),zod.null()]),
   "offering_type": zod.enum(['firm_commitment', 'atm', 'best_efforts', 'pipe_resale', 'rights_offering', 'exchange_offer', 'structured_note', 'debt_offering', 'base_prospectus_update', 'unknown']),
+  "registration_number": zod.union([zod.string(),zod.null()]),
+  "ticker": zod.union([zod.string(),zod.null()]),
+  "variant": zod.union([zod.string(),zod.null()]),
+  "offering_amount": zod.union([zod.string(),zod.null()]),
+  "offering_price": zod.union([zod.string(),zod.null()]),
+  "is_atm": zod.boolean(),
+  "is_preliminary": zod.boolean(),
+  "is_supplement": zod.boolean(),
   "cover_page": Prospectus424BCoverPage,
   "pricing": zod.union([Prospectus424BPricing,zod.null()]),
   "offering_terms": zod.union([Prospectus424BOfferingTerms,zod.null()]),
@@ -1692,7 +1828,11 @@ export const Prospectus424BData = zod.strictObject({
   "dilution": zod.union([OfferingDilution,zod.null()]),
   "capitalization": zod.union([OfferingCapitalization,zod.null()]),
   "underwriting": zod.union([OfferingUnderwriting,zod.null()]),
-  "filing_fees": Prospectus424BFilingFees
+  "filing_fees": Prospectus424BFilingFees,
+  "related_filings": zod.null().optional(),
+  "related_8k": zod.null().optional(),
+  "shelf_registration": zod.null().optional(),
+  "lifecycle": zod.null().optional()
 }).describe('filing.obj() for a 424B prospectus (any variant, and \/A) -- the edgar Prospectus424B.');
 
 export type Prospectus424BData = zod.input<typeof Prospectus424BData>;
@@ -1747,6 +1887,10 @@ export const prospectus497KDataKindDefault = `prospectus_497k`;
 export const Prospectus497KData = zod.strictObject({
   "kind": zod.literal("prospectus_497k").default(prospectus497KDataKindDefault),
   "form": zod.union([zod.string(),zod.null()]),
+  "cik": zod.union([zod.string(),zod.null()]),
+  "num_share_classes": zod.union([zod.number(),zod.null()]),
+  "tickers": zod.array(zod.string()),
+  "class_ids": zod.array(zod.string()),
   "fund_name": zod.union([zod.string(),zod.null()]),
   "prospectus_date": zod.union([zod.string(),zod.null()]),
   "investment_objective": zod.union([zod.string(),zod.null()]),
@@ -2139,10 +2283,17 @@ export const nPortDataKindDefault = `nport`;
 export const NPortData = zod.strictObject({
   "kind": zod.literal("nport").default(nPortDataKindDefault),
   "form": zod.union([zod.string(),zod.null()]),
+  "cik": zod.union([zod.string(),zod.null()]),
+  "name": zod.union([zod.string(),zod.null()]),
+  "series_id": zod.union([zod.string(),zod.null()]),
+  "reporting_period": zod.union([zod.string(),zod.null()]),
+  "has_investments": zod.union([zod.boolean(),zod.null()]),
   "header": zod.union([NPortHeader,zod.null()]),
   "general_info": zod.union([NPortGeneralInfo,zod.null()]),
   "fund_info": zod.union([NPortFundInfo,zod.null()]),
-  "investments": zod.array(NPortInvestment)
+  "investments": zod.array(NPortInvestment),
+  "derivatives": zod.array(NPortInvestment),
+  "non_derivatives": zod.array(NPortInvestment)
 });
 
 export type NPortData = zod.input<typeof NPortData>;
@@ -2307,6 +2458,16 @@ export const nmfpDataKindDefault = `nmfp`;
 export const NmfpData = zod.strictObject({
   "kind": zod.literal("nmfp").default(nmfpDataKindDefault),
   "form": zod.union([zod.string(),zod.null()]),
+  "cik": zod.union([zod.string(),zod.null()]),
+  "name": zod.union([zod.string(),zod.null()]),
+  "series_id": zod.union([zod.string(),zod.null()]),
+  "report_date": zod.union([zod.string(),zod.null()]),
+  "net_assets": zod.union([zod.number(),zod.null()]),
+  "fund_category": zod.union([zod.string(),zod.null()]),
+  "num_securities": zod.union([zod.number(),zod.null()]),
+  "num_share_classes": zod.union([zod.number(),zod.null()]),
+  "average_maturity_wam": zod.union([zod.number(),zod.null()]),
+  "average_maturity_wal": zod.union([zod.number(),zod.null()]),
   "general_info": zod.union([NmfpGeneralInfo,zod.null()]),
   "series_info": zod.union([NmfpSeriesLevelInfo,zod.null()]),
   "share_classes": zod.array(NmfpShareClassInfo),
@@ -2401,11 +2562,18 @@ export const NcenSecuritiesLending = zod.strictObject({
 export type NcenSecuritiesLending = zod.input<typeof NcenSecuritiesLending>;
 export type NcenSecuritiesLendingOutput = zod.output<typeof NcenSecuritiesLending>;
 
-export const NcenLineOfCredit = zod.strictObject({
-  "has_line_of_credit": zod.boolean(),
+export const NcenLineOfCreditFacility = zod.strictObject({
   "is_committed": zod.union([zod.string(),zod.null()]),
   "size": zod.union([zod.number(),zod.null()]),
   "institution_names": zod.array(zod.string())
+});
+
+export type NcenLineOfCreditFacility = zod.input<typeof NcenLineOfCreditFacility>;
+export type NcenLineOfCreditFacilityOutput = zod.output<typeof NcenLineOfCreditFacility>;
+
+export const NcenLineOfCredit = zod.strictObject({
+  "has_line_of_credit": zod.boolean(),
+  "facilities": zod.array(NcenLineOfCreditFacility)
 });
 
 export type NcenLineOfCredit = zod.input<typeof NcenLineOfCredit>;
@@ -2450,6 +2618,15 @@ export const NcenETFInfo = zod.strictObject({
 export type NcenETFInfo = zod.input<typeof NcenETFInfo>;
 export type NcenETFInfoOutput = zod.output<typeof NcenETFInfo>;
 
+export const NcenShareClass = zod.strictObject({
+  "class_id": zod.union([zod.string(),zod.null()]),
+  "class_name": zod.union([zod.string(),zod.null()]),
+  "class_ticker": zod.union([zod.string(),zod.null()])
+}).describe('Identity of one share class (from the SGML header\'s class-contract block).');
+
+export type NcenShareClass = zod.input<typeof NcenShareClass>;
+export type NcenShareClassOutput = zod.output<typeof NcenShareClass>;
+
 export const NcenFundSeriesInfo = zod.strictObject({
   "name": zod.union([zod.string(),zod.null()]),
   "series_id": zod.union([zod.string(),zod.null()]),
@@ -2471,7 +2648,8 @@ export const NcenFundSeriesInfo = zod.strictObject({
   "securities_lending": zod.array(NcenSecuritiesLending),
   "line_of_credit": zod.union([NcenLineOfCredit,zod.null()]),
   "liquidity_providers": zod.array(NcenLiquidityProvider),
-  "etf_info": zod.union([NcenETFInfo,zod.null()])
+  "etf_info": zod.union([NcenETFInfo,zod.null()]),
+  "share_classes": zod.array(NcenShareClass)
 });
 
 export type NcenFundSeriesInfo = zod.input<typeof NcenFundSeriesInfo>;
@@ -2492,6 +2670,15 @@ export const ncenDataKindDefault = `ncen`;
 export const NcenData = zod.strictObject({
   "kind": zod.literal("ncen").default(ncenDataKindDefault),
   "form": zod.union([zod.string(),zod.null()]),
+  "cik": zod.union([zod.string(),zod.null()]),
+  "name": zod.union([zod.string(),zod.null()]),
+  "series_id": zod.union([zod.string(),zod.null()]),
+  "lei": zod.union([zod.string(),zod.null()]),
+  "classification_type": zod.union([zod.string(),zod.null()]),
+  "is_etf_company": zod.union([zod.boolean(),zod.null()]),
+  "num_series": zod.union([zod.number(),zod.null()]),
+  "series_ids": zod.array(zod.string()),
+  "total_series": zod.union([zod.number(),zod.null()]),
   "report_date": zod.union([zod.string(),zod.null()]),
   "is_period_lt_12_months": zod.boolean(),
   "registrant": zod.union([NcenRegistrantInfo,zod.null()]),
@@ -2552,8 +2739,16 @@ export const ncsrDataKindDefault = `ncsr`;
 export const NcsrData = zod.strictObject({
   "kind": zod.literal("ncsr").default(ncsrDataKindDefault),
   "form": zod.union([zod.string(),zod.null()]),
+  "cik": zod.union([zod.string(),zod.null()]),
+  "fund_name": zod.union([zod.string(),zod.null()]),
+  "series_id": zod.union([zod.string(),zod.null()]),
+  "net_assets": zod.union([zod.number(),zod.null()]),
+  "portfolio_turnover": zod.union([zod.number(),zod.null()]),
   "report_type": zod.union([zod.string(),zod.null()]),
-  "funds": zod.array(NcsrFund)
+  "is_annual": zod.boolean(),
+  "num_share_classes": zod.number(),
+  "funds": zod.array(NcsrFund),
+  "share_classes": zod.array(NcsrShareClass)
 });
 
 export type NcsrData = zod.input<typeof NcsrData>;
@@ -2774,6 +2969,8 @@ export const Health = zod.strictObject({
 export type Health = zod.input<typeof Health>;
 export type HealthOutput = zod.output<typeof Health>;
 
+export const stitchedStatementRecordSignAmbiguousDefault = false;
+
 export const StitchedStatementRecord = zod.strictObject({
   "concept": zod.string(),
   "label": zod.string(),
@@ -2783,7 +2980,8 @@ export const StitchedStatementRecord = zod.strictObject({
   "is_total": zod.boolean(),
   "balance": zod.union([zod.enum(['debit', 'credit']),zod.null()]).describe('XBRL balance attribute of the concept; with weight, determines how the value aggregates.'),
   "weight": zod.union([zod.number(),zod.null()]).describe('Calculation-arc weight toward the parent total (e.g. -1.0 subtracts); null when the concept is not in a calculation tree.'),
-  "preferred_sign": zod.union([zod.number(),zod.null()]).describe('Display sign multiplier from the presentation linkbase: apply to values to reproduce SEC HTML display. Values ship raw.'),
+  "preferred_sign": zod.union([zod.number(),zod.null()]).describe('Display sign multiplier from the presentation linkbase: apply to values to reproduce SEC HTML display. Values ship raw. Null when sign_ambiguous.'),
+  "sign_ambiguous": zod.boolean().default(stitchedStatementRecordSignAmbiguousDefault).describe('True when periods\/filings disagree on this concept\'s preferred_sign; preferred_sign is then null instead of an arbitrary first-seen pick.'),
   "unit": zod.union([zod.string(),zod.null()]).describe('Normalized unit: usd, shares, usdPerShare, number, ...'),
   "currency": zod.union([zod.string(),zod.null()]).describe('ISO 4217 code when the unit is monetary (incl. per-share); null for shares\/pure numbers.'),
   "values": zod.array(StatementValue)
@@ -3173,7 +3371,7 @@ export const GetAttachmentContentFilingAccessionAttachmentsSequenceGetParams = z
 export const getAttachmentContentFilingAccessionAttachmentsSequenceGetQueryFmtDefault = `text`;
 
 export const GetAttachmentContentFilingAccessionAttachmentsSequenceGetQueryParams = zod.strictObject({
-  "fmt": zod.enum(['raw', 'text', 'markdown']).default(getAttachmentContentFilingAccessionAttachmentsSequenceGetQueryFmtDefault)
+  "fmt": zod.enum(['text', 'markdown', 'raw']).default(getAttachmentContentFilingAccessionAttachmentsSequenceGetQueryFmtDefault)
 })
 
 export const GetAttachmentContentFilingAccessionAttachmentsSequenceGetResponse = AttachmentContentResponse
@@ -3273,7 +3471,7 @@ export const GetCompanyFinancialsMultiCompanyIdFinancialsMultiGetQueryParams = z
   "period": zod.enum(['annual', 'quarterly']).default(getCompanyFinancialsMultiCompanyIdFinancialsMultiGetQueryPeriodDefault),
   "n": zod.number().min(getCompanyFinancialsMultiCompanyIdFinancialsMultiGetQueryNMin).max(getCompanyFinancialsMultiCompanyIdFinancialsMultiGetQueryNMax).default(getCompanyFinancialsMultiCompanyIdFinancialsMultiGetQueryNDefault),
   "view": zod.enum(['raw', 'standardized']).default(getCompanyFinancialsMultiCompanyIdFinancialsMultiGetQueryViewDefault),
-  "dimensions": zod.boolean().default(getCompanyFinancialsMultiCompanyIdFinancialsMultiGetQueryDimensionsDefault),
+  "dimensions": zod.boolean().default(getCompanyFinancialsMultiCompanyIdFinancialsMultiGetQueryDimensionsDefault).describe('Controls input view for stitching. The stitcher currently resolves total-level rows only; dimensional segments are excluded from stitched output regardless of this flag. Use per-filing \/financials for full dimensional data.'),
   "amendments": zod.boolean().default(getCompanyFinancialsMultiCompanyIdFinancialsMultiGetQueryAmendmentsDefault)
 })
 
@@ -3351,6 +3549,8 @@ export const SearchCompanyFactsCompanyIdFactsSearchGetParams = zod.strictObject(
   "id": zod.string()
 })
 
+export const searchCompanyFactsCompanyIdFactsSearchGetQueryQMax = 200;
+
 export const searchCompanyFactsCompanyIdFactsSearchGetQueryStartDefault = 0;
 export const searchCompanyFactsCompanyIdFactsSearchGetQueryStartMin = 0;
 
@@ -3360,7 +3560,7 @@ export const searchCompanyFactsCompanyIdFactsSearchGetQueryPageSizeMax = 1000;
 
 
 export const SearchCompanyFactsCompanyIdFactsSearchGetQueryParams = zod.strictObject({
-  "q": zod.string(),
+  "q": zod.string().min(1).max(searchCompanyFactsCompanyIdFactsSearchGetQueryQMax),
   "start": zod.number().min(searchCompanyFactsCompanyIdFactsSearchGetQueryStartMin).default(searchCompanyFactsCompanyIdFactsSearchGetQueryStartDefault),
   "page_size": zod.number().min(1).max(searchCompanyFactsCompanyIdFactsSearchGetQueryPageSizeMax).default(searchCompanyFactsCompanyIdFactsSearchGetQueryPageSizeDefault)
 })

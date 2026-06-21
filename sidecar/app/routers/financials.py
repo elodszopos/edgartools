@@ -58,16 +58,20 @@ _FORM_CHAIN: dict[str, tuple[str, ...]] = {
 
 def _latest_financials(company: Company, period: FinancialsPeriod, *, amendments: bool) -> tuple[Filing, Financials]:
     forms = _FORM_CHAIN[period]
+    no_xbrl_filing: Filing | None = None
     for form in forms:
         filing = company.get_filings(form=form, amendments=amendments, trigger_full_load=False).latest()
         if isinstance(filing, Filing):  # latest() with default n=1 yields one filing or None
             financials = Financials.extract(filing)
-            if financials is None:  # filing exists but carries no XBRL data
-                raise HTTPException(
-                    status_code=404,
-                    detail=f"latest {form} {filing.accession_no} has no XBRL financial data",
-                )
+            if financials is None:  # filing exists but carries no XBRL data -- try next form
+                no_xbrl_filing = filing
+                continue
             return filing, financials
+    if no_xbrl_filing is not None:
+        raise HTTPException(
+            status_code=404,
+            detail=f"latest {no_xbrl_filing.form} {no_xbrl_filing.accession_no} has no XBRL financial data",
+        )
     raise HTTPException(
         status_code=404,
         detail=f"no {period} filing ({'/'.join(forms)}) at SEC for CIK {pad_cik(company.cik)}",
@@ -158,7 +162,7 @@ def get_company_financials_multi(
     period: FinancialsPeriod = "annual",
     n: Annotated[int, Query(ge=2, le=8)] = 4,  # filings stitched; each costs one SGML fetch
     view: FinancialsView = "standardized",
-    dimensions: bool = False,
+    dimensions: Annotated[bool, Query(description="Controls input view for stitching. The stitcher currently resolves total-level rows only; dimensional segments are excluded from stitched output regardless of this flag. Use per-filing /financials for full dimensional data.")] = False,
     amendments: bool = False,  # filing-selection policy: as-filed (false) vs restated (true)
 ) -> MultiFinancialsResponse:
     company = lookup_company(id)
@@ -202,6 +206,7 @@ def get_company_financials_ttm(
     company = lookup_company(id)
     if as_of is not None:
         if _TTM_QUARTER_KEY.match(as_of) is not None:
+            as_of = as_of.upper()
             year = int(as_of[:4])
         else:
             try:  # the library accepts ISO dates or YYYY-QN quarter keys

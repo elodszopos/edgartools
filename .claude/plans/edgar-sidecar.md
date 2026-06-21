@@ -263,21 +263,21 @@ Commit per unit on green: `git add <unit files> && git commit -m "sidecar: U## <
 
 | ID | Phase | Scope | State |
 |---|---|---|---|
-| U00 | P0 | Scaffold: `sidecar/` pyproject (local `edgar` path dep), app skeleton, settings, identity boot, `/health`, Dockerfile, compose.yaml, ruff/pyright config | done |
-| U01 | P0 | `serialize.py` policy + common models (FilingRef/FilingsPage/EntityRef/FilingEnvelope sans union) + exception->status mapping + CIK helpers (unit-tested) | done |
-| U02 | P0 | Test harness: pytest + URL-keyed fixture-store wiring, golden-dump helper, live marker, budget guard; first fixture+test (`/health`, `/tickers`) | done |
-| U03 | P0 | Codegen: evaluate+pick tool (comet_ask), export_openapi.py, generate_zod.sh, check_drift.sh, ts/ scaffold (bun, eslint, zod), first golden->Zod test green | done |
-| U10 | P1 | `/filings` + `/filings/current` (paging, owner filter) | done |
-| U11 | P1 | `/search` EFTS full-text (verify pagination depth past 100/page) | done |
-| U12 | P1 | `/tickers` full map (exchange field) | done |
-| U20 | P2 | `/filing/{accession}` envelope: multi-entity, related docs, `data=null` | done |
-| U21 | P2 | `/content` (markdown/text/html) + `/sections` | done |
-| U22 | P2 | `/attachments` list + `/attachments/{seq}` content | done |
-| U30 | P3 | `/company/{id}` full-fidelity profile + `/submissions` | done |
-| U31 | P3 | `/financials` annual+quarterly: IS/BS/CF/equity/comprehensive + cover, raw+standardized views, dimensions flag, `/metrics` scalars | done |
-| U32 | P3 | `/financials/multi` (XBRLS) + `/financials/ttm` | done |
-| U33 | P3 | `/facts` + `/facts/concept/{c}` + `/facts/search` (preserve form/filed/accn) | done |
-| U34 | P3 | `/filing/{accession}/xbrl` per-filing statements | done |
+| U00 | P0 | Scaffold: `sidecar/` pyproject (local `edgar` path dep), app skeleton, settings, identity boot, `/health`, Dockerfile, compose.yaml, ruff/pyright config | confirmed |
+| U01 | P0 | `serialize.py` policy + common models (FilingRef/FilingsPage/EntityRef/FilingEnvelope sans union) + exception->status mapping + CIK helpers (unit-tested) | confirmed |
+| U02 | P0 | Test harness: pytest + URL-keyed fixture-store wiring, golden-dump helper, live marker, budget guard; first fixture+test (`/health`, `/tickers`) | confirmed |
+| U03 | P0 | Codegen: evaluate+pick tool (comet_ask), export_openapi.py, generate_zod.sh, check_drift.sh, ts/ scaffold (bun, eslint, zod), first golden->Zod test green | confirmed |
+| U10 | P1 | `/filings` + `/filings/current` (paging, owner filter) | confirmed |
+| U11 | P1 | `/search` EFTS full-text (verify pagination depth past 100/page) | confirmed |
+| U12 | P1 | `/tickers` full map (exchange field) | confirmed |
+| U20 | P2 | `/filing/{accession}` envelope: multi-entity, related docs, `data=null` | confirmed |
+| U21 | P2 | `/content` (markdown/text/html) + `/sections` | confirmed |
+| U22 | P2 | `/attachments` list + `/attachments/{seq}` content | confirmed |
+| U30 | P3 | `/company/{id}` full-fidelity profile + `/submissions` | confirmed |
+| U31 | P3 | `/financials` annual+quarterly: IS/BS/CF/equity/comprehensive + cover, raw+standardized views, dimensions flag, `/metrics` scalars | confirmed |
+| U32 | P3 | `/financials/multi` (XBRLS) + `/financials/ttm` | confirmed |
+| U33 | P3 | `/facts` + `/facts/concept/{c}` + `/facts/search` (preserve form/filed/accn) | confirmed |
+| U34 | P3 | `/filing/{accession}/xbrl` per-filing statements | confirmed |
 | U40 | P4 | Form 4 typed data (ownership base machinery shared with 3/5) | done |
 | U41 | P4 | Form 3 | done |
 | U42 | P4 | Form 5 | done |

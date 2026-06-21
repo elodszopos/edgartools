@@ -82,6 +82,9 @@ def test_attachments_listing(client: TestClient, golden) -> None:
     groups = [row["group"] for row in anixa["attachments"]]
     assert groups.count("document") == 7
     assert groups.count("data_file") == 56
+    # documents-then-data_files ordering invariant
+    first_data = groups.index("data_file")
+    assert all(g == "document" for g in groups[:first_data])
     # filer supplied no descriptions; exhibits fall back to standard exhibit text
     tenk = anixa["attachments"][0]
     assert tenk["description"] is None

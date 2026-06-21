@@ -79,6 +79,7 @@ class HeaderIssuer(WireModel):
     company: CompanyInfo | None
     business_address: Address | None
     mailing_address: Address | None
+    former_names: list[FormerName]
 
 
 class HeaderSubjectCompany(WireModel):

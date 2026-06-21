@@ -2,9 +2,10 @@
 
 Statements come from Statement.to_dataframe(presentation=False) - raw instance values,
 standardized labels per the view param. Period columns are unpivoted into typed
-values[] records keyed by XBRL period key via df.attrs["period_columns"], the
-column -> (period_key, period_label) mapping the library stamps at DataFrame build -
-no column-name parsing here; a missing stamp raises KeyError loudly.
+values[] records keyed by XBRL period key. The column->(period_key, period_label)
+mapping is reconstructed by calling determine_periods_to_display with the same
+arguments the library uses internally, then zipping with the DataFrame's non-metadata
+columns (which appear in the same order). A length mismatch raises loudly.
 """
 
 from __future__ import annotations
@@ -156,11 +157,20 @@ def _build_period_columns(
     """Reconstruct the column -> (period_key, period_label) map.
 
     The DataFrame's non-metadata columns are the period columns, in the same order
-    as determine_periods_to_display. Zip them to get the mapping.
+    as determine_periods_to_display. Zip them to get the mapping. More data columns
+    than periods = genuine library drift (raises). Fewer data columns = transition-
+    period column-name collision (safe: zip truncates at the shorter iterable, the
+    setdefault keep-first handles the duplicate column name correctly).
     """
     statement_type = stmt.canonical_type if stmt.canonical_type else stmt.role_or_type
     periods_to_display = determine_periods_to_display(stmt.xbrl, statement_type)
     data_columns = [c for c in df.columns if c not in _METADATA_COLUMNS]
+    if len(data_columns) > len(periods_to_display):
+        raise ValueError(
+            f"period-column drift: DataFrame has {len(data_columns)} data columns "
+            f"but determine_periods_to_display returned {len(periods_to_display)} periods "
+            f"for {statement_type!r}. New metadata column? Columns: {data_columns}"
+        )
     mapping: dict[str, tuple[str, str]] = {}
     for col, (period_key, period_label) in zip(data_columns, periods_to_display):
         mapping.setdefault(col, (period_key, period_label))

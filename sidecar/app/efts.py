@@ -4,6 +4,9 @@ edgar.search.efts exposes only the single-shot search_filings() wrapper; its
 param-building and hit/aggregation parsing are private. /search drives its own
 paginated fetch against EFTS_BASE_URL, so the encode/decode is here, reusing
 edgar's public EFTSResult / EFTSAggregations / Aggregation dataclasses.
+
+NOTE: parse_hit/parse_aggregations mirror edgar.search.efts._parse_hit/_parse_aggregations
+(private). If edgar changes its EFTS response parsing, these must be updated in lockstep.
 """
 
 from __future__ import annotations

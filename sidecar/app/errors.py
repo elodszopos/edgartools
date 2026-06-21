@@ -16,6 +16,7 @@ import httpx
 from edgar import DataObjectException
 from edgar.core import TooManyRequestsException
 from edgar.dates import InvalidDateException
+from edgar.documents.exceptions import ParsingError
 from edgar.entity.core import CompanyNotFoundError
 from edgar.enums import ValidationError as EdgarValidationError
 from edgar.httprequests import IdentityNotSetException, TooManyRequestsError
@@ -34,6 +35,7 @@ _HANDLED_TYPES: tuple[type[Exception], ...] = (
     EdgarValidationError,
     DataObjectException,
     CompanyNotFoundError,
+    ParsingError,
     httpx.HTTPError,
 )
 
@@ -52,6 +54,8 @@ def status_for_exception(exc: Exception) -> tuple[int, str] | None:
         return 422, str(exc)
     if isinstance(exc, DataObjectException):
         return 502, str(exc)
+    if isinstance(exc, ParsingError):
+        return 502, f"document parsing failed: {exc}"
     if isinstance(exc, httpx.HTTPStatusError):
         status = exc.response.status_code
         if status == 404:

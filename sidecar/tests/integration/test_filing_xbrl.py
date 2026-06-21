@@ -78,5 +78,20 @@ def test_filing_xbrl_nonexistent_is_404(client: TestClient) -> None:
     assert "0000000000-95-654321" in response.json()["detail"]
 
 
+def test_filing_xbrl_raw_view_and_dimensions(client: TestClient) -> None:
+    response = client.get(f"/filing/{_NVDA_10K}/xbrl", params={"view": "raw", "dimensions": "true"})
+    assert response.status_code == 200
+    body = response.json()
+    assert body["view"] == "raw"
+    assert body["dimensions"] is True
+    income = body["income_statement"]
+    assert income is not None
+    assert len(income["records"]) > 0
+    # with dimensions=True, we get more records than SUMMARY mode (dimensional breakdowns)
+    default_resp = client.get(f"/filing/{_NVDA_10K}/xbrl")
+    default_income = default_resp.json()["income_statement"]
+    assert len(income["records"]) >= len(default_income["records"])
+
+
 def test_filing_xbrl_bad_accession_is_422(client: TestClient) -> None:
     assert client.get("/filing/not-an-accession/xbrl").status_code == 422

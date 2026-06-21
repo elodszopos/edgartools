@@ -8,8 +8,9 @@ query().by_concept (fuzzy on concept OR label, exact=true for an indexed exact m
 from __future__ import annotations
 
 import re
+from typing import Annotated
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Query
 
 from app.cik import pad_cik
 from app.converters.facts import facts_page
@@ -55,7 +56,7 @@ def get_company_facts_concept(
 @router.get("/company/{id}/facts/search")
 def search_company_facts(
     id: str,
-    q: str,
+    q: Annotated[str, Query(min_length=1, max_length=200)],
     start: StartParam = 0,
     page_size: PageSizeParam = 100,
 ) -> FactsResponse:

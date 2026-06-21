@@ -86,6 +86,18 @@ def test_search_paging_filters_and_facets(client: TestClient, golden) -> None:
     golden("search", "cybersecurity_8k_page", page1)
 
 
+def test_search_efts_error_bodies(client: TestClient) -> None:
+    # EFTS returns HTTP 200 + error JSON body for window violations
+    response = client.get("/search", params={"q": "__efts_window_error_test__"})
+    assert response.status_code == 422
+    assert "Result window" in response.json()["detail"]
+
+    # generic EFTS errors map to 502
+    response = client.get("/search", params={"q": "__efts_generic_error_test__"})
+    assert response.status_code == 502
+    assert "all shards failed" in response.json()["detail"]
+
+
 def test_search_param_validation(client: TestClient) -> None:
     # neither q nor items
     response = client.get("/search")

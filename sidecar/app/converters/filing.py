@@ -155,10 +155,10 @@ def _issuer(issuer: Issuer | None) -> HeaderIssuer | None:
     if issuer is None:
         return None
     return HeaderIssuer(
-        # Issuer.former_company_names exists on the dataclass but the header parse never fills it
         company=_company_info(issuer.company_information),
         business_address=_address(issuer.business_address),
         mailing_address=_address(issuer.mailing_address),
+        former_names=_former_names(issuer.former_company_names),
     )
 
 

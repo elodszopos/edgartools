@@ -217,6 +217,14 @@ def test_filing_content_formats(client: TestClient, golden) -> None:
     assert "Puri" in nvda["content"]
     golden("filing_content", "nvidia_form4_text", nvda)
 
+    # page_breaks=true with markdown is valid and returns content
+    response = client.get("/filing/0001193125-25-004072/content", params={"fmt": "markdown", "page_breaks": "true"})
+    assert response.status_code == 200
+    pb = response.json()
+    assert pb["fmt"] == "markdown"
+    assert pb["content"] is not None
+    assert len(pb["content"]) > 0
+
     # page_breaks only makes sense for markdown
     response = client.get("/filing/0001193125-25-004072/content", params={"fmt": "text", "page_breaks": "true"})
     assert response.status_code == 422
@@ -275,6 +283,20 @@ def test_filing_sections_detection(client: TestClient, golden) -> None:
     form4 = response.json()
     assert form4["total"] == 0
     assert form4["sections"] == []
+
+
+def test_filing_envelope_data_null(client: TestClient, golden) -> None:
+    # CORRESP is permanently envelope-only (not in _DATA_BUILDERS) -> data=null, obj_type=null
+    response = client.get("/filing/0001104659-22-119482")
+    assert response.status_code == 200
+    corresp = response.json()
+    assert corresp["accession_number"] == "0001104659-22-119482"
+    assert corresp["form"] == "CORRESP"
+    assert corresp["data"] is None
+    assert corresp["obj_type"] is None
+    assert corresp["header"] is not None
+    assert corresp["entities"] != []
+    golden("filing", "corresp_data_null", corresp)
 
 
 def test_filing_accession_format_validation(client: TestClient) -> None:

@@ -1282,9 +1282,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
+              "description": "Controls input view for stitching. The stitcher currently resolves total-level rows only; dimensional segments are excluded from stitched output regardless of this flag. Use per-filing /financials for full dimensional data.",
               "default": false,
               "title": "Dimensions"
-            }
+            },
+            "description": "Controls input view for stitching. The stitcher currently resolves total-level rows only; dimensional segments are excluded from stitched output regardless of this flag. Use per-filing /financials for full dimensional data."
           },
           {
             "name": "amendments",
@@ -1675,6 +1677,8 @@
             "required": true,
             "schema": {
               "type": "string",
+              "minLength": 1,
+              "maxLength": 200,
               "title": "Q"
             }
           },
@@ -8628,6 +8632,13 @@
                 "type": "null"
               }
             ]
+          },
+          "former_names": {
+            "items": {
+              "$ref": "#/components/schemas/FormerName"
+            },
+            "type": "array",
+            "title": "Former Names"
           }
         },
         "additionalProperties": false,
@@ -8635,7 +8646,8 @@
         "required": [
           "company",
           "business_address",
-          "mailing_address"
+          "mailing_address",
+          "former_names"
         ],
         "title": "HeaderIssuer"
       },

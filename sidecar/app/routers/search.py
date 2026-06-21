@@ -72,6 +72,8 @@ def search(
 
     params = _build_efts_params(query, forms, items, cik, date_from, date_to, start)
     response = get_with_retry(EFTS_BASE_URL, params=params)
+    if response.status_code != 200:
+        raise HTTPException(status_code=502, detail=f"EFTS upstream returned HTTP {response.status_code}")
     data = orjson.loads(response.content)
 
     if "errorType" in data:

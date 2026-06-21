@@ -65,6 +65,12 @@ test('at least one golden endpoint exists', () => {
   expect(endpoints.length).toBeGreaterThan(0);
 });
 
+test('every schema mapping has a fixture directory', () => {
+  for (const key of Object.keys(RESPONSE_SCHEMAS)) {
+    expect(endpoints, `stale RESPONSE_SCHEMAS key: ${key}`).toContain(key);
+  }
+});
+
 for (const endpoint of endpoints) {
   describe(endpoint, () => {
     test('has a response schema mapping', () => {
