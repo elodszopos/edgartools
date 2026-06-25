@@ -194,8 +194,8 @@ class NcenData(WireModel):
     series_id: str | None
     lei: str | None
     classification_type: str | None
-    is_etf_company: bool | None
-    num_series: int | None
+    is_etf_company: bool
+    num_series: int
     series_ids: list[str]
     total_series: int | None
     report_date: str | None  # as-filed text (reportEndingPeriod attribute)

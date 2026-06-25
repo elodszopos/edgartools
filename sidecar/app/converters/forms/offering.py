@@ -23,7 +23,7 @@ from app.models.forms.offering import (
 from app.serialize import to_float, to_int, to_str
 
 
-def _fee_security(sec: Any) -> OfferingFeeSecurity:
+def fee_security(sec: Any) -> OfferingFeeSecurity:
     return OfferingFeeSecurity(
         security_type=to_str(sec.security_type),
         security_title=to_str(sec.security_title),
@@ -43,8 +43,8 @@ def fee_table(ft: Any) -> OfferingFeeTable | None:
         total_offering_amount=to_float(ft.total_offering_amount),
         net_fee_due=to_float(ft.net_fee_due),
         total_fees_previously_paid=to_float(ft.total_fees_previously_paid),
-        securities=[_fee_security(s) for s in ft.securities],
-        carry_forwards=[_fee_security(s) for s in ft.carry_forwards],
+        securities=[fee_security(s) for s in ft.securities],
+        carry_forwards=[fee_security(s) for s in ft.carry_forwards],
         has_carry_forward=bool(ft.has_carry_forward),
         fee_deferred=bool(ft.fee_deferred),
         exhibit_url=to_str(ft.exhibit_url),

@@ -18,14 +18,7 @@ from edgar.offerings.registration_s3 import RegistrationS3
 from app.converters.forms.registration_s1 import registration_s1_data
 from app.converters.forms.registration_s3 import registration_s3_data
 from app.models.forms.drs import DRSData, DRSUnderlying
-from app.serialize import to_date, to_int, to_str
-
-
-def _date_str(value: Any) -> str | None:
-    if isinstance(value, str):
-        return to_str(value)
-    parsed = to_date(value)
-    return parsed.isoformat() if parsed is not None else None
+from app.serialize import to_int, to_iso_str, to_str
 
 
 def _underlying(obj: Any) -> DRSUnderlying | None:
@@ -41,7 +34,7 @@ def drs_data(obj: DraftRegistrationStatement) -> DRSData:
     return DRSData(
         form=obj.form,
         company=to_str(obj.company),
-        filing_date=_date_str(obj.filing_date),
+        filing_date=to_iso_str(obj.filing_date),
         accession_number=to_str(obj.accession_number),
         underlying_form=to_str(obj.underlying_form) or "Unknown",
         is_amendment=bool(obj.is_amendment),

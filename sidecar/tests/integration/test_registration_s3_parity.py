@@ -27,9 +27,22 @@ def s3():
     return obj
 
 
+_STRUCTURAL = {
+    "cover_page",
+    "fee_table",
+}
+
+
 def test_registration_s3_full_fidelity(s3) -> None:
     edgar_data = data_surface(s3)
     wire_fields = set(RegistrationS3Data.model_fields.keys()) - {"kind"}
 
     not_on_wire = edgar_data - wire_fields
     assert not not_on_wire, f"Edgar exposes these but wire model doesn't have them — map them: {sorted(not_on_wire)}"
+
+
+def test_registration_s3_structural_fields_present() -> None:
+    """Nested edgar BaseModels are filtered by data_surface; this guard catches schema drift."""
+    wire_fields = set(RegistrationS3Data.model_fields.keys())
+    missing = _STRUCTURAL - wire_fields
+    assert not missing, f"structural fields missing from RegistrationS3Data: {sorted(missing)}"

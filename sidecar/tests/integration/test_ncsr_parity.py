@@ -24,9 +24,22 @@ def shareholder_report():
     return obj
 
 
+_STRUCTURAL = {
+    "funds",
+    "share_classes",
+}
+
+
 def test_ncsr_full_fidelity(shareholder_report) -> None:
     edgar_data = data_surface(shareholder_report)
     wire_fields = set(NcsrData.model_fields.keys()) - {"kind"}
 
     not_on_wire = edgar_data - wire_fields
     assert not not_on_wire, f"Edgar exposes these but wire model doesn't have them — map them: {sorted(not_on_wire)}"
+
+
+def test_ncsr_structural_fields_present() -> None:
+    """Nested edgar BaseModels are filtered by data_surface; this guard catches schema drift."""
+    wire_fields = set(NcsrData.model_fields.keys())
+    missing = _STRUCTURAL - wire_fields
+    assert not missing, f"structural fields missing from NcsrData: {sorted(missing)}"

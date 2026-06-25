@@ -24,6 +24,13 @@ def fund_report():
     return obj
 
 
+_STRUCTURAL = {
+    "header",
+    "general_info",
+    "fund_info",
+}
+
+
 def test_nport_full_fidelity(fund_report) -> None:
     edgar_data = data_surface(fund_report)
     wire_fields = set(NPortData.model_fields.keys()) - {"kind"}
@@ -32,3 +39,10 @@ def test_nport_full_fidelity(fund_report) -> None:
 
     not_on_wire = edgar_on_wire - wire_fields
     assert not not_on_wire, f"Edgar exposes these but wire model doesn't have them — map them: {sorted(not_on_wire)}"
+
+
+def test_nport_structural_fields_present() -> None:
+    """Nested edgar BaseModels are filtered by data_surface; this guard catches schema drift."""
+    wire_fields = set(NPortData.model_fields.keys())
+    missing = _STRUCTURAL - wire_fields
+    assert not missing, f"structural fields missing from NPortData: {sorted(missing)}"

@@ -68,9 +68,11 @@ def test_form5_ross_gifts_and_indirect_holdings(client: TestClient, golden) -> N
     assert indirect_natures == {"Partnership", "Trust III", "Trust V", "Trust VI"}
 
     # the annual summary: three gifts (code G -> "Gift"), zero price, indirect
+    # per-row form is the originally-reportable form (gifts are Form 4 events deferred to annual)
     gifts = _by_code(data["non_derivative_transactions"], "G")
     assert len(gifts) == 3
     for gift in gifts:
+        assert gift["form"] == "4"
         assert gift["transaction_type"] == "Gift"
         assert gift["price"] == 0.0
         assert gift["acquired_disposed"] == "A"

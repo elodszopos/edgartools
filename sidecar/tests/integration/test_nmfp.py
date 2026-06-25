@@ -51,6 +51,7 @@ def test_nmfp_prime_v3_iso_timeseries_repos(client: TestClient, golden) -> None:
     body = _nmfp(client, _PRIME)
     data = body["data"]
     assert data["form"] == "N-MFP3"
+    assert data["name"] == "Invesco Premier Portfolio"
 
     gi = data["general_info"]
     assert gi["registrant_name"] == "Invesco Treasurer's Series Trust"
@@ -121,6 +122,7 @@ def test_nmfp_legacy_v2_synthetic_labels(client: TestClient, golden) -> None:
     body = _nmfp(client, _LEGACY)
     data = body["data"]
     assert data["form"] == "N-MFP2"
+    assert data["name"] is None
 
     gi = data["general_info"]
     # N-MFP2 legacy schema omits the registrant + series names that N-MFP3 carries

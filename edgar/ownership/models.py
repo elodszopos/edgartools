@@ -199,6 +199,12 @@ class Footnotes:
         return pd.DataFrame([(k, v) for k, v in self._footnotes.items()],
                             columns=["id", "footnote"]).set_index("id")
 
+    def items(self):
+        return self._footnotes.items()
+
+    def __iter__(self):
+        return iter(self._footnotes)
+
     def __len__(self):
         return len(self._footnotes)
 

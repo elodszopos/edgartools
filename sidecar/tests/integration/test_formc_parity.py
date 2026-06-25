@@ -41,3 +41,10 @@ def test_formc_full_fidelity(form_c) -> None:
 
     not_on_wire = edgar_on_wire - wire_fields
     assert not not_on_wire, f"Edgar exposes these but wire model doesn't have them — map them: {sorted(not_on_wire)}"
+
+
+def test_formc_structural_fields_present() -> None:
+    """Reverse check: nested structural blocks exist on the wire model."""
+    wire_fields = set(FormCData.model_fields.keys())
+    for wire_name in _RENAMES.values():
+        assert wire_name in wire_fields, f"structural field {wire_name!r} missing from FormCData"

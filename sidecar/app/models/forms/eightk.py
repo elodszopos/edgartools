@@ -11,6 +11,8 @@ from __future__ import annotations
 
 from typing import Literal
 
+from pydantic import Field
+
 from app.models.common import DocumentRef, WireModel
 from app.models.forms.company_report import Auditor
 
@@ -32,10 +34,10 @@ class EightKData(WireModel):
     content_type: str  # classification: earnings|director_change|material_agreement|asset_change|...
     date_of_report: str | None  # the event/report date, the object's own formatted string
     items: list[EightKItem]
-    auditor: Auditor | None  # from earnings press release; null when no parseable earnings
+    auditor: Auditor | None  # from XBRL DEI facts (rare on 8-K; typically null)
     has_press_release: bool
     has_earnings: bool  # Item 2.02 present AND a parseable EX-99.1 earnings exhibit exists
-    balance_sheet: str | None  # set to None -- Statement object served at /xbrl
-    income_statement: str | None  # set to None -- Statement object served at /xbrl
-    cash_flow_statement: str | None  # set to None -- Statement object served at /xbrl
+    balance_sheet: str | None = Field(None, description="Reserved; financial statements served at GET /filing/{accession}/xbrl")
+    income_statement: str | None = Field(None, description="Reserved; financial statements served at GET /filing/{accession}/xbrl")
+    cash_flow_statement: str | None = Field(None, description="Reserved; financial statements served at GET /filing/{accession}/xbrl")
     exhibits: list[DocumentRef]  # curated content exhibits (get_exhibits): EX-99, EX-10, ...

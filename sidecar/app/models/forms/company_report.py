@@ -25,6 +25,6 @@ class Auditor(WireModel):
 
     name: str
     location: str | None  # city/country; edgar '' (DEI fact absent) normalizes to null
-    firm_id: int | None  # PCAOB firm ID; edgar 0 sentinel (absent) normalizes to null
+    firm_id: int | None  # PCAOB firm ID; null when the DEI fact is absent
     icfr_attestation: bool  # auditor attested to internal control over financial reporting
     period_end: str | None  # fiscal period end this auditor signed for (distinguishes current vs prior)

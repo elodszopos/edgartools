@@ -88,7 +88,7 @@ def test_ncen_traditional_fund_governance_providers(client: TestClient, golden) 
     s = data["series"][0]
     assert s["name"] == "BNY Mellon Large Cap Equity Fund"
     assert s["series_id"] == "S000019789"
-    assert s["is_diversified"] is True
+    assert s["is_diversified"] is True  # tri-state: True/False/None; None path requires a filing without the diversification flag (rare)
     assert s["avg_net_assets"] == 290767802.0
     assert s["aggregate_commission"] == 62561.0
     assert s["is_securities_lending"] is True
@@ -139,6 +139,7 @@ def test_ncen_traditional_fund_governance_providers(client: TestClient, golden) 
             {"is_committed": "Uncommitted", "size": 300000000.0, "institution_names": ["The Bank of New York Mellon"]},
         ],
     }
+    assert s["liquidity_providers"] == []
     assert s["etf_info"] is None  # not an ETF series
 
     # all 4 share classes from the SGML header's class-contract block (id/name/ticker), joined per series
@@ -189,6 +190,8 @@ def test_ncen_etf_trust_authorized_participants(client: TestClient, golden) -> N
     assert etf["is_in_kind"] is True
     assert etf["avg_pct_purchased_in_kind"] == 15.32
     assert etf["avg_pct_redeemed_in_kind"] == 98.61
+    assert etf["std_dev_purchased_in_kind"] == 34.26
+    assert etf["std_dev_redeemed_in_kind"] == 1.19
     assert len(etf["authorized_participants"]) == 4
     assert etf["authorized_participants"][0] == {
         "name": "RBC CAPITAL MARKETS, LLC",

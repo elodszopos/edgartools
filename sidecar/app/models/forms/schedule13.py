@@ -17,12 +17,12 @@ from typing import Literal
 from app.models.common import Address, WireModel
 
 
-class BeneficialOwner(WireModel):
+class Schedule13Owner(WireModel):
     """One reporting person from the cover page (joint filers -> multiple).
 
     13G never carries the person CIK on the cover page (always null); 13D usually does."""
 
-    cik: str | None  # as-filed, not zero-padded; null on 13G and on 13D no-CIK filers
+    cik: str | None  # as-filed verbatim (modern XML often zero-padded, legacy may not be)
     name: str
     citizenship: str | None
     sole_voting_power: int
@@ -42,7 +42,7 @@ class BeneficialOwner(WireModel):
 class Schedule13Issuer(WireModel):
     """The subject company whose securities are reported."""
 
-    cik: str | None  # as-filed, not zero-padded
+    cik: str | None  # as-filed verbatim (modern XML often zero-padded, legacy may not be)
     name: str | None
     cusip: str | None
     address: Address | None
@@ -112,7 +112,7 @@ class Schedule13DData(WireModel):
     kind: Literal["sc13d"] = "sc13d"
     issuer: Schedule13Issuer
     security: Schedule13Security
-    reporting_persons: list[BeneficialOwner]
+    reporting_persons: list[Schedule13Owner]
     items: Schedule13DItems
     signatures: list[Schedule13Signature]
     event_date: str | None  # date_of_event, as-filed MM/DD/YYYY
@@ -133,7 +133,7 @@ class Schedule13GData(WireModel):
     kind: Literal["sc13g"] = "sc13g"
     issuer: Schedule13Issuer
     security: Schedule13Security
-    reporting_persons: list[BeneficialOwner]
+    reporting_persons: list[Schedule13Owner]
     items: Schedule13GItems
     signatures: list[Schedule13Signature]
     event_date: str | None

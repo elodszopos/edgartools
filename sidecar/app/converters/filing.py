@@ -382,8 +382,6 @@ def _typed_data(filing: Filing) -> tuple[str | None, FilingData | None]:
             # a builder bug propagates (loud 500), surfaced by the parity + integration gates.
             if builder is form_d_data:
                 data = form_d_data(obj, filing.xml())
-            elif builder is ownership_data:
-                data = ownership_data(obj, filing)
             else:
                 data = builder(obj)
             return type(obj).__name__, data

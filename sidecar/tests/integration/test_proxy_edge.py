@@ -58,8 +58,19 @@ def _assert_fully_degraded(data: dict) -> None:
     assert data["company_name"] is None
     assert data["peo_name"] is None
     assert data["peo_total_comp"] is None
+    assert data["peo_actually_paid_comp"] is None
+    assert data["neo_avg_total_comp"] is None
+    assert data["neo_avg_actually_paid_comp"] is None
     assert data["net_income"] is None
     assert data["total_shareholder_return"] is None
+    assert data["peer_group_tsr"] is None
+    assert data["fiscal_year_end"] is None
+    assert data["company_selected_measure"] is None
+    assert data["company_selected_measure_value"] is None
+    assert data["insider_trading_policy_adopted"] is None
+    assert data["award_timing_mnpi_considered"] is None
+    assert data["award_dates_predetermined"] is None
+    assert data["mnpi_disclosure_timed_for_comp_value"] is None
     assert data["has_individual_executive_data"] is False
     assert data["performance_measures"] == []
     assert data["executive_compensation"] == []

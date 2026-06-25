@@ -14,6 +14,7 @@ from app.models.forms.eightk import EightKData
 from app.models.forms.sixk import SixKData
 
 _AAPL_8K = "0000320193-26-000011"  # rich: earnings, multi-item, EX-99.1
+_AAPL_OFFICER = "0001140361-26-015711"  # bare: officer change, no press release, no earnings
 _51TALK_6K = "0001104659-26-073181"  # rich: cover metadata, 20-F checkbox, EX-99.1
 
 
@@ -43,6 +44,27 @@ def test_eightk_full_fidelity(eight_k) -> None:
 
     not_on_wire = edgar_on_wire - wire_fields
     assert not not_on_wire, f"Edgar exposes these but wire model doesn't have them -- map them: {sorted(not_on_wire)}"
+
+
+def test_eightk_bare_fixture_fidelity() -> None:
+    """Second pass with a non-earnings fixture where press_releases/earnings return None.
+
+    On a bare 8-K these properties return None (not complex objects), so data_surface includes
+    them. They're represented as boolean flags on the wire (has_press_release, has_earnings) --
+    a structural transform, not an omission.
+    """
+    # edgar attrs that map to boolean flags on the wire (structural transform, not exclusion)
+    _FLAG_RENAMES = {"press_releases": "has_press_release", "earnings": "has_earnings"}
+
+    filing = get_by_accession_number_enriched(_AAPL_OFFICER)
+    assert filing is not None
+    obj = filing.obj()
+    assert obj is not None and type(obj).__name__ == "CurrentReport"
+    edgar_data = data_surface(obj)
+    wire_fields = set(EightKData.model_fields.keys()) - {"kind"}
+    edgar_on_wire = {_FLAG_RENAMES.get(a, a) for a in edgar_data}
+    not_on_wire = edgar_on_wire - wire_fields
+    assert not not_on_wire, f"Bare 8-K exposes these but wire model doesn't: {sorted(not_on_wire)}"
 
 
 def test_sixk_full_fidelity(six_k) -> None:

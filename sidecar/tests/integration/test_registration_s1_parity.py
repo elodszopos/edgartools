@@ -24,6 +24,16 @@ def s1():
     return obj
 
 
+_STRUCTURAL = {
+    "cover_page",
+    "fee_table",
+    "selling_stockholders",
+    "dilution",
+    "capitalization",
+    "underwriting",
+}
+
+
 def test_registration_s1_full_fidelity(s1) -> None:
     edgar_data = data_surface(s1)
     wire_fields = set(RegistrationS1Data.model_fields.keys()) - {"kind"}
@@ -32,3 +42,10 @@ def test_registration_s1_full_fidelity(s1) -> None:
 
     not_on_wire = edgar_on_wire - wire_fields
     assert not not_on_wire, f"Edgar exposes these but wire model doesn't have them — map them: {sorted(not_on_wire)}"
+
+
+def test_registration_s1_structural_fields_present() -> None:
+    """Nested edgar BaseModels are filtered by data_surface; this guard catches schema drift."""
+    wire_fields = set(RegistrationS1Data.model_fields.keys())
+    missing = _STRUCTURAL - wire_fields
+    assert not missing, f"structural fields missing from RegistrationS1Data: {sorted(missing)}"

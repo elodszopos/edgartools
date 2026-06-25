@@ -87,7 +87,7 @@ class RegistrationS1Data(WireModel):
     underwriting: OfferingUnderwriting | None
 
     # cross-entity fetch, served separately
-    is_effective: bool | None = None
-    effective_date: str | None = None
+    is_effective: None = None
+    effective_date: None = None
     related_filings: None = None
     takedowns: None = None

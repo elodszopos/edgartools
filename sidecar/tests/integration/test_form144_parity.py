@@ -1,9 +1,8 @@
 """Parity gate: every data attribute edgar's Form144 exposes is on the wire.
 
 Uses data_surface() for auto-filtered attribute discovery. The wire model carries
-the as-filed tables and notice signature; edgar's analytical layer (totals, percentages,
-holding-period math, 10b5-1 inference, anomaly flags) is client-derivable from the
-captured raw rows.
+the as-filed tables, notice signature, and edgar's analytical layer (totals, percentages,
+holding-period math, 10b5-1 inference, anomaly flags).
 """
 
 from __future__ import annotations

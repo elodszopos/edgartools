@@ -16,7 +16,7 @@ from typing import Any
 from edgar.offerings.registration_s1 import RegistrationS1
 
 from app.converters.forms.offering import (
-    _fee_security,
+    fee_security,
     capitalization,
     dilution,
     fee_table,
@@ -24,14 +24,7 @@ from app.converters.forms.offering import (
     underwriting,
 )
 from app.models.forms.registration_s1 import RegistrationS1Data, S1CoverPage
-from app.serialize import to_date, to_float, to_str
-
-
-def _date_str(value: Any) -> str | None:
-    if isinstance(value, str):
-        return to_str(value)
-    parsed = to_date(value)
-    return parsed.isoformat() if parsed is not None else None
+from app.serialize import to_date, to_float, to_iso_str, to_str
 
 
 def _cover_page(cp: Any) -> S1CoverPage:
@@ -58,7 +51,7 @@ def registration_s1_data(obj: RegistrationS1) -> RegistrationS1Data:
     return RegistrationS1Data(
         form=obj.form,
         company=to_str(obj.company),
-        filing_date=_date_str(obj.filing_date),
+        filing_date=to_iso_str(obj.filing_date),
         accession_number=to_str(obj.accession_number),
         is_amendment=bool(obj.is_amendment),
         offering_type=obj.offering_type.value,
@@ -68,7 +61,7 @@ def registration_s1_data(obj: RegistrationS1) -> RegistrationS1Data:
         state_of_incorporation=to_str(obj.state_of_incorporation),
         total_offering=to_float(obj.total_offering),
         net_fee=to_float(obj.net_fee),
-        securities=[_fee_security(s) for s in obj.securities],
+        securities=[fee_security(s) for s in obj.securities],
         cover_page=_cover_page(obj.cover_page),
         fee_table=fee_table(obj.fee_table),
         selling_stockholders=selling_stockholders(obj.selling_stockholders),

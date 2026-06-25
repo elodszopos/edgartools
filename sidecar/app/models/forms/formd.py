@@ -146,4 +146,4 @@ class FormDData(WireModel):
     related_persons: list[FormDPerson]
     offering: FormDOffering
     signatures: FormDSignatureBlock | None
-    is_new: bool  # True when not an amendment (proxies offering_data.is_new)
+    is_new: bool  # edgar's isAmendment flag (True = amendment, False = new filing; name inherited from edgar)

@@ -24,9 +24,24 @@ def prospectus():
     return obj
 
 
+_STRUCTURAL = {
+    "share_classes",
+    "performance_returns",
+    "best_quarter",
+    "worst_quarter",
+}
+
+
 def test_prospectus_497k_full_fidelity(prospectus) -> None:
     edgar_data = data_surface(prospectus)
     wire_fields = set(Prospectus497KData.model_fields.keys()) - {"kind"}
 
     not_on_wire = edgar_data - wire_fields
     assert not not_on_wire, f"Edgar exposes these but wire model doesn't have them — map them: {sorted(not_on_wire)}"
+
+
+def test_prospectus_497k_structural_fields_present() -> None:
+    """Nested edgar BaseModels are filtered by data_surface; this guard catches schema drift."""
+    wire_fields = set(Prospectus497KData.model_fields.keys())
+    missing = _STRUCTURAL - wire_fields
+    assert not missing, f"structural fields missing from Prospectus497KData: {sorted(missing)}"

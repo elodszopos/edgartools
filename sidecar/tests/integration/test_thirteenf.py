@@ -13,6 +13,8 @@ Accessions span the matrix:
   fig_notice         13F-NT: has_holdings False, holdings empty, totals zero (an affiliated
                      manager reports the holdings), but cover/summary/signature still parse
   investidor         13F-HR, dollars era, 27 holdings, several put/call option rows
+
+13F-CTR (combination report) is in THIRTEENF_FORMS but has zero filings in EDGAR as of 2026-06.
 """
 
 from __future__ import annotations

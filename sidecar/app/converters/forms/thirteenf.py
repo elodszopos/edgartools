@@ -4,9 +4,8 @@ The cover/summary/signature come from the parsed primary document (`primary_form
 holdings come from the disaggregated `infotable` DataFrame, one wire record per row. total_value
 is read from the top-level `obj.total_value` (which normalizes pre-2023 thousands -> dollars), NOT
 the raw `summary_page.total_value` dataclass field (era-dependent thousands). Cross-filing
-properties (previous_holding_report, compare_holdings, holding_history) and the convenience
-manager/signer accessors are not mapped (they require cross-filing SEC fetches or duplicate
-envelope-level data).
+properties (previous_holding_report, compare_holdings, holding_history) are not mapped -- they
+require cross-filing SEC fetches excluded by the envelope own-artifacts policy.
 """
 
 from __future__ import annotations

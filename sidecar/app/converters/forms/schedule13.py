@@ -15,7 +15,7 @@ from edgar.beneficial_ownership import Schedule13D, Schedule13G
 
 from app.models.common import Address as WireAddress
 from app.models.forms.schedule13 import (
-    BeneficialOwner,
+    Schedule13Owner,
     Schedule13DData,
     Schedule13DItems,
     Schedule13GData,
@@ -24,14 +24,7 @@ from app.models.forms.schedule13 import (
     Schedule13Security,
     Schedule13Signature,
 )
-from app.serialize import to_date, to_str
-
-
-def _date_str(value: Any) -> str | None:
-    if isinstance(value, str):
-        return to_str(value)
-    parsed = to_date(value)
-    return parsed.isoformat() if parsed is not None else None
+from app.serialize import to_date, to_iso_str, to_str
 
 
 def _address(address: Any) -> WireAddress | None:
@@ -48,8 +41,8 @@ def _address(address: Any) -> WireAddress | None:
     )
 
 
-def _owner(p: Any) -> BeneficialOwner:
-    return BeneficialOwner(
+def _owner(p: Any) -> Schedule13Owner:
+    return Schedule13Owner(
         cik=to_str(p.cik),  # "" on 13G / no-CIK 13D filers -> null
         name=p.name,  # required; kept raw as filed
         citizenship=to_str(p.citizenship),
@@ -146,7 +139,7 @@ def schedule_13d_data(obj: Schedule13D) -> Schedule13DData:
         signatures=[_signature(s) for s in obj.signatures],
         event_date=event,
         date_of_event=event,  # edgar exposes both names for the same value
-        filing_date=_date_str(obj.filing_date),
+        filing_date=to_iso_str(obj.filing_date),
         previously_filed=bool(obj.previously_filed),
         is_amendment=bool(obj.is_amendment),
         amendment_number=obj.amendment_number,
@@ -166,7 +159,7 @@ def schedule_13g_data(obj: Schedule13G) -> Schedule13GData:
         signatures=[_signature(s) for s in obj.signatures],
         event_date=event,
         date_of_event=event,  # edgar exposes both names for the same value
-        filing_date=_date_str(obj.filing_date),
+        filing_date=to_iso_str(obj.filing_date),
         rule_designation=to_str(obj.rule_designation),
         is_passive_investor=bool(obj.is_passive_investor),
         is_amendment=bool(obj.is_amendment),

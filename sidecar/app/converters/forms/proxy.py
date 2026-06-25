@@ -29,16 +29,7 @@ from app.models.forms.proxy import (
     ProxySummaryCompRow,
     ProxyVotingProposal,
 )
-from app.serialize import to_date, to_float, to_int, to_str
-
-
-def _date_str(value: Any) -> str | None:
-    # date-ish XBRL cells arrive as ISO strings OR date/Timestamp objects (period_end column);
-    # normalize to an ISO string, keeping a faithful passthrough of an already-string value
-    if isinstance(value, str):
-        return to_str(value)
-    parsed = to_date(value)
-    return parsed.isoformat() if parsed is not None else None
+from app.serialize import to_date, to_float, to_int, to_iso_str, to_str
 
 
 def _records(df: Any) -> list[dict[str, Any]]:
@@ -88,7 +79,7 @@ def _beneficial_owner(r: dict[str, Any]) -> ProxyBeneficialOwner:
 
 def _exec_comp_row(r: dict[str, Any]) -> ProxyExecCompRow:
     return ProxyExecCompRow(
-        fiscal_year_end=_date_str(r.get("fiscal_year_end")),
+        fiscal_year_end=to_iso_str(r.get("fiscal_year_end")),
         peo_total_comp=to_float(r.get("peo_total_comp")),
         peo_actually_paid_comp=to_float(r.get("peo_actually_paid_comp")),
         neo_avg_total_comp=to_float(r.get("neo_avg_total_comp")),
@@ -98,7 +89,7 @@ def _exec_comp_row(r: dict[str, Any]) -> ProxyExecCompRow:
 
 def _pvp_row(r: dict[str, Any]) -> ProxyPvpRow:
     return ProxyPvpRow(
-        fiscal_year_end=_date_str(r.get("fiscal_year_end")),
+        fiscal_year_end=to_iso_str(r.get("fiscal_year_end")),
         peo_actually_paid_comp=to_float(r.get("peo_actually_paid_comp")),
         neo_avg_actually_paid_comp=to_float(r.get("neo_avg_actually_paid_comp")),
         total_shareholder_return=to_float(r.get("total_shareholder_return")),
@@ -110,7 +101,7 @@ def _pvp_row(r: dict[str, Any]) -> ProxyPvpRow:
 
 def _award_close_to_mnpi(r: dict[str, Any]) -> ProxyAwardCloseToMnpi:
     return ProxyAwardCloseToMnpi(
-        grant_date=_date_str(r.get("grant_date")),
+        grant_date=to_iso_str(r.get("grant_date")),
         executive=to_str(r.get("executive")),
         award_type=to_str(r.get("award_type")),
         exercise_price=to_float(r.get("exercise_price")),
@@ -127,8 +118,10 @@ def _named_executive(ne: Any) -> ProxyNamedExecutive:
         role=to_str(ne.role),
         total_comp=to_float(ne.total_comp),
         actually_paid_comp=to_float(ne.actually_paid_comp),
-        fiscal_year_end=_date_str(ne.fiscal_year_end),
+        fiscal_year_end=to_iso_str(ne.fiscal_year_end),
     )
+
+
 
 
 def _voting_proposal(vp: Any) -> ProxyVotingProposal:
@@ -173,12 +166,12 @@ def _audit_fees(af: Any) -> ProxyAuditFees | None:
 def proxy_data(obj: ProxyStatement) -> ProxyData:
     return ProxyData(
         form=obj.form,
-        filing_date=_date_str(obj.filing_date),
+        filing_date=to_iso_str(obj.filing_date),
         company_name=to_str(obj.company_name),
         cik=to_str(obj.cik),
         accession_number=to_str(obj.accession_number),
         has_xbrl=bool(obj.has_xbrl),
-        fiscal_year_end=_date_str(obj.fiscal_year_end),
+        fiscal_year_end=to_iso_str(obj.fiscal_year_end),
         peo_name=to_str(obj.peo_name),
         peo_total_comp=to_float(obj.peo_total_comp),
         peo_actually_paid_comp=to_float(obj.peo_actually_paid_comp),

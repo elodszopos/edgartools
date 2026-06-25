@@ -63,7 +63,8 @@ def test_tenq_apple_standard(client: TestClient, golden) -> None:
     assert data["is_amendment"] is False
     assert data["report_period"] == "2025-12-27"  # Q1 FY2026 (fiscal year ends late September)
     assert data["has_financials"] is True
-    assert data["auditors"] == []  # 10-Q is unaudited -> no DEI auditor facts tagged
+    assert data["auditor"] is None  # 10-Q is unaudited -> no DEI auditor facts tagged
+    assert data["auditors"] == []
 
     # full quarterly structure: Part I Items 1-4 + Part II Items 1,1A,2-6
     assert _pairs(data) == {
@@ -84,7 +85,12 @@ def test_tenq_apple_standard(client: TestClient, golden) -> None:
     assert _item(data, "I", "1")["title"] == "Financial Statements"
     assert _item(data, "II", "1")["title"] == "Legal Proceedings"
     assert _item(data, "II", "1A")["title"] == "Risk Factors"
-    assert _item(data, "I", "2")["title"].startswith("Management's Discussion and Analysis")
+    assert _item(data, "I", "2")["title"] == "Management's Discussion and Analysis of Financial Condition and Results of Operations (MD&A)"
+
+    # items arrive in detection order (NOT sorted by part/number)
+    assert [f"{i['part']},{i['item']}" for i in data["items"]] == [
+        "I,1", "I,3", "I,4", "II,1", "II,1A", "II,2", "II,3", "II,4", "II,5", "II,6", "I,2",
+    ]
 
     golden("filing", "tenq_apple", body)
 
@@ -96,12 +102,14 @@ def test_tenq_sandisk_amendment(client: TestClient, golden) -> None:
     assert body["form"] == "10-Q/A"
     assert data["is_amendment"] is True
     assert data["report_period"] == "2024-12-27"
+    assert data["auditor"] is None
     assert data["auditors"] == []
+    assert data["has_financials"] is True
 
     # a partial amendment: restates MD&A / risk factors but NOT the Part I Item 1 financial statements
     assert ("I", "1") not in _pairs(data)
     assert _item(data, "II", "1A")["title"] == "Risk Factors"
-    assert _item(data, "I", "2")["title"].startswith("Management's Discussion and Analysis")
+    assert _item(data, "I", "2")["title"] == "Management's Discussion and Analysis of Financial Condition and Results of Operations (MD&A)"
 
     golden("filing", "tenq_sandisk_amendment", body)
 
@@ -111,10 +119,14 @@ def test_tenq_riverview_bank(client: TestClient, golden) -> None:
     data = body["data"]
     assert body["company"] == "RIVERVIEW BANCORP INC"
     assert body["form"] == "10-Q"
+    assert data["is_amendment"] is False
     assert data["report_period"] == "2024-12-31"  # fiscal year ends in March -> Dec quarter is Q3
     assert data["has_financials"] is True
+    assert data["auditor"] is None
+    assert data["auditors"] == []
 
     # same issuer as the U46 10-K bank fixture: the 10-Q yields a DISTINCT kind + part-qualified items
+    assert len(data["items"]) >= 4
     assert _item(data, "I", "1")["title"] == "Financial Statements"
     assert _item(data, "II", "1")["title"] == "Legal Proceedings"
 
@@ -126,9 +138,13 @@ def test_tenq_realty_income_reit(client: TestClient, golden) -> None:
     data = body["data"]
     assert body["company"] == "REALTY INCOME CORP"
     assert body["form"] == "10-Q"
+    assert data["is_amendment"] is False
     assert data["report_period"] == "2026-03-31"  # Q1 2026
     assert data["has_financials"] is True
+    assert data["auditor"] is None
+    assert data["auditors"] == []
 
+    assert len(data["items"]) >= 4
     assert _item(data, "I", "1")["title"] == "Financial Statements"
     assert _item(data, "II", "1A")["title"] == "Risk Factors"
 

@@ -13,7 +13,7 @@ from typing import Any
 from app.auditors import extract_auditors
 from app.converters.forms.company_report import report_item_from_catalog
 from app.models.forms.tenk import Subsidiary, TenKData
-from app.serialize import to_date, to_float, to_str
+from app.serialize import to_date, to_float, to_iso_str, to_str
 
 
 def _subsidiary(sub: Any) -> Subsidiary:
@@ -34,7 +34,7 @@ def ten_k_data(obj: Any) -> TenKData:
         is_amendment=form.endswith("/A"),
         report_period=to_date(obj.period_of_report),
         company=to_str(obj.company),
-        filing_date=to_date(obj.filing_date),
+        filing_date=to_iso_str(obj.filing_date),
         items=[report_item_from_catalog(display, obj.structure) for display in obj.items],
         auditor=auditors[0] if auditors else None,
         auditors=auditors,

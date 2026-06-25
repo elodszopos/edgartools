@@ -13,6 +13,9 @@ Parsed Decimal fees/returns cross as floats (the U53a rule); the $10K expense-ex
 edgar's metadata extractor does not surface prospectus_date / portfolio_managers for these filings, so
 those are faithfully null / empty on the wire. inception_date is structurally null (edgar's from_filing
 never sets it) but is still carried from the typed backing list, not the lossy `performance` DataFrame.
+
+497K/A (amendment): zero recent filings in SEC EFTS as of 2026-06; the matches_form expansion is
+validated by other form families' /A amendment tests (N-CEN/A, N-MFP3/A, S-3/A).
 """
 
 from __future__ import annotations

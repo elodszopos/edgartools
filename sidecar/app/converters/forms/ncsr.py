@@ -124,7 +124,8 @@ def _fund(
         portfolio_turnover=to_float(_first(turnover, class_ids)),
         advisory_fees_paid=to_float(_first(advisory, class_ids)),
         holdings_count=to_int(_first(holdings_count, class_ids)),
-        # TODO(DEFERRED): per-holding data not extracted -- lives in the HTML holdings table, not oef: XBRL facts
+        # oef:HoldingPctOfNav is never tagged by filers; holdings_count comes from oef:HoldingsCount but
+        # the per-holding breakdown lives in unstructured HTML, not XBRL -- edgar returns [] here
         holdings=[],
         share_classes=[_share_class(c, ratios, expenses, returns) for c in series.classes],
     )

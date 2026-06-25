@@ -15,16 +15,9 @@ from typing import Any
 
 from edgar.offerings.registration_s3 import RegistrationS3
 
-from app.converters.forms.offering import _fee_security, fee_table
+from app.converters.forms.offering import fee_security, fee_table
 from app.models.forms.registration_s3 import RegistrationS3Data, S3CoverPage
-from app.serialize import to_date, to_float, to_str
-
-
-def _date_str(value: Any) -> str | None:
-    if isinstance(value, str):
-        return to_str(value)
-    parsed = to_date(value)
-    return parsed.isoformat() if parsed is not None else None
+from app.serialize import to_float, to_iso_str, to_str
 
 
 def _cover_page(cp: Any) -> S3CoverPage:
@@ -49,7 +42,7 @@ def registration_s3_data(obj: RegistrationS3) -> RegistrationS3Data:
     return RegistrationS3Data(
         form=obj.form,
         company=to_str(obj.company),
-        filing_date=_date_str(obj.filing_date),
+        filing_date=to_iso_str(obj.filing_date),
         accession_number=to_str(obj.accession_number),
         is_amendment=bool(obj.is_amendment),
         is_auto_shelf=bool(obj.is_auto_shelf),
@@ -60,7 +53,7 @@ def registration_s3_data(obj: RegistrationS3) -> RegistrationS3Data:
         total_offering=to_float(obj.total_offering),
         net_fee=to_float(obj.net_fee),
         fee_deferred=bool(obj.fee_deferred),
-        securities=[_fee_security(s) for s in obj.securities],
+        securities=[fee_security(s) for s in obj.securities],
         cover_page=_cover_page(obj.cover_page),
         fee_table=fee_table(obj.fee_table),
         related_filings=None,  # cross-entity fetch, served separately

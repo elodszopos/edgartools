@@ -1,7 +1,7 @@
 """Integration (U54): the S-3 / F-3 shelf-registration family over the one `RegistrationS3` ->
 kind=registration_s3.
 
-Six fixtures pin the dispatch + structural matrix. S-3, S-3ASR, S-3/A, F-3, F-3ASR all dispatch to
+Seven fixtures pin the dispatch + structural matrix. S-3, S-3ASR, S-3D, S-3/A, F-3, F-3ASR all dispatch to
 RegistrationS3 (matches_form expands each base form to its /A amendment); what differs is the
 offering-type classification and which fee-table shape appears:
 
@@ -15,6 +15,7 @@ offering-type classification and which fee-table shape appears:
   tss              S-3/A    amendment -> is_amendment, NO Exhibit 107 -> fee_table is genuinely None
   cn_energy        F-3      foreign (Cayman) resale shelf -> single-security fee table, real amounts
   takeda           F-3ASR   foreign automatic shelf -> is_auto_shelf, DEFERRED fees
+  bcb              S-3D     dividend reinvestment plan shelf -> dispatches through RegistrationS3
 
 S-3 has none of S-1's prospectus tables (selling stockholders / dilution / capitalization /
 underwriting) -- shelf registrations incorporate financials by reference. edgar's _fee_table
@@ -37,6 +38,7 @@ _BAKKT = "0001193125-25-149177"  # S-3 resale, Bakkt Holdings (fee-table shell)
 _TSS = "0001654954-25-007450"  # S-3/A amendment, TSS, Inc. (fee_table None)
 _CN_ENERGY = "0001477932-25-004859"  # F-3 foreign resale, CN Energy Group
 _TAKEDA = "0001395064-25-000097"  # F-3ASR foreign auto shelf, Takeda Pharmaceutical
+_BCB = "0001193125-26-203334"  # S-3D, BCB Bancorp Inc (dividend reinvestment plan shelf)
 
 
 @pytest.fixture(scope="module")
@@ -201,3 +203,26 @@ def test_f3asr_foreign_auto_shelf(client: TestClient, golden) -> None:
     assert ft["total_offering_amount"] == 0.0
     assert len(ft["securities"]) == 3
     golden("filing", "registration_s3_takeda_f3asr", body)
+
+
+def test_s3d_dividend_reinvestment_shelf(client: TestClient, golden) -> None:
+    body = _s3(client, _BCB)
+    data = body["data"]
+    assert data["form"] == "S-3D"
+    assert data["is_amendment"] is False
+    assert data["is_auto_shelf"] is False
+    assert data["offering_type"] == "universal_shelf"
+    assert data["company"] == "BCB BANCORP INC"
+
+    cover = data["cover_page"]
+    assert cover["company_name"] == "BCB BANCORP INC"
+    assert cover["state_of_incorporation"] == "New Jersey"
+    assert cover["ein"] == "26-0065262"
+
+    ft = data["fee_table"]
+    assert ft is not None
+    assert ft["total_offering_amount"] == 10350000.0
+    assert ft["net_fee_due"] == 1429.34
+    assert len(ft["securities"]) == 1
+
+    golden("filing", "registration_s3_bcb_s3d", body)

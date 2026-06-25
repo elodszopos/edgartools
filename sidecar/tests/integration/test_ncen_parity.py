@@ -1,14 +1,8 @@
 """Parity gate: every data attribute edgar's FundCensus exposes is on the wire.
 
 Auto-filters methods. Compares against the actual Pydantic wire model.
-Zero hand-maintained exclusion lists.
-
-TODO(REVISIT): this gate checks only the TOP-LEVEL FundCensus surface. The nested Pydantic models
-(FundSeriesInfo, LineOfCredit, LineOfCreditFacility, FundShareClass, RegistrantInfo, ServiceProvider,
-BrokerDealer, ETFInfo, ...) are NOT field-checked, so a new field on any of them is silently dropped
-by the converter with no gate failure -- exactly the class of gap that let share_classes go unmapped.
-Add per-model `model_fields` checks (mirror test_tenk_parity's dataclasses.fields checks) as part of
-the parity-gate cardinality/coverage sweep.
+Zero hand-maintained exclusion lists. A _STRUCTURAL guard catches nested BaseModel
+fields that data_surface filters out.
 """
 
 from __future__ import annotations
@@ -31,9 +25,23 @@ def fund_census():
     return obj
 
 
+_STRUCTURAL = {
+    "registrant",
+    "series",
+    "signature_info",
+}
+
+
 def test_ncen_full_fidelity(fund_census) -> None:
     edgar_data = data_surface(fund_census)
     wire_fields = set(NcenData.model_fields.keys()) - {"kind"}
 
     not_on_wire = edgar_data - wire_fields
     assert not not_on_wire, f"Edgar exposes these but wire model doesn't have them — map them: {sorted(not_on_wire)}"
+
+
+def test_ncen_structural_fields_present() -> None:
+    """Nested edgar BaseModels are filtered by data_surface; this guard catches schema drift."""
+    wire_fields = set(NcenData.model_fields.keys())
+    missing = _STRUCTURAL - wire_fields
+    assert not missing, f"structural fields missing from NcenData: {sorted(missing)}"

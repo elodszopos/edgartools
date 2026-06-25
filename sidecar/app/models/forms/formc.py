@@ -87,25 +87,25 @@ class FormCAnnualReport(WireModel):
     Field names mirror edgar's exactly (1:1 with the converter) - the `_most_recent_fiscal_year` /
     `_prior_fiscal_year` pairs are the current and previous fiscal year as filed."""
 
-    current_employees: int | None
-    total_asset_most_recent_fiscal_year: float | None
-    total_asset_prior_fiscal_year: float | None
-    cash_equi_most_recent_fiscal_year: float | None
-    cash_equi_prior_fiscal_year: float | None
-    act_received_most_recent_fiscal_year: float | None
-    act_received_prior_fiscal_year: float | None
-    short_term_debt_most_recent_fiscal_year: float | None
-    short_term_debt_prior_fiscal_year: float | None
-    long_term_debt_most_recent_fiscal_year: float | None
-    long_term_debt_prior_fiscal_year: float | None
-    revenue_most_recent_fiscal_year: float | None
-    revenue_prior_fiscal_year: float | None
-    cost_goods_sold_most_recent_fiscal_year: float | None
-    cost_goods_sold_prior_fiscal_year: float | None
-    tax_paid_most_recent_fiscal_year: float | None
-    tax_paid_prior_fiscal_year: float | None
-    net_income_most_recent_fiscal_year: float | None
-    net_income_prior_fiscal_year: float | None
+    current_employees: int
+    total_asset_most_recent_fiscal_year: float
+    total_asset_prior_fiscal_year: float
+    cash_equi_most_recent_fiscal_year: float
+    cash_equi_prior_fiscal_year: float
+    act_received_most_recent_fiscal_year: float
+    act_received_prior_fiscal_year: float
+    short_term_debt_most_recent_fiscal_year: float
+    short_term_debt_prior_fiscal_year: float
+    long_term_debt_most_recent_fiscal_year: float
+    long_term_debt_prior_fiscal_year: float
+    revenue_most_recent_fiscal_year: float
+    revenue_prior_fiscal_year: float
+    cost_goods_sold_most_recent_fiscal_year: float
+    cost_goods_sold_prior_fiscal_year: float
+    tax_paid_most_recent_fiscal_year: float
+    tax_paid_prior_fiscal_year: float
+    net_income_most_recent_fiscal_year: float
+    net_income_prior_fiscal_year: float
     offering_jurisdictions: list[str]  # state codes the securities are offered in
 
 

@@ -152,6 +152,8 @@ def test_tenk_riverview_bank_icfr_false(client: TestClient, golden) -> None:
     assert body["form"] == "10-K"
     assert data["report_period"] == "2026-03-31"  # fiscal year ends in March
 
+    assert data["has_financials"] is True
+
     # an auditor CHANGE: current Aprio + prior Delap, each tagged on its own period context.
     # Before the per-context grouping fix the wire kept only the first DEI fact and dropped Delap.
     # Aprio also did NOT attest to ICFR -- the only icfr_attestation=False fixture.
@@ -182,6 +184,8 @@ def test_tenk_albemarle_amendment(client: TestClient, golden) -> None:
     assert body["form"] == "10-K/A"
     assert data["is_amendment"] is True
     assert data["report_period"] == "2024-12-31"
+
+    assert data["has_financials"] is True
 
     # a partial amendment: carries ONLY Item 15 (Exhibits), no other items, no EX-21 exhibit
     assert [i["item"] for i in data["items"]] == ["15"]

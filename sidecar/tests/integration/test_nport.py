@@ -2,7 +2,7 @@
 
 NPORT has ZERO XBRL -- edgar lxml-parses the submission XML into a header tree, general/fund info
 (risk metrics, monthly returns + flows) and a flat holdings list whose derivative rows carry a typed
-forward/swap/future/option/swaption sub-record. Four fixtures pin the matrix:
+forward/swap/future/option/swaption sub-record. Five fixtures pin the matrix:
 
   1ws_credit    single-series fund (NO seriesClassInfo -> null), 3 FX risk-metric currencies, a
                 floating-rate foreign bond (debt_security, conditional currency + exchange rate), a
@@ -11,6 +11,7 @@ forward/swap/future/option/swaption sub-record. Four fixtures pin the matrix:
   sands_global  multi-class equity + an EUR/USD FX FWD (forward_derivative leg)
   acadian_em    643-holding EM fund: foreign equity priced in IDR (conditional currency), a PLN FWD,
                 and a WAR whose data edgar files into option_derivative (delta "XXXX" sentinel kept)
+  pimco         large multi-series fund: swaption (SWO) derivatives with nested swap sub-records
 
 Parsed Decimals cross as floats; DebtSecurity.maturity_date (the one edgar parses) crosses as an ISO
 date; every other date stays as-filed text. The decimal_or_na "N/A" no-number sentinel -> null; a filed
@@ -28,6 +29,7 @@ _1WS = "0001752724-25-076577"  # NPORT-P, 1WS Credit Income Fund (bond + SWP + F
 _OSHAUGHNESSY = "0001145549-25-021726"  # NPORT-P, O'Shaughnessy Market Leaders Value (simple equity)
 _SANDS = "0001752724-25-075388"  # NPORT-P, Sands Capital Global Growth (equity + FX forward)
 _ACADIAN = "0001752724-25-075368"  # NPORT-P, Acadian Emerging Markets (warrant-as-option + EM foreign)
+_PIMCO = "0001099263-26-007248"  # NPORT-P, PIMCO Funds (swaption derivative, nested swap)
 
 
 @pytest.fixture(scope="module")
@@ -268,3 +270,34 @@ def test_nport_warrant_as_option_em_foreign(client: TestClient, golden) -> None:
     assert opt["delta"] == "XXXX"  # non-numeric delta sentinel kept as raw filed text
 
     golden("filing", "nport_acadian_warrant", body)
+
+
+def test_nport_swaption_derivative(client: TestClient, golden) -> None:
+    body = _nport(client, _PIMCO)
+    data = body["data"]
+    assert data["form"] == "NPORT-P"
+
+    gi = data["general_info"]
+    assert gi["cik"] == "0000810893"  # the trust CIK, not the filer CIK
+
+    invs = data["investments"]
+    # PIMCO files swaptions (SWO) with nested swap sub-records
+    swo_holdings = [i for i in invs if i["derivative_info"] and i["derivative_info"]["derivative_category"] == "SWO"]
+    assert len(swo_holdings) >= 1
+
+    swo = swo_holdings[0]
+    assert swo["derivative_info"]["swaption_derivative"] is not None
+    sd = swo["derivative_info"]["swaption_derivative"]
+    assert sd["put_or_call"] == "Call"
+    assert sd["written_or_purchased"] == "Purchased"
+    assert sd["exercise_price"] == 2.17
+    assert sd["exercise_price_currency"] == "USD"
+    assert sd["expiration_date"] == "2032-07-19"
+    assert sd["delta"] == "XXXX"  # non-numeric sentinel kept as raw filed text
+    # swaption wraps a nested swap with its own counterparty and terms
+    ns = sd["nested_swap"]
+    assert ns is not None
+    assert ns["counterparty_name"] == "MORGAN STANLEY & CO. LLC"
+    assert ns["currency"] == "USD"
+
+    golden("filing", "nport_pimco_swaption", body)

@@ -457,7 +457,7 @@ def nport_data(obj: FundReport) -> NPortData:
     return NPortData(
         form=to_str(filing.form) if filing is not None else None,
         cik=pad_cik(cik) if cik else None,
-        name=to_str(obj.name),
+        name=to_str(obj.general_info.name) if obj.general_info.series_name is None else to_str(obj.name),
         series_id=to_str(obj.series_id),
         reporting_period=to_str(obj.reporting_period),
         has_investments=obj.has_investments,

@@ -24,7 +24,7 @@ class TenKData(WireModel):
     is_amendment: bool
     report_period: date | None
     company: str | None
-    filing_date: date | None
+    filing_date: str | None
     items: list[ReportItem]
     auditor: Auditor | None  # first (current-period) auditor; null when no DEI auditor facts
     auditors: list[Auditor]

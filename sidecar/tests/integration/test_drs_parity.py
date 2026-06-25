@@ -31,6 +31,11 @@ def drs():
     return obj
 
 
+_STRUCTURAL = {
+    "underlying_object",
+}
+
+
 def test_drs_full_fidelity(drs) -> None:
     edgar_data = data_surface(drs)
     wire_fields = set(DRSData.model_fields.keys()) - {"kind"}
@@ -39,3 +44,10 @@ def test_drs_full_fidelity(drs) -> None:
 
     not_on_wire = edgar_on_wire - wire_fields
     assert not not_on_wire, f"Edgar exposes these but wire model doesn't have them — map them: {sorted(not_on_wire)}"
+
+
+def test_drs_structural_fields_present() -> None:
+    """Nested edgar BaseModels are filtered by data_surface; this guard catches schema drift."""
+    wire_fields = set(DRSData.model_fields.keys())
+    missing = _STRUCTURAL - wire_fields
+    assert not missing, f"structural fields missing from DRSData: {sorted(missing)}"

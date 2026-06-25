@@ -24,6 +24,16 @@ def proxy():
     return obj
 
 
+_TABLE_WIRE_FIELDS = {
+    "executive_compensation",
+    "pay_vs_performance",
+    "awards_close_to_mnpi",
+    "summary_compensation_table",
+    "director_compensation_table",
+    "beneficial_ownership",
+}
+
+
 def test_proxy_full_fidelity(proxy) -> None:
     edgar_data = data_surface(proxy)
     wire_fields = set(ProxyData.model_fields.keys()) - {"kind"}
@@ -32,3 +42,10 @@ def test_proxy_full_fidelity(proxy) -> None:
 
     not_on_wire = edgar_on_wire - wire_fields
     assert not not_on_wire, f"Edgar exposes these but wire model doesn't have them -- map them: {sorted(not_on_wire)}"
+
+
+def test_proxy_table_wire_fields_present() -> None:
+    """DataFrame properties are filtered by data_surface; this guard catches schema drift."""
+    wire_fields = set(ProxyData.model_fields.keys())
+    missing = _TABLE_WIRE_FIELDS - wire_fields
+    assert not missing, f"table fields missing from ProxyData: {sorted(missing)}"

@@ -2,8 +2,8 @@
 
 The three securities tables live on the object as DataFrames whose rows carry the broker and seller
 addresses. edgartools' analytical layer (totals/percentages/holding-period/10b5-1/anomaly properties)
-is derived from these rows and is excluded -- the wire carries the raw, as-filed rows so consumers
-derive their own metrics. Dates stay as-filed MM/DD/YYYY strings.
+is included alongside the raw rows -- useful computed metrics derived from the as-filed data. Dates
+stay as-filed MM/DD/YYYY strings.
 """
 
 from __future__ import annotations

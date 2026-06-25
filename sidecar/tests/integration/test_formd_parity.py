@@ -1,7 +1,8 @@
 """Parity gate: every data attribute edgar's FormD exposes is on the wire.
 
-Auto-filters methods. Compares against the actual Pydantic wire model.
-Zero hand-maintained exclusion lists.
+data_surface only discovers top-level scalar/bool properties (edgar Pydantic BaseModel
+blocks like offering_data and signature_block are filtered); the structural fields guard
+ensures those nested blocks are present on the wire model.
 """
 
 from __future__ import annotations
@@ -14,7 +15,6 @@ from app.models.forms.formd import FormDData
 
 _CENTERSEAT_D = "0002054457-25-000001"
 
-# Edgar names that map to different wire field names
 _RENAMES = {
     "offering_data": "offering",
     "signature_block": "signatures",
@@ -38,3 +38,10 @@ def test_formd_full_fidelity(form_d) -> None:
 
     not_on_wire = edgar_on_wire - wire_fields
     assert not not_on_wire, f"Edgar exposes these but wire model doesn't have them — map them: {sorted(not_on_wire)}"
+
+
+def test_formd_structural_fields_present() -> None:
+    """Nested edgar blocks are filtered by data_surface; this guard catches schema drift."""
+    wire_fields = set(FormDData.model_fields.keys())
+    for wire_name in _RENAMES.values():
+        assert wire_name in wire_fields, f"structural field {wire_name!r} missing from FormDData"

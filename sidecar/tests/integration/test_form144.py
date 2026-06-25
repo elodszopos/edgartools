@@ -3,10 +3,9 @@
 One `Form144` object backs 144 and 144/A -> one kind (`form144`); `form` is the variant (derived
 from is_amendment, since Form144 exposes no `.form`). `data` is the as-filed Rule 144 notice: issuer
 identity, the person selling + relationship, and the three XML tables (securities information / how
-acquired / sold in past 3 months) + the notice signature's 10b5-1 plan adoption dates. Derived
-analytics (totals, percentages, holding-period, 10b5-1 inference, anomaly flags) are excluded -- the
-raw rows ship instead. Dates are kept as-filed MM/DD/YYYY strings (the form permits 1933
-placeholders). Accessions span:
+acquired / sold in past 3 months) + the notice signature's 10b5-1 plan adoption dates + edgar's
+analytical layer (totals, percentages, holding-period, 10b5-1 inference, anomaly flags). Dates are
+kept as-filed MM/DD/YYYY strings (the form permits 1933 placeholders). Accessions span:
 
   abeona    standard single-security 144: 10b5-1 plan adopted, nothing_to_report true
   arbutus   144 with NO plan + a rich 12-row prior-sales table (nothing_to_report false)
@@ -65,8 +64,12 @@ def test_form144_abeona_standard_10b5_1(client: TestClient, golden) -> None:
     assert data["nothing_to_report"] is True  # real bool (edgar fix): nothing sold in past 3 months
     assert data["remarks"] is None
 
-    # 10b5-1 plan: the raw adoption date is captured (the is_10b5_1_plan inference is excluded)
+    # 10b5-1 plan: raw adoption date + edgar's analytical inference
     assert data["notice_signature"]["plan_adoption_dates"] == ["09/18/2024"]
+    assert data["is_10b5_1_plan"] is True
+    assert data["has_multiple_plans"] is False
+    assert data["days_since_plan_adoption"] is not None
+    assert data["cooling_off_compliant"] is True
     assert data["notice_signature"]["notice_date"] == "03/31/2025"
     assert data["notice_signature"]["signature"].startswith("/s/ James Weimer")
 
@@ -95,6 +98,15 @@ def test_form144_abeona_standard_10b5_1(client: TestClient, golden) -> None:
     assert all(row["is_gift"] == "N" for row in data["securities_to_be_sold"])
     # nothing sold in past 3 months -> empty table (and nothing_to_report 'Y')
     assert data["securities_sold_past_3_months"] == []
+
+    # aggregation scalars from edgar's analytical layer
+    assert data["num_securities"] == 1
+    assert data["is_multi_security"] is False
+    assert data["total_units_to_be_sold"] == 25000
+    assert data["total_market_value"] == 119560.0
+    assert data["is_short_hold"] is False
+    assert data["is_large_liquidation"] is False
+    assert data["anomaly_flags"] == []
 
     golden("filing", "form144_abeona", _data(client, _ABEONA))
 
@@ -154,6 +166,8 @@ def test_form144_red_robin_amendment_multi_security(client: TestClient, golden) 
     assert data["remarks"].startswith("This Form 144/A amends the Form 144 filed on March 13, 2025")
 
     # MULTI-security: four distinct securitiesInformation rows (different approx sale dates)
+    assert data["num_securities"] == 4
+    assert data["is_multi_security"] is True
     secs = data["securities_information"]
     assert len(secs) == 4
     assert all(s["security_class"] == "Common Stock" for s in secs)

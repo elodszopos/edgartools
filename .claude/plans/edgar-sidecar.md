@@ -278,29 +278,29 @@ Commit per unit on green: `git add <unit files> && git commit -m "sidecar: U## <
 | U32 | P3 | `/financials/multi` (XBRLS) + `/financials/ttm` | confirmed |
 | U33 | P3 | `/facts` + `/facts/concept/{c}` + `/facts/search` (preserve form/filed/accn) | confirmed |
 | U34 | P3 | `/filing/{accession}/xbrl` per-filing statements | confirmed |
-| U40 | P4 | Form 4 typed data (ownership base machinery shared with 3/5) | done |
-| U41 | P4 | Form 3 | done |
-| U42 | P4 | Form 5 | done |
-| U43 | P4 | 8-K + 6-K/CurrentReport | done |
-| U44 | P4 | SC 13D + SC 13G | done |
-| U45 | P4 | 13F (single-filing holdings; D3 resolved no auto-merge) | done |
-| U46 | P4 | 10-K (items/sections/auditor + financials linkage) | done |
-| U47 | P4 | 10-Q | done |
-| U48 | P4 | 20-F + 40-F | done |
-| U49 | P4 | Form 144 | done |
-| U50 | P4 | Form D | done |
-| U51 | P4 | Form C (+C-U/C-AR/C-TR) | done |
-| U52a | P4 | Proxy foundation: full ProxyStatement model+converter+dispatch+parity+core fixtures (DEF 14A w/ XBRL+HTML tables, degraded/no-XBRL) +codegen | done |
-| U52b | P4 | Proxy edge-case matrix: DEFM14A merger / DEFC14A contested / PRE 14A preliminary / DFAN14A dissident / PX14A6G exempt fixtures + ground-truth comp assertions | done |
-| U53a | P4 | S-1 + F-1 (RegistrationS1) + shared offering nested models (offering.py) | done |
-| U54 | P4 | S-3 family | done |
-| U53b | P4 | DRS (wraps S-1/S-3 -> embeds U53a+U54 converters; runs AFTER U54 by dependency) | done |
-| U55a | P4 | 424B family (Prospectus424B): B1/B2/B3/B4/B5/B7/B8 + structured notes + ATM + resale | done |
-| U55b | P4 | 497K (Prospectus497K) fund summary prospectus | done |
-| U56 | P4 | NPORT FundReport | done |
-| U57a | P4 | N-MFP (MoneyMarketFund: N-MFP2 + N-MFP3) | done |
-| U57b | P4 | N-CEN (FundCensus) | done |
-| U57c | P4 | N-CSR (FundShareholderReport) | in-progress |
+| U40 | P4 | Form 4 typed data (ownership base machinery shared with 3/5) | confirmed |
+| U41 | P4 | Form 3 | confirmed |
+| U42 | P4 | Form 5 | confirmed |
+| U43 | P4 | 8-K + 6-K/CurrentReport | confirmed |
+| U44 | P4 | SC 13D + SC 13G | confirmed |
+| U45 | P4 | 13F (single-filing holdings; D3 resolved no auto-merge) | confirmed |
+| U46 | P4 | 10-K (items/sections/auditor + financials linkage) | confirmed |
+| U47 | P4 | 10-Q | confirmed |
+| U48 | P4 | 20-F + 40-F | confirmed |
+| U49 | P4 | Form 144 | confirmed |
+| U50 | P4 | Form D | confirmed |
+| U51 | P4 | Form C (+C-U/C-AR/C-TR) | confirmed |
+| U52a | P4 | Proxy foundation: full ProxyStatement model+converter+dispatch+parity+core fixtures (DEF 14A w/ XBRL+HTML tables, degraded/no-XBRL) +codegen | confirmed |
+| U52b | P4 | Proxy edge-case matrix: DEFM14A merger / DEFC14A contested / PRE 14A preliminary / DFAN14A dissident / PX14A6G exempt fixtures + ground-truth comp assertions | confirmed |
+| U53a | P4 | S-1 + F-1 (RegistrationS1) + shared offering nested models (offering.py) | confirmed |
+| U54 | P4 | S-3 family | confirmed |
+| U53b | P4 | DRS (wraps S-1/S-3 -> embeds U53a+U54 converters; runs AFTER U54 by dependency) | confirmed |
+| U55a | P4 | 424B family (Prospectus424B): B1/B2/B3/B4/B5/B7/B8 + structured notes + ATM + resale | confirmed |
+| U55b | P4 | 497K (Prospectus497K) fund summary prospectus | confirmed |
+| U56 | P4 | NPORT FundReport | confirmed |
+| U57a | P4 | N-MFP (MoneyMarketFund: N-MFP2 + N-MFP3) | confirmed |
+| U57b | P4 | N-CEN (FundCensus) | confirmed |
+| U57c | P4 | N-CSR (FundShareholderReport) | done |
 | U57d | P4 | N-PX (proxy voting record) | todo |
 | U58 | P4 | EFFECT + 10-D (CMBS) | todo |
 | U60 | P5 | Full sweep: all goldens x Zod strict, openapi snapshot, docker build + container `/health`, fixture census in README | todo |
@@ -384,3 +384,5 @@ U56 | done | NPORT-P/EX (+N-PORT/A) -> ONE FundReport -> kind=nport via NPORT_FO
 U57a | done | N-MFP2+N-MFP3 (+/A) -> ONE MoneyMarketFund -> kind=nmfp via MONEY_MARKET_FORMS; BOTH schema versions parse to the SAME object. ZERO XBRL (lxml). Stored structs general_info/series_info/share_classes[]/securities[] (securities nest ratings[]+repo_agreement->collateral[]); parity = U56 pattern. GOTCHA v2: null registrant/series, synthetic ts labels (week_N/null) vs v3 ISO, cusip->otherUniqueId. GOTCHA ratings: edgar reads ONLY security-level assigningNRSRORating (NOT demand-feature/guarantee NRSRO); empty=correct, not an edgar bug. FIXTURE: v2 forces pre-mid-2024 filing -> 2023 form.gz index (~5MB, normal). G7: U57b/c/d next. See test_nmfp.py.
 
 U57b | done | N-CEN (+/A) -> ONE FundCensus -> kind=ncen via NCEN_FORMS. ZERO XBRL (lxml). 5 stored structs: report_date, is_period_lt_12_months, registrant (governance), series[] (deep per-series tree: provider lists + brokers + principal_transactions + securities_lending + line_of_credit + etf_info->authorized_participants), signature_info; parity = U56 pattern. GOTCHA: line_of_credit.is_committed is as-filed TEXT (Committed/Uncommitted) NOT bool. GOTCHA: BrokerDealer/Accountant file_number+lei keep literal 'N/A' (edgar _text not _clean_na; only CRD nulled). is_diversified tri-state bool|None. FIXTURE: etf_info needs an ETF trust; liquidity_providers empty (in-house norm). G7: U57c/d next. See test_ncen.py.
+
+U57c | done | N-CSR + N-CSRS (+/A) -> ONE FundShareholderReport -> kind=ncsr via NCSR_FORMS. UNLIKE all other fund forms (NPORT/N-MFP/N-CEN = lxml zero-XBRL), N-CSR carries Inline XBRL in the open-end-fund (oef:) taxonomy via filing.xbrl() + FactQuery. Only open-end funds carry this taxonomy; closed-end/BDC filings return obj()=None -> data=null. A single filing covers a WHOLE TRUST: funds[] (one NcsrFund per SEC series), each with net_assets/portfolio_turnover/advisory_fees_paid/holdings_count and share_classes[]. Identity (series_id/fund_name/class_id/class_name/class_ticker) is authoritative SGML from the header (app/sgml_series.py parses SERIES-AND-CLASSES-CONTRACTS-DATA); figures are oef facts keyed by ClassAxis dimension. The converter bypasses edgar's flat object and builds from SGML+XBRL directly. GOTCHA: oef:HoldingPctOfNav is never tagged by filers -- holdings_count is populated but holdings[] is always empty (the per-holding data lives in unstructured HTML, not oef XBRL). GOTCHA: load classes report each annual-return horizon twice (standardized max-load + without-sales-load), keyed by SalesLoadAxis; no-load classes report once. GOTCHA: single-class funds file facts undimensioned (no ClassAxis). FIXTURES: bny_muni (annual, 1 fund, 5 classes, load+no-load returns), gator (annual, 1 fund, 1 class, authoritative SGML name), bny_intl (N-CSRS semi-annual, 3-fund trust, anti-flattening), emkt (N-CSR/A amendment dispatch). See test_ncsr.py + test_ncsr_parity.py.

@@ -32,14 +32,7 @@ from app.models.forms.prospectus_424b import (
     Prospectus424BPricingColumn,
     Prospectus424BStructuredNote,
 )
-from app.serialize import to_date, to_int, to_str
-
-
-def _date_str(value: Any) -> str | None:
-    if isinstance(value, str):
-        return to_str(value)
-    parsed = to_date(value)
-    return parsed.isoformat() if parsed is not None else None
+from app.serialize import to_date, to_int, to_iso_str, to_str
 
 
 def _terms_dict(raw: dict[Any, Any] | None) -> dict[str, str | None]:
@@ -150,7 +143,7 @@ def prospectus_424b_data(obj: Prospectus424B) -> Prospectus424BData:
     return Prospectus424BData(
         form=obj.form,
         company=to_str(obj.company),
-        filing_date=_date_str(obj.filing_date),
+        filing_date=to_iso_str(obj.filing_date),
         accession_number=to_str(obj.accession_number),
         is_amendment=bool(obj.is_amendment),
         amendment_number=to_int(obj.amendment_number),

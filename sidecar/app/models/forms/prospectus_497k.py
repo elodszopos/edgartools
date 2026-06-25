@@ -8,11 +8,11 @@ not duplicated here. Fees and the $10K expense example are one `Prospectus497KSh
 class; the average-annual-returns rows mirror edgar's `PerformanceReturn`.
 
 `performance_returns` is read from edgar's backing list, NOT from the public `performance` DataFrame:
-that DataFrame is a lossy view (it drops `inception_date`). The convenience derivations edgar layers on
-top -- `tickers` / `class_ids` (lists pulled off the share classes), `num_share_classes` (a length),
-and the `fees` / `expense_example` DataFrame views (rows already captured in `share_classes`) -- are
-not mapped (they duplicate data already present in the share_classes list). Parsed Decimal cells cross
-the wire as floats (the U53a rule: floats where edgar parsed), the expense-example dollars as ints.
+that DataFrame is a lossy view (it drops `inception_date`). `tickers`, `class_ids`, and
+`num_share_classes` ARE mapped as flat convenience fields; only the DataFrame views (`fees` /
+`expense_example` / `performance`) are excluded (their row data is already in `share_classes` /
+`performance_returns`). Parsed Decimal cells cross the wire as floats (the U53a rule: floats where
+edgar parsed), the expense-example dollars as ints.
 """
 
 from __future__ import annotations

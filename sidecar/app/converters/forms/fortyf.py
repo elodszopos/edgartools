@@ -1,10 +1,10 @@
 """edgar `FortyF` (Form 40-F) -> `FortyFData`, explicit field-by-field.
 
-Maps the wrapper's own bounded artifacts -- `form` + `period_of_report` (header) and
-`auditors`/`has_financials` (the 40-F wrapper's own iXBRL). Does NOT touch `obj.items` /
-`obj.aif_*` / `obj.mda_*` / the AIF section properties: those download the AIF exhibit and
-content-sniff candidate EX-99 documents (separate per-document SEC fetches). The AIF / MD&A are
-served via /attachments + /content + /sections.
+Maps the wrapper's own bounded artifacts plus AIF section text: `form` + `period_of_report`
+(header), `auditors`/`has_financials` (the 40-F wrapper's own iXBRL), and named AIF sections
+(`obj.items`, `obj.business`, `obj[name]`) whose first access downloads the AIF exhibit (cached).
+Raw-format properties (`aif_html`, `aif_text`, `mda_html`, `mda_text`, `mda_attachment`) are
+excluded from the wire -- they're source content, not parsed structured data.
 """
 
 from __future__ import annotations
@@ -20,7 +20,7 @@ def _section(obj: Any, name: str) -> str | None:
     try:
         val = obj[name]
         return to_str(val) if val else None
-    except Exception:
+    except (KeyError, TypeError, AttributeError, IndexError):
         return None
 
 

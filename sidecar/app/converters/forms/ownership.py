@@ -12,8 +12,6 @@ from __future__ import annotations
 
 from typing import Any
 
-from bs4 import BeautifulSoup, Tag
-from edgar._filings import Filing
 from edgar.ownership import Ownership
 
 from app.models.common import Address as WireAddress
@@ -51,10 +49,9 @@ def _footnote_ids(value: Any) -> list[str]:
 
 
 def _footnotes(footnotes: Any) -> dict[str, str]:
-    # edgar's Footnotes wraps a plain id->text dict (no public accessor); the parity + integration
-    # tests assert real footnote text, so a rename here fails loudly rather than silently emptying
-    raw = getattr(footnotes, "_footnotes", None)
-    return {str(k): str(v) for k, v in raw.items()} if isinstance(raw, dict) else {}
+    if footnotes is None or len(footnotes) == 0:
+        return {}
+    return {str(k): str(v) for k, v in footnotes.items()}
 
 
 def _address(address: Any) -> WireAddress | None:
@@ -151,24 +148,7 @@ def _signature(sig: Any) -> OwnerSignature:
     return OwnerSignature(signature=sig.signature, date=sig.date)
 
 
-def _aff_10b5_one(filing: Filing) -> bool | None:
-    # document-level Rule 10b5-1 trading-plan checkbox (aff10b5One); edgar's public Ownership object
-    # does not surface it, so read it straight from the form XML. Parsed with edgar's own parser
-    # (BeautifulSoup "xml") to stay in lockstep with how obj() read the same document. Element text is
-    # "1"/"0" (also "true"/"false") -> to_bool; element absent (older forms) -> null.
-    xml = filing.xml()
-    if xml is None:
-        return None
-    root = BeautifulSoup(xml, "xml").find("ownershipDocument")
-    if not isinstance(root, Tag):
-        return None
-    el = root.find("aff10b5One")
-    if not isinstance(el, Tag):
-        return None
-    return to_bool(el.text)
-
-
-def ownership_data(obj: Ownership, filing: Filing) -> OwnershipData:
+def ownership_data(obj: Ownership) -> OwnershipData:
     non_deriv = obj.non_derivative_table
     deriv = obj.derivative_table
     return OwnershipData(
@@ -188,8 +168,8 @@ def ownership_data(obj: Ownership, filing: Filing) -> OwnershipData:
         reporting_period=to_str(obj.reporting_period),
         remarks=to_str(obj.remarks),
         no_securities=bool(obj.no_securities),
-        aff_10b5_one=_aff_10b5_one(filing),
+        aff_10b5_one=obj.aff_10b5_one,
         insider_name=to_str(obj.insider_name),
         position=to_str(obj.position),
-        shares_traded=int(obj.shares_traded) if obj.shares_traded else None,
+        shares_traded=int(obj.shares_traded) if obj.shares_traded is not None else None,
     )

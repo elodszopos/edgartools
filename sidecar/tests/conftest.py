@@ -131,11 +131,17 @@ def _is_ci() -> bool:
     return os.environ.get("CI", "").strip().lower() in ("1", "true", "yes")
 
 
+_DAYS_SENTINEL = -999
+
+
 def _normalize_for_golden(endpoint: str, obj: Any) -> Any:
-    # Strip the volatile edgartools version out of the health payload before compare/write so a
-    # release bump never drifts the golden.
+    # Strip volatile runtime-computed values before compare/write so time-drift never breaks goldens.
     if endpoint == "health" and isinstance(obj, dict) and "edgartools_version" in obj:
         return {**obj, "edgartools_version": _VERSION_SENTINEL}
+    if endpoint == "filing" and isinstance(obj, dict):
+        data = obj.get("data")
+        if isinstance(data, dict) and data.get("kind") == "formc" and "days_to_deadline" in data:
+            return {**obj, "data": {**data, "days_to_deadline": _DAYS_SENTINEL, "is_expired": True}}
     return obj
 
 

@@ -5,9 +5,9 @@ securities. One `Form144` object backs 144 and 144/A -> one kind (`form144`); `f
 issuer, and the three XML tables -- securities information (what's being sold), how those securities
 were acquired, and any sales in the past 3 months -- plus the notice signature (10b5-1 plan adoption
 dates). edgartools' analytical layer (totals, percentages, holding-period math, 10b5-1 inference,
-anomaly flags) is client-derivable from these raw rows and is excluded (parity gate). Date fields
-are kept as filed (MM/DD/YYYY free-text strings, including the form's 1933 placeholder dates), NOT
-ISO-coerced -- the form permits partial/placeholder dates and edgar stores them raw.
+anomaly flags) is included alongside the raw rows -- useful computed metrics from the parsed data.
+Date fields are kept as filed (MM/DD/YYYY free-text strings, including the form's 1933 placeholder
+dates), NOT ISO-coerced -- the form permits partial/placeholder dates and edgar stores them raw.
 """
 
 from __future__ import annotations
@@ -103,7 +103,7 @@ class Form144Data(WireModel):
     notice_signature: Form144Signature | None
     # aggregation scalars from edgar's analytical layer
     num_securities: int | None
-    is_multi_security: bool | None
+    is_multi_security: bool
     total_units_to_be_sold: int | None
     total_market_value: float | None
     total_amount_acquired: int | None
@@ -122,11 +122,11 @@ class Form144Data(WireModel):
     holding_period_days: int | None
     holding_period_years: float | None
     # 10b5-1 plan and compliance
-    is_10b5_1_plan: bool | None
-    has_multiple_plans: bool | None
+    is_10b5_1_plan: bool
+    has_multiple_plans: bool
     days_since_plan_adoption: int | None
     cooling_off_compliant: bool | None
     # anomaly detection
-    is_short_hold: bool | None
-    is_large_liquidation: bool | None
+    is_short_hold: bool
+    is_large_liquidation: bool
     anomaly_flags: list[str]

@@ -2384,133 +2384,6 @@
         "title": "Auditor",
         "description": "One audit firm from the XBRL DEI facts. A filing carries several when it reports an\nauditor change -- current + prior, each tagged on its own period context."
       },
-      "BeneficialOwner": {
-        "properties": {
-          "cik": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Cik"
-          },
-          "name": {
-            "type": "string",
-            "title": "Name"
-          },
-          "citizenship": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Citizenship"
-          },
-          "sole_voting_power": {
-            "type": "integer",
-            "title": "Sole Voting Power"
-          },
-          "shared_voting_power": {
-            "type": "integer",
-            "title": "Shared Voting Power"
-          },
-          "sole_dispositive_power": {
-            "type": "integer",
-            "title": "Sole Dispositive Power"
-          },
-          "shared_dispositive_power": {
-            "type": "integer",
-            "title": "Shared Dispositive Power"
-          },
-          "aggregate_amount": {
-            "type": "integer",
-            "title": "Aggregate Amount"
-          },
-          "percent_of_class": {
-            "type": "number",
-            "title": "Percent Of Class"
-          },
-          "type_of_reporting_person": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Type Of Reporting Person"
-          },
-          "fund_type": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Fund Type"
-          },
-          "comment": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Comment"
-          },
-          "member_of_group": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Member Of Group"
-          },
-          "is_aggregate_exclude_shares": {
-            "type": "boolean",
-            "title": "Is Aggregate Exclude Shares"
-          },
-          "no_cik": {
-            "type": "boolean",
-            "title": "No Cik"
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "required": [
-          "cik",
-          "name",
-          "citizenship",
-          "sole_voting_power",
-          "shared_voting_power",
-          "sole_dispositive_power",
-          "shared_dispositive_power",
-          "aggregate_amount",
-          "percent_of_class",
-          "type_of_reporting_person",
-          "fund_type",
-          "comment",
-          "member_of_group",
-          "is_aggregate_exclude_shares",
-          "no_cik"
-        ],
-        "title": "BeneficialOwner",
-        "description": "One reporting person from the cover page (joint filers -> multiple).\n\n13G never carries the person CIK on the cover page (always null); 13D usually does."
-      },
       "CompanyInfo": {
         "properties": {
           "name": {
@@ -3662,7 +3535,8 @@
                 "type": "null"
               }
             ],
-            "title": "Balance Sheet"
+            "title": "Balance Sheet",
+            "description": "Reserved; financial statements served at GET /filing/{accession}/xbrl"
           },
           "income_statement": {
             "anyOf": [
@@ -3673,7 +3547,8 @@
                 "type": "null"
               }
             ],
-            "title": "Income Statement"
+            "title": "Income Statement",
+            "description": "Reserved; financial statements served at GET /filing/{accession}/xbrl"
           },
           "cash_flow_statement": {
             "anyOf": [
@@ -3684,7 +3559,8 @@
                 "type": "null"
               }
             ],
-            "title": "Cash Flow Statement"
+            "title": "Cash Flow Statement",
+            "description": "Reserved; financial statements served at GET /filing/{accession}/xbrl"
           },
           "exhibits": {
             "items": {
@@ -3708,9 +3584,6 @@
           "auditor",
           "has_press_release",
           "has_earnings",
-          "balance_sheet",
-          "income_statement",
-          "cash_flow_statement",
           "exhibits"
         ],
         "title": "EightKData",
@@ -5990,14 +5863,7 @@
             "title": "Num Securities"
           },
           "is_multi_security": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "type": "boolean",
             "title": "Is Multi Security"
           },
           "total_units_to_be_sold": {
@@ -6166,25 +6032,11 @@
             "title": "Holding Period Years"
           },
           "is_10b5_1_plan": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "type": "boolean",
             "title": "Is 10B5 1 Plan"
           },
           "has_multiple_plans": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "type": "boolean",
             "title": "Has Multiple Plans"
           },
           "days_since_plan_adoption": {
@@ -6210,25 +6062,11 @@
             "title": "Cooling Off Compliant"
           },
           "is_short_hold": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "type": "boolean",
             "title": "Is Short Hold"
           },
           "is_large_liquidation": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "type": "boolean",
             "title": "Is Large Liquidation"
           },
           "anomaly_flags": {
@@ -6564,212 +6402,79 @@
       "FormCAnnualReport": {
         "properties": {
           "current_employees": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "type": "integer",
             "title": "Current Employees"
           },
           "total_asset_most_recent_fiscal_year": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "type": "number",
             "title": "Total Asset Most Recent Fiscal Year"
           },
           "total_asset_prior_fiscal_year": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "type": "number",
             "title": "Total Asset Prior Fiscal Year"
           },
           "cash_equi_most_recent_fiscal_year": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "type": "number",
             "title": "Cash Equi Most Recent Fiscal Year"
           },
           "cash_equi_prior_fiscal_year": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "type": "number",
             "title": "Cash Equi Prior Fiscal Year"
           },
           "act_received_most_recent_fiscal_year": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "type": "number",
             "title": "Act Received Most Recent Fiscal Year"
           },
           "act_received_prior_fiscal_year": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "type": "number",
             "title": "Act Received Prior Fiscal Year"
           },
           "short_term_debt_most_recent_fiscal_year": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "type": "number",
             "title": "Short Term Debt Most Recent Fiscal Year"
           },
           "short_term_debt_prior_fiscal_year": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "type": "number",
             "title": "Short Term Debt Prior Fiscal Year"
           },
           "long_term_debt_most_recent_fiscal_year": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "type": "number",
             "title": "Long Term Debt Most Recent Fiscal Year"
           },
           "long_term_debt_prior_fiscal_year": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "type": "number",
             "title": "Long Term Debt Prior Fiscal Year"
           },
           "revenue_most_recent_fiscal_year": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "type": "number",
             "title": "Revenue Most Recent Fiscal Year"
           },
           "revenue_prior_fiscal_year": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "type": "number",
             "title": "Revenue Prior Fiscal Year"
           },
           "cost_goods_sold_most_recent_fiscal_year": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "type": "number",
             "title": "Cost Goods Sold Most Recent Fiscal Year"
           },
           "cost_goods_sold_prior_fiscal_year": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "type": "number",
             "title": "Cost Goods Sold Prior Fiscal Year"
           },
           "tax_paid_most_recent_fiscal_year": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "type": "number",
             "title": "Tax Paid Most Recent Fiscal Year"
           },
           "tax_paid_prior_fiscal_year": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "type": "number",
             "title": "Tax Paid Prior Fiscal Year"
           },
           "net_income_most_recent_fiscal_year": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "type": "number",
             "title": "Net Income Most Recent Fiscal Year"
           },
           "net_income_prior_fiscal_year": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "type": "number",
             "title": "Net Income Prior Fiscal Year"
           },
           "offering_jurisdictions": {
@@ -12345,25 +12050,11 @@
             "title": "Classification Type"
           },
           "is_etf_company": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "type": "boolean",
             "title": "Is Etf Company"
           },
           "num_series": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "type": "integer",
             "title": "Num Series"
           },
           "series_ids": {
@@ -18981,25 +18672,11 @@
             ]
           },
           "is_effective": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "type": "null",
             "title": "Is Effective"
           },
           "effective_date": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "type": "null",
             "title": "Effective Date"
           },
           "related_filings": {
@@ -19637,7 +19314,7 @@
           },
           "reporting_persons": {
             "items": {
-              "$ref": "#/components/schemas/BeneficialOwner"
+              "$ref": "#/components/schemas/Schedule13Owner"
             },
             "type": "array",
             "title": "Reporting Persons"
@@ -19982,7 +19659,7 @@
           },
           "reporting_persons": {
             "items": {
-              "$ref": "#/components/schemas/BeneficialOwner"
+              "$ref": "#/components/schemas/Schedule13Owner"
             },
             "type": "array",
             "title": "Reporting Persons"
@@ -20361,6 +20038,133 @@
         ],
         "title": "Schedule13Issuer",
         "description": "The subject company whose securities are reported."
+      },
+      "Schedule13Owner": {
+        "properties": {
+          "cik": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cik"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "citizenship": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Citizenship"
+          },
+          "sole_voting_power": {
+            "type": "integer",
+            "title": "Sole Voting Power"
+          },
+          "shared_voting_power": {
+            "type": "integer",
+            "title": "Shared Voting Power"
+          },
+          "sole_dispositive_power": {
+            "type": "integer",
+            "title": "Sole Dispositive Power"
+          },
+          "shared_dispositive_power": {
+            "type": "integer",
+            "title": "Shared Dispositive Power"
+          },
+          "aggregate_amount": {
+            "type": "integer",
+            "title": "Aggregate Amount"
+          },
+          "percent_of_class": {
+            "type": "number",
+            "title": "Percent Of Class"
+          },
+          "type_of_reporting_person": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Type Of Reporting Person"
+          },
+          "fund_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fund Type"
+          },
+          "comment": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Comment"
+          },
+          "member_of_group": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Member Of Group"
+          },
+          "is_aggregate_exclude_shares": {
+            "type": "boolean",
+            "title": "Is Aggregate Exclude Shares"
+          },
+          "no_cik": {
+            "type": "boolean",
+            "title": "No Cik"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "cik",
+          "name",
+          "citizenship",
+          "sole_voting_power",
+          "shared_voting_power",
+          "sole_dispositive_power",
+          "shared_dispositive_power",
+          "aggregate_amount",
+          "percent_of_class",
+          "type_of_reporting_person",
+          "fund_type",
+          "comment",
+          "member_of_group",
+          "is_aggregate_exclude_shares",
+          "no_cik"
+        ],
+        "title": "Schedule13Owner",
+        "description": "One reporting person from the cover page (joint filers -> multiple).\n\n13G never carries the person CIK on the cover page (always null); 13D usually does."
       },
       "Schedule13Security": {
         "properties": {
@@ -21942,8 +21746,7 @@
           "filing_date": {
             "anyOf": [
               {
-                "type": "string",
-                "format": "date"
+                "type": "string"
               },
               {
                 "type": "null"

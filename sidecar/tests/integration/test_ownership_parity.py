@@ -24,10 +24,14 @@ from app.models.forms.ownership import OwnershipData
 
 _IONIS = "0000874015-26-000183"
 
-# Structural splits: one edgar attribute becomes multiple wire fields
-_SPLITS = {
-    "non_derivative_table": {"non_derivative_holdings", "non_derivative_transactions"},
-    "derivative_table": {"derivative_holdings", "derivative_transactions"},
+# Table-based wire fields: one edgar compound container becomes multiple typed lists on the wire.
+# data_surface filters these containers (non-dataclass edgar objects), so the introspection gate
+# cannot discover them automatically. This explicit set guarantees they exist on the wire model.
+_TABLE_WIRE_FIELDS = {
+    "non_derivative_holdings",
+    "non_derivative_transactions",
+    "derivative_holdings",
+    "derivative_transactions",
 }
 
 
@@ -60,13 +64,17 @@ def test_ownership_full_fidelity(ownership) -> None:
 
     edgar_on_wire: set[str] = set()
     for attr in edgar_data - tabular:
-        if attr in _SPLITS:
-            edgar_on_wire.update(_SPLITS[attr])
-        else:
-            edgar_on_wire.add(attr)
+        edgar_on_wire.add(attr)
 
     not_on_wire = edgar_on_wire - wire_fields
     assert not not_on_wire, f"Edgar exposes these but wire model doesn't have them — map them: {sorted(not_on_wire)}"
+
+
+def test_table_wire_fields_present() -> None:
+    """Explicit guard: table-based fields exist on the wire model (data_surface can't discover them)."""
+    wire_fields = set(OwnershipData.model_fields.keys())
+    missing = _TABLE_WIRE_FIELDS - wire_fields
+    assert not missing, f"table wire fields missing from OwnershipData: {sorted(missing)}"
 
 
 def test_non_derivative_holding_fields_captured() -> None:
