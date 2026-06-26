@@ -35,12 +35,14 @@ from app.converters.common import document_ref
 from app.converters.forms.drs import drs_data
 from app.converters.forms.eightk import eight_k_data
 from app.converters.forms.form144 import form_144_data
+from app.converters.forms.effect import effect_data
 from app.converters.forms.formc import form_c_data
 from app.converters.forms.formd import form_d_data
 from app.converters.forms.fortyf import forty_f_data
 from app.converters.forms.ncen import ncen_data
 from app.converters.forms.ncsr import ncsr_data
 from app.converters.forms.nmfp import nmfp_data
+from app.converters.forms.npx import npx_data
 from app.converters.forms.nport import nport_data
 from app.converters.forms.ownership import ownership_data
 from app.converters.forms.prospectus_424b import prospectus_424b_data
@@ -364,6 +366,12 @@ _DATA_BUILDERS: list[tuple[list[str], Callable[..., FilingData]]] = [
     # BEFORE obj() keeps the (legitimate) xbrl() parse scoped to N-CSR; a non-open-end filer with no
     # oef XBRL -> from_filing returns None -> data=null.
     (NCSR_FORMS, ncsr_data),  # U57c
+    # U57d N-PX proxy voting record: edgar doesn't export NPX_FORMS; explicit list, matches_form
+    # auto-expands to the "/A" amendment (N-PX/A)
+    (["N-PX"], npx_data),  # U57d N-PX proxy voting record
+    # U58 EFFECT: SEC effectiveness notice. No "/A" variant -- EFFECT is itself the terminal notice.
+    # edgar parses from the primary XML (not SGML); from_xml returns None on parse failure -> data=null.
+    (["EFFECT"], effect_data),  # U58 EFFECT
 ]
 
 

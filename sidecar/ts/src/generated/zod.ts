@@ -443,6 +443,27 @@ export const DocumentRef = zod.strictObject({
 export type DocumentRef = zod.input<typeof DocumentRef>;
 export type DocumentRefOutput = zod.output<typeof DocumentRef>;
 
+export const effectDataKindDefault = `effect`;
+export const effectDataCikOneRegExp = new RegExp('^\\d{10}$');
+
+
+export const EffectData = zod.strictObject({
+  "kind": zod.literal("effect").default(effectDataKindDefault),
+  "form": zod.union([zod.string(),zod.null()]),
+  "cik": zod.union([zod.string().regex(effectDataCikOneRegExp),zod.null()]),
+  "submission_type": zod.union([zod.string(),zod.null()]),
+  "is_live": zod.boolean(),
+  "schema_version": zod.union([zod.string(),zod.null()]),
+  "effective_date": zod.union([zod.string(),zod.null()]),
+  "entity": zod.union([zod.string(),zod.null()]),
+  "source_submission_type": zod.union([zod.string(),zod.null()]),
+  "source_accession_no": zod.union([zod.string(),zod.null()]),
+  "source_file_number": zod.union([zod.string(),zod.null()])
+});
+
+export type EffectData = zod.input<typeof EffectData>;
+export type EffectDataOutput = zod.output<typeof EffectData>;
+
 export const EightKItem = zod.strictObject({
   "item": zod.string(),
   "title": zod.union([zod.string(),zod.null()])
@@ -2754,6 +2775,133 @@ export const NcsrData = zod.strictObject({
 export type NcsrData = zod.input<typeof NcsrData>;
 export type NcsrDataOutput = zod.output<typeof NcsrData>;
 
+export const NpxIncludedManager = zod.strictObject({
+  "serial_no": zod.string(),
+  "form13f_file_number": zod.union([zod.string(),zod.null()]),
+  "name": zod.string(),
+  "sec_file_number": zod.union([zod.string(),zod.null()])
+});
+
+export type NpxIncludedManager = zod.input<typeof NpxIncludedManager>;
+export type NpxIncludedManagerOutput = zod.output<typeof NpxIncludedManager>;
+
+export const NpxClassInfo = zod.strictObject({
+  "class_id": zod.string()
+});
+
+export type NpxClassInfo = zod.input<typeof NpxClassInfo>;
+export type NpxClassInfoOutput = zod.output<typeof NpxClassInfo>;
+
+export const NpxReportSeriesClassInfo = zod.strictObject({
+  "series_id": zod.string(),
+  "class_infos": zod.array(NpxClassInfo)
+});
+
+export type NpxReportSeriesClassInfo = zod.input<typeof NpxReportSeriesClassInfo>;
+export type NpxReportSeriesClassInfoOutput = zod.output<typeof NpxReportSeriesClassInfo>;
+
+export const NpxSeriesReport = zod.strictObject({
+  "id_of_series": zod.string(),
+  "name_of_series": zod.union([zod.string(),zod.null()]),
+  "lei_of_series": zod.union([zod.string(),zod.null()])
+});
+
+export type NpxSeriesReport = zod.input<typeof NpxSeriesReport>;
+export type NpxSeriesReportOutput = zod.output<typeof NpxSeriesReport>;
+
+export const NpxVoteCategory = zod.strictObject({
+  "category_type": zod.string()
+});
+
+export type NpxVoteCategory = zod.input<typeof NpxVoteCategory>;
+export type NpxVoteCategoryOutput = zod.output<typeof NpxVoteCategory>;
+
+export const NpxVoteRecord = zod.strictObject({
+  "how_voted": zod.string(),
+  "shares_voted": zod.number(),
+  "management_recommendation": zod.string()
+});
+
+export type NpxVoteRecord = zod.input<typeof NpxVoteRecord>;
+export type NpxVoteRecordOutput = zod.output<typeof NpxVoteRecord>;
+
+export const NpxProxyVote = zod.strictObject({
+  "issuer_name": zod.string(),
+  "meeting_date": zod.union([zod.string(),zod.null()]),
+  "vote_description": zod.string(),
+  "shares_voted": zod.number(),
+  "shares_on_loan": zod.number(),
+  "cusip": zod.union([zod.string(),zod.null()]),
+  "isin": zod.union([zod.string(),zod.null()]),
+  "figi": zod.union([zod.string(),zod.null()]),
+  "other_vote_description": zod.union([zod.string(),zod.null()]),
+  "vote_source": zod.union([zod.string(),zod.null()]),
+  "vote_series": zod.union([zod.string(),zod.null()]),
+  "vote_other_info": zod.union([zod.string(),zod.null()]),
+  "vote_categories": zod.array(NpxVoteCategory),
+  "vote_records": zod.array(NpxVoteRecord),
+  "other_managers": zod.array(zod.string())
+});
+
+export type NpxProxyVote = zod.input<typeof NpxProxyVote>;
+export type NpxProxyVoteOutput = zod.output<typeof NpxProxyVote>;
+
+export const npxDataKindDefault = `npx`;
+export const npxDataCikOneRegExp = new RegExp('^\\d{10}$');
+
+
+export const NpxData = zod.strictObject({
+  "kind": zod.literal("npx").default(npxDataKindDefault),
+  "form": zod.union([zod.string(),zod.null()]),
+  "cik": zod.union([zod.string().regex(npxDataCikOneRegExp),zod.null()]),
+  "fund_name": zod.union([zod.string(),zod.null()]),
+  "period_of_report": zod.union([zod.string(),zod.null()]),
+  "report_calendar_year": zod.union([zod.string(),zod.null()]),
+  "submission_type": zod.union([zod.string(),zod.null()]),
+  "is_amendment": zod.boolean(),
+  "report_type": zod.union([zod.string(),zod.null()]),
+  "address": zod.union([zod.string(),zod.null()]),
+  "phone_number": zod.union([zod.string(),zod.null()]),
+  "agent_for_service_name": zod.union([zod.string(),zod.null()]),
+  "agent_for_service_address": zod.union([zod.string(),zod.null()]),
+  "agent_for_service_address_street1": zod.union([zod.string(),zod.null()]),
+  "agent_for_service_address_street2": zod.union([zod.string(),zod.null()]),
+  "agent_for_service_address_city": zod.union([zod.string(),zod.null()]),
+  "agent_for_service_address_state_country": zod.union([zod.string(),zod.null()]),
+  "agent_for_service_address_zip_code": zod.union([zod.string(),zod.null()]),
+  "signer_name": zod.union([zod.string(),zod.null()]),
+  "signer_title": zod.union([zod.string(),zod.null()]),
+  "signature_date": zod.union([zod.string(),zod.null()]),
+  "tx_printed_signature": zod.union([zod.string(),zod.null()]),
+  "crd_number": zod.union([zod.string(),zod.null()]),
+  "filer_sec_file_number": zod.union([zod.string(),zod.null()]),
+  "lei_number": zod.union([zod.string(),zod.null()]),
+  "npx_file_number": zod.union([zod.string(),zod.null()]),
+  "confidential_treatment": zod.union([zod.string(),zod.null()]),
+  "notice_explanation": zod.union([zod.string(),zod.null()]),
+  "explanatory_choice": zod.union([zod.string(),zod.null()]),
+  "other_included_managers_count": zod.union([zod.string(),zod.null()]),
+  "investment_company_type": zod.union([zod.string(),zod.null()]),
+  "series_count": zod.union([zod.string(),zod.null()]),
+  "registrant_type": zod.union([zod.string(),zod.null()]),
+  "year_or_quarter": zod.union([zod.string(),zod.null()]),
+  "amendment_no": zod.union([zod.string(),zod.null()]),
+  "amendment_type": zod.union([zod.string(),zod.null()]),
+  "de_novo_request_choice": zod.union([zod.string(),zod.null()]),
+  "conf_denied_expired": zod.union([zod.string(),zod.null()]),
+  "live_test_flag": zod.union([zod.string(),zod.null()]),
+  "contact_name": zod.union([zod.string(),zod.null()]),
+  "contact_phone_number": zod.union([zod.string(),zod.null()]),
+  "contact_email_address": zod.union([zod.string(),zod.null()]),
+  "included_managers": zod.array(NpxIncludedManager),
+  "report_series_class_infos": zod.array(NpxReportSeriesClassInfo),
+  "series_reports": zod.array(NpxSeriesReport),
+  "proxy_votes": zod.array(NpxProxyVote)
+});
+
+export type NpxData = zod.input<typeof NpxData>;
+export type NpxDataOutput = zod.output<typeof NpxData>;
+
 export const filingEnvelopeAccessionNumberRegExp = new RegExp('^\\d{10}-\\d{2}-\\d{6}$');
 export const filingEnvelopeCikRegExp = new RegExp('^\\d{10}$');
 
@@ -2771,7 +2919,7 @@ export const FilingEnvelope = zod.strictObject({
   "homepage_url": zod.string(),
   "text_url": zod.string(),
   "obj_type": zod.union([zod.string(),zod.null()]),
-  "data": zod.union([zod.union([OwnershipData,EightKData,SixKData,Schedule13DData,Schedule13GData,Form13FData,TenKData,TenQData,TwentyFData,FortyFData,Form144Data,FormDData,FormCData,ProxyData,RegistrationS1Data,RegistrationS3Data,DRSData,Prospectus424BData,Prospectus497KData,NPortData,NmfpData,NcenData,NcsrData]),zod.null()])
+  "data": zod.union([zod.union([OwnershipData,EightKData,SixKData,Schedule13DData,Schedule13GData,Form13FData,TenKData,TenQData,TwentyFData,FortyFData,Form144Data,FormDData,FormCData,ProxyData,RegistrationS1Data,RegistrationS3Data,DRSData,EffectData,Prospectus424BData,Prospectus497KData,NPortData,NmfpData,NcenData,NcsrData,NpxData]),zod.null()])
 });
 
 export type FilingEnvelope = zod.input<typeof FilingEnvelope>;

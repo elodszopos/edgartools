@@ -3437,6 +3437,135 @@
         "title": "DocumentRef",
         "description": "A lean reference to one filing attachment (primary document or content exhibit).\n\nShared by the envelope's primary_documents and the current-report forms' exhibits -\none shape for \"a submission document\", content fetched separately via /attachments/{seq}."
       },
+      "EffectData": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "const": "effect",
+            "title": "Kind",
+            "default": "effect"
+          },
+          "form": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Form"
+          },
+          "cik": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^\\d{10}$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cik"
+          },
+          "submission_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Submission Type"
+          },
+          "is_live": {
+            "type": "boolean",
+            "title": "Is Live"
+          },
+          "schema_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Schema Version"
+          },
+          "effective_date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Effective Date"
+          },
+          "entity": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Entity"
+          },
+          "source_submission_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Submission Type"
+          },
+          "source_accession_no": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Accession No"
+          },
+          "source_file_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source File Number"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "form",
+          "cik",
+          "submission_type",
+          "is_live",
+          "schema_version",
+          "effective_date",
+          "entity",
+          "source_submission_type",
+          "source_accession_no",
+          "source_file_number"
+        ],
+        "title": "EffectData"
+      },
       "EightKData": {
         "properties": {
           "kind": {
@@ -4265,6 +4394,9 @@
                     "$ref": "#/components/schemas/DRSData"
                   },
                   {
+                    "$ref": "#/components/schemas/EffectData"
+                  },
+                  {
                     "$ref": "#/components/schemas/Prospectus424BData"
                   },
                   {
@@ -4281,12 +4413,16 @@
                   },
                   {
                     "$ref": "#/components/schemas/NcsrData"
+                  },
+                  {
+                    "$ref": "#/components/schemas/NpxData"
                   }
                 ],
                 "discriminator": {
                   "propertyName": "kind",
                   "mapping": {
                     "drs": "#/components/schemas/DRSData",
+                    "effect": "#/components/schemas/EffectData",
                     "form10k": "#/components/schemas/TenKData",
                     "form10q": "#/components/schemas/TenQData",
                     "form13f": "#/components/schemas/Form13FData",
@@ -4301,6 +4437,7 @@
                     "ncsr": "#/components/schemas/NcsrData",
                     "nmfp": "#/components/schemas/NmfpData",
                     "nport": "#/components/schemas/NPortData",
+                    "npx": "#/components/schemas/NpxData",
                     "ownership": "#/components/schemas/OwnershipData",
                     "prospectus_424b": "#/components/schemas/Prospectus424BData",
                     "prospectus_497k": "#/components/schemas/Prospectus497KData",
@@ -14907,6 +15044,843 @@
           "footnote_ids"
         ],
         "title": "NonDerivativeTransaction"
+      },
+      "NpxClassInfo": {
+        "properties": {
+          "class_id": {
+            "type": "string",
+            "title": "Class Id"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "class_id"
+        ],
+        "title": "NpxClassInfo"
+      },
+      "NpxData": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "const": "npx",
+            "title": "Kind",
+            "default": "npx"
+          },
+          "form": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Form"
+          },
+          "cik": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^\\d{10}$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cik"
+          },
+          "fund_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fund Name"
+          },
+          "period_of_report": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Period Of Report"
+          },
+          "report_calendar_year": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Report Calendar Year"
+          },
+          "submission_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Submission Type"
+          },
+          "is_amendment": {
+            "type": "boolean",
+            "title": "Is Amendment"
+          },
+          "report_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Report Type"
+          },
+          "address": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Address"
+          },
+          "phone_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone Number"
+          },
+          "agent_for_service_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Agent For Service Name"
+          },
+          "agent_for_service_address": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Agent For Service Address"
+          },
+          "agent_for_service_address_street1": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Agent For Service Address Street1"
+          },
+          "agent_for_service_address_street2": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Agent For Service Address Street2"
+          },
+          "agent_for_service_address_city": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Agent For Service Address City"
+          },
+          "agent_for_service_address_state_country": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Agent For Service Address State Country"
+          },
+          "agent_for_service_address_zip_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Agent For Service Address Zip Code"
+          },
+          "signer_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Signer Name"
+          },
+          "signer_title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Signer Title"
+          },
+          "signature_date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Signature Date"
+          },
+          "tx_printed_signature": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tx Printed Signature"
+          },
+          "crd_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Crd Number"
+          },
+          "filer_sec_file_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Filer Sec File Number"
+          },
+          "lei_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lei Number"
+          },
+          "npx_file_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Npx File Number"
+          },
+          "confidential_treatment": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Confidential Treatment"
+          },
+          "notice_explanation": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notice Explanation"
+          },
+          "explanatory_choice": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Explanatory Choice"
+          },
+          "other_included_managers_count": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Other Included Managers Count"
+          },
+          "investment_company_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Investment Company Type"
+          },
+          "series_count": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Series Count"
+          },
+          "registrant_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Registrant Type"
+          },
+          "year_or_quarter": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Year Or Quarter"
+          },
+          "amendment_no": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Amendment No"
+          },
+          "amendment_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Amendment Type"
+          },
+          "de_novo_request_choice": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "De Novo Request Choice"
+          },
+          "conf_denied_expired": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Conf Denied Expired"
+          },
+          "live_test_flag": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Live Test Flag"
+          },
+          "contact_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contact Name"
+          },
+          "contact_phone_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contact Phone Number"
+          },
+          "contact_email_address": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contact Email Address"
+          },
+          "included_managers": {
+            "items": {
+              "$ref": "#/components/schemas/NpxIncludedManager"
+            },
+            "type": "array",
+            "title": "Included Managers"
+          },
+          "report_series_class_infos": {
+            "items": {
+              "$ref": "#/components/schemas/NpxReportSeriesClassInfo"
+            },
+            "type": "array",
+            "title": "Report Series Class Infos"
+          },
+          "series_reports": {
+            "items": {
+              "$ref": "#/components/schemas/NpxSeriesReport"
+            },
+            "type": "array",
+            "title": "Series Reports"
+          },
+          "proxy_votes": {
+            "items": {
+              "$ref": "#/components/schemas/NpxProxyVote"
+            },
+            "type": "array",
+            "title": "Proxy Votes"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "form",
+          "cik",
+          "fund_name",
+          "period_of_report",
+          "report_calendar_year",
+          "submission_type",
+          "is_amendment",
+          "report_type",
+          "address",
+          "phone_number",
+          "agent_for_service_name",
+          "agent_for_service_address",
+          "agent_for_service_address_street1",
+          "agent_for_service_address_street2",
+          "agent_for_service_address_city",
+          "agent_for_service_address_state_country",
+          "agent_for_service_address_zip_code",
+          "signer_name",
+          "signer_title",
+          "signature_date",
+          "tx_printed_signature",
+          "crd_number",
+          "filer_sec_file_number",
+          "lei_number",
+          "npx_file_number",
+          "confidential_treatment",
+          "notice_explanation",
+          "explanatory_choice",
+          "other_included_managers_count",
+          "investment_company_type",
+          "series_count",
+          "registrant_type",
+          "year_or_quarter",
+          "amendment_no",
+          "amendment_type",
+          "de_novo_request_choice",
+          "conf_denied_expired",
+          "live_test_flag",
+          "contact_name",
+          "contact_phone_number",
+          "contact_email_address",
+          "included_managers",
+          "report_series_class_infos",
+          "series_reports",
+          "proxy_votes"
+        ],
+        "title": "NpxData"
+      },
+      "NpxIncludedManager": {
+        "properties": {
+          "serial_no": {
+            "type": "string",
+            "title": "Serial No"
+          },
+          "form13f_file_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Form13F File Number"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "sec_file_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sec File Number"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "serial_no",
+          "form13f_file_number",
+          "name",
+          "sec_file_number"
+        ],
+        "title": "NpxIncludedManager"
+      },
+      "NpxProxyVote": {
+        "properties": {
+          "issuer_name": {
+            "type": "string",
+            "title": "Issuer Name"
+          },
+          "meeting_date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Meeting Date"
+          },
+          "vote_description": {
+            "type": "string",
+            "title": "Vote Description"
+          },
+          "shares_voted": {
+            "type": "number",
+            "title": "Shares Voted"
+          },
+          "shares_on_loan": {
+            "type": "number",
+            "title": "Shares On Loan"
+          },
+          "cusip": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cusip"
+          },
+          "isin": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Isin"
+          },
+          "figi": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Figi"
+          },
+          "other_vote_description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Other Vote Description"
+          },
+          "vote_source": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Vote Source"
+          },
+          "vote_series": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Vote Series"
+          },
+          "vote_other_info": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Vote Other Info"
+          },
+          "vote_categories": {
+            "items": {
+              "$ref": "#/components/schemas/NpxVoteCategory"
+            },
+            "type": "array",
+            "title": "Vote Categories"
+          },
+          "vote_records": {
+            "items": {
+              "$ref": "#/components/schemas/NpxVoteRecord"
+            },
+            "type": "array",
+            "title": "Vote Records"
+          },
+          "other_managers": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Other Managers"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "issuer_name",
+          "meeting_date",
+          "vote_description",
+          "shares_voted",
+          "shares_on_loan",
+          "cusip",
+          "isin",
+          "figi",
+          "other_vote_description",
+          "vote_source",
+          "vote_series",
+          "vote_other_info",
+          "vote_categories",
+          "vote_records",
+          "other_managers"
+        ],
+        "title": "NpxProxyVote"
+      },
+      "NpxReportSeriesClassInfo": {
+        "properties": {
+          "series_id": {
+            "type": "string",
+            "title": "Series Id"
+          },
+          "class_infos": {
+            "items": {
+              "$ref": "#/components/schemas/NpxClassInfo"
+            },
+            "type": "array",
+            "title": "Class Infos"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "series_id",
+          "class_infos"
+        ],
+        "title": "NpxReportSeriesClassInfo"
+      },
+      "NpxSeriesReport": {
+        "properties": {
+          "id_of_series": {
+            "type": "string",
+            "title": "Id Of Series"
+          },
+          "name_of_series": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name Of Series"
+          },
+          "lei_of_series": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lei Of Series"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id_of_series",
+          "name_of_series",
+          "lei_of_series"
+        ],
+        "title": "NpxSeriesReport"
+      },
+      "NpxVoteCategory": {
+        "properties": {
+          "category_type": {
+            "type": "string",
+            "title": "Category Type"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "category_type"
+        ],
+        "title": "NpxVoteCategory"
+      },
+      "NpxVoteRecord": {
+        "properties": {
+          "how_voted": {
+            "type": "string",
+            "title": "How Voted"
+          },
+          "shares_voted": {
+            "type": "number",
+            "title": "Shares Voted"
+          },
+          "management_recommendation": {
+            "type": "string",
+            "title": "Management Recommendation"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "how_voted",
+          "shares_voted",
+          "management_recommendation"
+        ],
+        "title": "NpxVoteRecord"
       },
       "OfferingCapitalization": {
         "properties": {

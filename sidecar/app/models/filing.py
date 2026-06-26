@@ -9,6 +9,7 @@ from pydantic import Field
 
 from app.models.common import ACCESSION_PATTERN, CIK_PATTERN, Address, DocumentRef, WireModel
 from app.models.forms.drs import DRSData
+from app.models.forms.effect import EffectData
 from app.models.forms.eightk import EightKData
 from app.models.forms.form144 import Form144Data
 from app.models.forms.formc import FormCData
@@ -17,6 +18,7 @@ from app.models.forms.fortyf import FortyFData
 from app.models.forms.ncen import NcenData
 from app.models.forms.ncsr import NcsrData
 from app.models.forms.nmfp import NmfpData
+from app.models.forms.npx import NpxData
 from app.models.forms.nport import NPortData
 from app.models.forms.ownership import OwnershipData
 from app.models.forms.prospectus_424b import Prospectus424BData
@@ -133,12 +135,14 @@ FilingData = (
     | RegistrationS1Data
     | RegistrationS3Data
     | DRSData
+    | EffectData
     | Prospectus424BData
     | Prospectus497KData
     | NPortData
     | NmfpData
     | NcenData
     | NcsrData
+    | NpxData
 )
 
 
@@ -165,7 +169,9 @@ class FilingEnvelope(WireModel):
     # ncen (N-CEN annual fund census; registrant + governance + per-series service providers/ETF mechanics) |
     # ncsr (N-CSR/N-CSRS certified shareholder report; Inline-XBRL oef: taxonomy -> per-fund funds[] (one per
     # SEC series) with fund-level figures + share-class expenses/returns; the one fund form built from
-    # filing.xbrl(), not lxml).
+    # filing.xbrl(), not lxml) |
+    # npx (N-PX / N-PX/A proxy voting record; XML-parsed primary doc + proxy vote table attachments;
+    # fund voting reports carry series + vote records, notice reports carry metadata only).
     obj_type: str | None
     data: Annotated[FilingData, Field(discriminator="kind")] | None
 
