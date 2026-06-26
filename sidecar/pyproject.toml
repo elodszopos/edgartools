@@ -25,6 +25,7 @@ dev = [
     "pyyaml==6.0.3",
     "ruff==0.15.17",
     "pyright==1.1.410",
+    "lxml-stubs>=0.5.1",
 ]
 
 [tool.uv]

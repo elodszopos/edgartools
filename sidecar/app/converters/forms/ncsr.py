@@ -133,8 +133,11 @@ def _fund(
 
 def ncsr_data(obj: FundShareholderReport) -> NcsrData:
     filing = obj.filing
+    assert filing is not None, "ncsr_data called on a FundShareholderReport without a source filing"
     series = parse_series_classes(filing.header.text)
-    facts = filing.xbrl().facts
+    xbrl = filing.xbrl()
+    assert xbrl is not None, "ncsr_data called on a filing without XBRL"
+    facts = xbrl.facts
 
     net_assets = _scalar_by_class(facts, _NET_ASSETS)
     turnover = _scalar_by_class(facts, _PORTFOLIO_TURNOVER)

@@ -304,8 +304,8 @@ Commit per unit on green: `git add <unit files> && git commit -m "sidecar: U## <
 | U57d | P4 | N-PX (proxy voting record) | done |
 | U58a | P4 | EFFECT (effectiveness notice) | done |
 | U58b | P4 | 10-D (CMBS ABS distribution report) | deferred |
-| U60 | P5 | Full sweep: all goldens x Zod strict, openapi snapshot, docker build + container `/health`, fixture census in README | todo |
-| U61 | P5 | README runbook + consumer wiring notes (KD compose snippet + zod copy path — documentation only) | todo |
+| U60 | P5 | Full sweep: all goldens x Zod strict, openapi snapshot, docker build + container `/health`, fixture census in README | done |
+| U61 | P5 | README runbook + consumer wiring notes (KD compose snippet + zod copy path — documentation only) | done |
 
 ## Open decisions
 

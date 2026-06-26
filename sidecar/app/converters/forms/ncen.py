@@ -109,10 +109,10 @@ def _facilities_by_series(xml: str | None) -> dict[str, list[NcenLineOfCreditFac
         details = loc.find("lineOfCreditDetails")
         for detail in details.findall("lineOfCreditDetail") if details is not None else []:
             institutions = detail.find("lineOfCreditInstitutions")
-            names = [
-                inst.get("creditInstitutionName")
+            names: list[str] = [
+                name
                 for inst in (institutions.findall("lineOfCreditInstitution") if institutions is not None else [])
-                if inst.get("creditInstitutionName")
+                if (name := inst.get("creditInstitutionName")) is not None
             ]
             facilities.append(
                 NcenLineOfCreditFacility(
